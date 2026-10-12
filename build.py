@@ -1,5 +1,5 @@
-"""Construye IG Vault.apk sin Gradle (aapt2 -> javac -> d8 -> zipalign -> apksigner). Mismo metodo que Coucou.
-Uso: python build.py   (deja la APK en 'Mis Android Apps\IG Vault.apk')"""
+"""Construye IG Extractor.apk sin Gradle (aapt2 -> javac -> d8 -> zipalign -> apksigner). Mismo metodo que Coucou.
+Uso: python build.py   (deja la APK en 'Mis Android Apps\IG Extractor.apk')"""
 import os, shutil, subprocess, zipfile, secrets
 
 AQUI = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
@@ -7,7 +7,7 @@ SRC, BUILD = AQUI + "/src", AQUI + "/build"
 SDK = os.path.join(os.environ["LOCALAPPDATA"], "Android", "Sdk").replace("\\", "/")
 BT, JAR = SDK + "/build-tools/36.1.0", SDK + "/platforms/android-36.1/android.jar"
 VERSION_CODE, VERSION_NAME = 1, "1.0"
-DESTINO = r"C:\Users\PC\DeskBox\Apps\Mis Android Apps\IG Vault.apk"
+DESTINO = r"C:\Users\PC\DeskBox\Apps\Mis Android Apps\IG Extractor.apk"
 KSDIR = os.path.expanduser("~/.igvault-movil")
 
 
@@ -45,8 +45,8 @@ def main():
         open(pw, "w").write(secrets.token_urlsafe(18))
     p = open(pw).read()
     if not os.path.exists(ks):
-        run(["keytool", "-genkeypair", "-keystore", ks, "-storepass", p, "-keypass", p, "-alias", "igvault", "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000", "-dname", "CN=IG Vault,O=Privado,C=CH"])
-    final = AQUI + "/IG Vault.apk"
+        run(["keytool", "-genkeypair", "-keystore", ks, "-storepass", p, "-keypass", p, "-alias", "igvault", "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000", "-dname", "CN=IG Extractor,O=Privado,C=CH"])
+    final = AQUI + "/IG Extractor.apk"
     run([BT + "/apksigner.bat", "sign", "--ks", ks, "--ks-pass", "pass:" + p, "--key-pass", "pass:" + p, "--ks-key-alias", "igvault", "--out", final, al])
     print(run([BT + "/apksigner.bat", "verify", "--verbose", final]).strip())
     os.makedirs(os.path.dirname(DESTINO), exist_ok=True)
