@@ -137,12 +137,14 @@ try { const d = JSON.parse(localStorage.getItem("igv") || "null"); if (d) db = {
 const guardar = () => { try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } };
 
 // ============ detección de links ============
-const RE_URL = /https?:\/\/[^\s<>()\[\]"'«»]+/gi;
+const RE_URL = /(?<![\w.\/-])(?:https?:\/\/|(?:www\.)?(?:instagram\.com|youtube\.com|youtu\.be|github\.com)\/)[^\s<>()\[\]"'«»]+/gi;
 const RE_IG = /instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv)\/([\w-]+)/i;
 const RE_YT = /(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([\w-]{6,})/i;
 const RE_GH = /github\.com\/([\w.-]+)\/([\w.-]+)/i;
 function limpiaUrl(u) {
-  u = u.replace(/[.,;:!?)\]}»”]+$/, "");
+  u = u.replace(/[.,;:!?)\]}»”*_~]+$/, "");
+  const lw = u.match(/^https?:\/\/l\.instagram\.com\/\?u=([^&]+)/i); if (lw) { try { u = decodeURIComponent(lw[1]); } catch (e) { } }
+  if (!/^https?:/i.test(u)) u = "https://" + u;
   const ig = u.match(RE_IG); if (ig) return `https://www.instagram.com/${ig[1] === "reels" ? "reel" : ig[1]}/${ig[2]}/`;
   return u;
 }
