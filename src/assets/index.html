@@ -382,7 +382,7 @@ async function analizar(card, textoManual) {
   let ai = null;
   if (hayIA() && ctx.trim()) {
     ai = await chatJson(`Eres un extractor. Debajo está el contenido de un link de ${card.tipo}. Responde SOLO JSON:
-{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español: qué es y para qué sirve, usando SOLO lo que dice el texto","categoria":"una categoría corta","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"web":"web oficial del proyecto/herramienta que se explica, solo si la conoces con seguridad; si no, null"}
+{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español: qué es y para qué sirve, usando SOLO lo que dice el texto","categoria":"una categoría corta","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"web":"web oficial del proyecto/herramienta que se explica, si habla de un servicio o herramienta conocida (Kaggle, Notion…) pon su web principal; null solo si no hay ninguna"}
 Categorías que ya existen: ${JSON.stringify(cats)}. Elige la que mejor encaje con lo que MUESTRAN el texto y las imágenes (repos de GitHub, herramientas de IA, programas…); crea una nueva de 1 a 3 palabras SOLO si ninguna encaja de verdad. Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO, no es el contenido. El resumen debe decir QUÉ herramientas/proyectos/ideas se explican (nómbralos si aparecen, también en el texto de las imágenes). Si el texto no da información: "resumen":"" y "categoria":"Sin clasificar". No inventes nada. Ordena, no descartes.
 CONTENIDO:
 ${ctx}`);
@@ -458,8 +458,8 @@ async function investigar(card, repos, ai, texto) {
   const imgsP = [...new Set(imgs)].slice(0, 3);
   if (imgsP.length) { card.imgsPost = card.imgs || []; card.imgs = imgsP; }
   card.links = links;
-  if (!hayIA() || (!md && !web)) return;
-  const ex = await chatJson(`Eres un divulgador técnico. Un post habla de un proyecto. Explícalo bien usando SOLO el material de abajo (no inventes nada; si falta un dato, no lo menciones). Responde SOLO JSON:
+  if (!hayIA()) return;
+  const ex = await chatJson(`Eres un divulgador técnico. Un post habla de un proyecto, servicio, skill o idea. Explica bien lo que quiere decir usando SOLO el material de abajo (no inventes nada; si falta un dato, no lo menciones). Si es una skill, plugin o instalación, di cómo se instala o se activa y el comando exacto si aparece. Responde SOLO JSON:
 {"explicacion":"4 a 6 frases en español claro: qué es, qué problema resuelve, cómo se instala o se usa (comandos o requisitos si el README los da), para quién sirve y límites o coste si se mencionan","puntos":["3 a 4 puntos cortos con lo más útil"]}
 POST (texto y voz): ${texto.slice(0, 1200)}
 ${r0 ? "README de " + r0.full + ": " + md.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 3500) : ""}
