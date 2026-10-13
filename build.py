@@ -24,7 +24,7 @@ CLAVES = SRC + "/assets/claves.json"  # solo dentro de la APK; esta en .gitignor
 
 def main():
     shutil.rmtree(BUILD, ignore_errors=True)
-    json.dump({"nvidia": os.environ.get("NVIDIA_API_KEY", ""), "openrouter": os.environ.get("OPENROUTER_API_KEY", "")}, open(CLAVES, "w"))
+    json.dump({"nvidia": os.environ.get("NVIDIA_API_KEY", ""), "openrouter": os.environ.get("OPENROUTER_API_KEY", ""), "groq": os.environ.get("GROQ_API_KEY", ""), "gemini": os.environ.get("GEMINI_API_KEY", "")}, open(CLAVES, "w"))
     for d in ("flat", "gen", "classes"):
         os.makedirs(BUILD + "/" + d)
     for base, _, fs in os.walk(SRC + "/res"):

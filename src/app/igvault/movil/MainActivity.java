@@ -283,6 +283,22 @@ public class MainActivity extends Activity {
             }).start();
         }
 
+        /** Voz del video -> texto en el movil: baja el principio del mp4 y lo manda a Groq/Gemini (ver Voz.java). */
+        @JavascriptInterface
+        public void voz(final int id, final String videoUrl) {
+            new Thread(() -> {
+                JSONObject out = new JSONObject();
+                try {
+                    JSONObject k = new JSONObject(claves());
+                    String[] r = Voz.transcribir(videoUrl, k.optString("groq"), k.optString("gemini"));
+                    out.put("status", r[0].isEmpty() ? 0 : 200).put("prov", r[0]).put("body", r[1]);
+                } catch (Exception e) {
+                    try { out.put("status", 0).put("body", "error: " + e); } catch (Exception x) { }
+                }
+                responder(id, out.toString());
+            }).start();
+        }
+
         /** Claves guardadas dentro de la APK al compilar (no estan en el repo). */
         @JavascriptInterface
         public String claves() {

@@ -121,7 +121,7 @@ let seq = 0; const pend = {};
 window.__r = (id, s) => { const f = pend[id]; if (f) { delete pend[id]; try { f(JSON.parse(s)); } catch (e) { f({}); } } };
 const nat = (fn, ...a) => new Promise(res => {
   const id = ++seq; pend[id] = res;
-  setTimeout(() => { if (pend[id]) { delete pend[id]; res({ status: 0, body: "", error: "tiempo agotado" }); } }, 45000);
+  setTimeout(() => { if (pend[id]) { delete pend[id]; res({ status: 0, body: "", error: "tiempo agotado" }); } }, fn === "voz" ? 110000 : 45000);
   N[fn](id, ...a);
 });
 async function http(url, { method = "GET", headers = {}, body = "" } = {}) {
@@ -196,11 +196,11 @@ async function chat(prompt, max = 900) {
     if (muertos[nom]) { errs.push(nom + ": " + muertos[nom]); continue; }
     for (const m of mods) {
       for (let i = 0; i < 2; i++) {
-        const r = await http(url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: prompt }], max_tokens: max, temperature: 0.2 }) });
+        const r = await http(url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: prompt }], max_tokens: max, temperature: 0.2, ...(nom === "NVIDIA" ? { chat_template_kwargs: { enable_thinking: false } } : {}) }) });
         if (r.status === 401 || r.status === 403) { muertos[nom] = "clave rechazada"; errs.push(nom + ": clave rechazada"); break; }
         if (r.status === 404 || r.status === 410) break;
         if (r.status === 200) {
-          try { const t = (JSON.parse(r.body).choices[0].message.content || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim(); if (t) return t; } catch (e) { }
+          try { const t = (JSON.parse(r.body).choices[0].message.content || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim(); if (t) return t; errs.push(m + ": vacío"); } catch (e) { errs.push(m + ": respuesta rara"); }
         } else errs.push(m + ": HTTP " + r.status);
         await dormir(1500 + i * 2500);
       }
@@ -243,16 +243,48 @@ function capDeOg(og) { // «123 likes, 4 comments - user on fecha: "texto"»
 const MURO = /(log in|sign up|inicia sesi|iniciar sesi|crear cuenta|create an account|page isn.t available|no est[aá] disponible)/i;
 async function leerIG(url) {
   const base = url.replace(/\/$/, "") + "/";
+  const g = await gbIG(base);
   let r = await pagina(base + "embed/captioned/");
-  let t = (r.cap || "").trim();
+  let t = (r.cap || "").trim() || g.cap;
   if (!t) t = capDeOg(r.og);
   if (!t) { r = await pagina(base); t = capDeOg(r.og) || ""; if (!t && r.og && !MURO.test(r.og) && r.og.length > 40) t = r.og; }
   if (!t) { const h = await http(base); if (h.status === 200) t = capDeOg(metaDe(h.body, "og:description")); }
   t = t.replace(/\s+\n/g, "\n").trim();
   const imgs = await imgsIG(base);
-  if (!imgs.length && (!t || (t.length < 25 && MURO.test(t)))) return { error: "Instagram no deja leer este post sin iniciar sesión" };
+  if (!imgs.length && g.img) imgs.push(g.img);
+  if (!imgs.length && !g.video && (!t || (t.length < 25 && MURO.test(t)))) return { error: "Instagram no deja leer este post sin iniciar sesión" };
   if (t.length < 25 && MURO.test(t)) t = "";
-  return { texto: t, imgs };
+  return { texto: t, imgs, video: g.video || await videoIG(base) };
+}
+// Página pública con User-Agent de Googlebot: Instagram sirve ahí sin login el pie, la imagen y el mp4 del reel
+async function gbIG(base) {
+  const o = { cap: "", video: "", img: "" };
+  try {
+    const r = await http(base, { headers: { "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" } });
+    if (r.status !== 200) return o;
+    const dec = x => { try { return JSON.parse('"' + x + '"'); } catch (e) { return ""; } };
+    const c = r.body.match(/"caption":\{"text":"((?:[^"\\]|\\.)*)"/); if (c) o.cap = dec(c[1]).trim();
+    const v = r.body.match(/"video_versions":\[\{[^\]]*?"url":"((?:[^"\\]|\\.)*)"/); if (v) o.video = dec(v[1]);
+    const i = r.body.match(/property="og:image" content="([^"]+)"/); if (i) o.img = i[1].replace(/&amp;/g, "&");
+  } catch (e) { }
+  return o;
+}
+// URL directa del vídeo de un reel/post (viene en el JSON del embed público)
+async function videoIG(base) {
+  try {
+    const e = await http(base + "embed/captioned/");
+    const m = e.status === 200 && e.body.match(/\\*"video_url\\*":\s*\\*"(https:.*?)\\*"/);
+    return m ? m[1].replace(/\\/g, "").replace(/u0026/g, "&").replace(/&amp;/g, "&") : "";
+  } catch (e) { return ""; }
+}
+// voz del vídeo -> texto, en el móvil (Groq → Groq v3 → Gemini → Gemini); vacío si no hay voz o no se pudo
+let vozError = "";
+async function leerVoz(urlVideo) {
+  vozError = "";
+  if (!urlVideo || !N || !N.voz) return "";
+  const r = await nat("voz", urlVideo);
+  if (r.status === 200 && r.body) return r.body;
+  vozError = r.body || r.error || "sin voz"; return "";
 }
 // hasta 3 imágenes del post (portada/carrusel), sin tocar la parte nativa
 async function imgsIG(base) {
@@ -330,6 +362,7 @@ async function analizar(card, textoManual) {
     if (l.error) { Object.assign(card, { estado: "revisar", motivo: l.error, categoria: "Para revisar" }); if (card.tipo !== "GitHub") return card; }
     texto = l.texto || ""; titulo = l.titulo || "";
     if (card.tipo === "Instagram") texto = quitaGancho(texto);
+    if (l.video) { const vz = await leerVoz(l.video); card.voz = vz ? "sí" : "no"; if (vz) texto += "\n[VOZ DEL VÍDEO, transcrita]\n" + vz.slice(0, 1300); }
     if (l.imgs && l.imgs.length) { card.imgs = l.imgs; const vi = await leerImgs(l.imgs); if (vi) texto += "\n[TEXTO EN LAS IMÁGENES DEL POST]\n" + vi; }
   }
   card.texto = texto.slice(0, 2500); card.tags = hashtags(texto);
