@@ -440,6 +440,7 @@ window.__atras = () => { const d = $("#dlg"); if (d.open) { d.close(); return tr
 // Recibe lo compartido (texto, chat exportado de WhatsApp, fotos): saca links, crea fichas por foto y empieza a ordenar solo.
 window.__chat = (t, fs) => {
   cambiaTab("pegar");
+  $("#txt").value = (fs.length ? `📎 ${fs.length} fotos recibidas\n\n` : "") + t.slice(0, 30000); try { detectar(); } catch (e) { } // se ve lo recibido: da calma
   const r = encolar(sacarLinks(t).links), st = Date.now().toString(36);
   for (const n of fs) db.cards.push({ id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
   guardar();
