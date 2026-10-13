@@ -181,7 +181,7 @@ async function ghReadme(full) {
   const r = await http("https://api.github.com/repos/" + full + "/readme", { headers: { ...ghH(), Accept: "application/vnd.github.raw+json" } });
   return r.status === 200 ? r.body.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 1500) : "";
 }
-const repoInfo = g => ({ full: g.full_name, desc: g.description || "", stars: g.stargazers_count, topics: g.topics || [], url: g.html_url, lang: g.language || "" });
+const repoInfo = g => ({ full: g.full_name, desc: g.description || "", stars: g.stargazers_count, topics: g.topics || [], url: g.html_url, lang: g.language || "", home: g.homepage || "" });
 
 // ============ IA en la nube ============
 const MOD_NV = ["nvidia/nemotron-3-super-120b-a12b", "z-ai/glm-5.3-flash", "nvidia/nemotron-3.5-lightning-30b-a3b"];
@@ -382,7 +382,7 @@ async function analizar(card, textoManual) {
   let ai = null;
   if (hayIA() && ctx.trim()) {
     ai = await chatJson(`Eres un extractor. Debajo está el contenido de un link de ${card.tipo}. Responde SOLO JSON:
-{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español: qué es y para qué sirve, usando SOLO lo que dice el texto","categoria":"una categoría corta","proyectos":[{"nombre":"...","repo":"owner/name o null"}]}
+{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español: qué es y para qué sirve, usando SOLO lo que dice el texto","categoria":"una categoría corta","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"web":"web oficial del proyecto/herramienta que se explica, solo si la conoces con seguridad; si no, null"}
 Categorías que ya existen: ${JSON.stringify(cats)}. Elige la que mejor encaje con lo que MUESTRAN el texto y las imágenes (repos de GitHub, herramientas de IA, programas…); crea una nueva de 1 a 3 palabras SOLO si ninguna encaja de verdad. Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO, no es el contenido. El resumen debe decir QUÉ herramientas/proyectos/ideas se explican (nómbralos si aparecen, también en el texto de las imágenes). Si el texto no da información: "resumen":"" y "categoria":"Sin clasificar". No inventes nada. Ordena, no descartes.
 CONTENIDO:
 ${ctx}`);
@@ -402,11 +402,69 @@ ${ctx}`);
   card.categoria = card.categoria.charAt(0).toUpperCase() + card.categoria.slice(1);
   card.categoria = cats.find(k => k.toLowerCase() === card.categoria.toLowerCase()) || card.categoria;
   card.fuente = ai ? (r0 ? "verificado" : "resumen IA") : (r0 ? "verificado" : "deducido");
+  try { await investigar(card, repos, ai, texto); } catch (e) { card.motivo = "No pude investigar a fondo: " + String(e).slice(0, 60); }
   card.estado = "ok"; card.motivo = "";
   if (hayIA() && !ai && ctx.trim()) card.motivo = "Sin IA ahora (" + iaError.slice(0, 90) + "): ordenado por GitHub/hashtags";
   if (ghAviso) card.motivo = (card.motivo ? card.motivo + " · " : "") + ghAviso;
   if (!texto.trim() && !r0) { card.estado = "revisar"; card.categoria = "Para revisar"; card.motivo = card.motivo || "No encontré texto en este link"; }
   return card;
+}
+
+
+// ============ investigar: lo que el post COMENTA (no el post) ============
+const MALA_IMG = /shields\.io|badge|\.svg(\?|$)|github\.com\/[^/]+\/[^/]+\/(actions|workflows)|travis|codecov|sponsor|buymeacoffee|ko-fi|star-history|contrib\.rocks|emoji/i;
+const WEB_NO = /(^|\.)(instagram|facebook|fb|tiktok|youtube|youtu|twitter|x|t|linkedin|github|githubusercontent|wa|whatsapp|bit|linktr|linktree|beacons|google|apple|play\.google)\.(com|be|me|ee|ly|ee|co|io)$/i;
+const abs = (u, base) => { try { return new URL(u, base).href; } catch (e) { return ""; } };
+const sinTags = h => decodeHtml(h.replace(/<(script|style|noscript|svg)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+async function readmeRaw(full) { // sin API (no gasta el límite de GitHub)
+  for (const f of ["README.md", "readme.md", "README.rst", "README"]) {
+    const r = await http("https://raw.githubusercontent.com/" + full + "/HEAD/" + f);
+    if (r.status === 200 && r.body.length > 40) return r.body;
+  }
+  return "";
+}
+function imgsReadme(md, full) {
+  const base = "https://raw.githubusercontent.com/" + full + "/HEAD/", out = [];
+  const cand = [...md.matchAll(/!\[[^\]]*\]\(\s*<?([^)\s>]+)/g)].map(m => m[1]).concat([...md.matchAll(/<img[^>]+src=["']([^"']+)/gi)].map(m => m[1]));
+  for (let u of cand) { u = abs(u, base); if (u && /^https?:/.test(u) && !MALA_IMG.test(u) && !out.includes(u)) out.push(u); if (out.length >= 3) break; }
+  return out;
+}
+async function leerProyectoWeb(url) {
+  const r = await http(url);
+  if (r.status !== 200 || !r.body) return null;
+  const h = r.body;
+  const img = abs(metaDe(h, "og:image") || metaDe(h, "twitter:image") || "", url);
+  return { url: r.url || url, titulo: decodeHtml((h.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [, ""])[1]).trim(), desc: metaDe(h, "og:description") || metaDe(h, "description") || "", texto: sinTags(h).slice(0, 1800), img };
+}
+async function investigar(card, repos, ai, texto) {
+  const links = [], imgs = [], add = (t, u) => { if (u && !links.some(l => l.u === u)) links.push({ t, u }); };
+  let md = "", web = null;
+  const r0 = repos[0];
+  if (r0) {
+    add("GitHub", r0.url);
+    md = await readmeRaw(r0.full);
+    imgs.push(...imgsReadme(md, r0.full));
+    for (const m of md.matchAll(/https?:\/\/(?:www\.)?npmjs\.com\/package\/[\w@./-]+/gi)) { add("npm", m[0].replace(/[).,]+$/, "")); break; }
+    if (r0.home && /^https?:/.test(r0.home) && !WEB_NO.test(new URL(r0.home).hostname)) web = await leerProyectoWeb(r0.home);
+  }
+  if (!web) { // web oficial: la que propone la IA o una que salga en el texto del post; solo cuenta si responde
+    const cands = [];
+    if (ai && typeof ai.web === "string" && /^https?:\/\//.test(ai.web)) cands.push(ai.web);
+    for (const m of texto.matchAll(/https?:\/\/[^\s)"'<>]+/g)) cands.push(m[0].replace(/[.,;]+$/, ""));
+    for (const u of cands.slice(0, 4)) { try { if (WEB_NO.test(new URL(u).hostname)) continue; } catch (e) { continue; } web = await leerProyectoWeb(u); if (web) break; }
+  }
+  if (web) { add("Web oficial", web.url); if (web.img) imgs.push(web.img); }
+  if (r0 && imgs.length < 3) imgs.push("https://opengraph.githubassets.com/1/" + r0.full); // tarjeta del repo (siempre existe)
+  const imgsP = [...new Set(imgs)].slice(0, 3);
+  if (imgsP.length) { card.imgsPost = card.imgs || []; card.imgs = imgsP; }
+  card.links = links;
+  if (!hayIA() || (!md && !web)) return;
+  const ex = await chatJson(`Eres un divulgador técnico. Un post habla de un proyecto. Explícalo bien usando SOLO el material de abajo (no inventes nada; si falta un dato, no lo menciones). Responde SOLO JSON:
+{"explicacion":"4 a 6 frases en español claro: qué es, qué problema resuelve, cómo se instala o se usa (comandos o requisitos si el README los da), para quién sirve y límites o coste si se mencionan","puntos":["3 a 4 puntos cortos con lo más útil"]}
+POST (texto y voz): ${texto.slice(0, 1200)}
+${r0 ? "README de " + r0.full + ": " + md.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 3500) : ""}
+${web ? "WEB OFICIAL (" + web.url + "): " + web.titulo + " — " + web.desc + " " + web.texto.slice(0, 1200) : ""}`);
+  if (ex && ex.explicacion && ex.explicacion.length > 60) { card.resumen = ex.explicacion; if (Array.isArray(ex.puntos)) card.puntos = ex.puntos.slice(0, 4).map(String); card.fuente = "investigado"; }
 }
 
 // ============ cola ============
@@ -464,14 +522,14 @@ function pintar() {
 function fichaHtml(c) {
   const r = c.repos && c.repos[0];
   const est = c.estado === "ok" ? "" : c.estado === "pendiente" ? '<span class="chip">en cola</span>' : '<span class="chip warn">revisar</span>';
-  return `<div class="card" data-id="${c.id}"><h3>${esc(c.titulo)}</h3>${c.imgs && c.imgs.length ? `<div style="display:flex;gap:6px;overflow-x:auto;margin:6px 0">${c.imgs.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" style="height:96px;border-radius:8px;flex:none" onerror="this.remove()">`).join("")}</div>` : ""}${c.resumen ? `<p>${esc(c.resumen)}</p>` : ""}
-<div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${r ? `<span class="chip ok">GitHub ✓ ${esc(r.full)} ★${miles(r.stars)}</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${est}</div>
+  return `<div class="card" data-id="${c.id}"><h3>${esc(c.titulo)}</h3>${c.imgs && c.imgs.length ? `<div style="display:flex;gap:6px;overflow-x:auto;margin:6px 0">${c.imgs.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" style="height:96px;border-radius:8px;flex:none" onerror="this.remove()">`).join("")}</div>` : ""}${c.resumen ? `<p>${esc(c.resumen)}</p>` : ""}${c.puntos && c.puntos.length ? `<ul style="margin:4px 0 6px 18px;padding:0">${c.puntos.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+${c.links && c.links.length ? `<div class="acc">${c.links.map(l => `<button class="btn sm" data-a="abrirl" data-u="${esc(l.u)}">${esc(l.t)} ↗</button>`).join("")}</div>` : ""}<div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${r ? `<span class="chip ok">GitHub ✓ ${esc(r.full)} ★${miles(r.stars)}</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${est}</div>
 ${c.motivo ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo)}</div>` : ""}
-<div class="acc"><button class="btn sm" data-a="abrir">Abrir link</button><button class="btn sm" data-a="copiar">Copiar</button><button class="btn sm" data-a="cat">Categoría</button><button class="btn sm" data-a="texto">Pegar texto</button><button class="btn sm" data-a="borrar" style="color:var(--bad)">Borrar</button></div></div>`;
+<div class="acc"><button class="btn sm" data-a="abrir">Ver post</button><button class="btn sm" data-a="copiar">Copiar</button><button class="btn sm" data-a="cat">Categoría</button><button class="btn sm" data-a="texto">Pegar texto</button><button class="btn sm" data-a="borrar" style="color:var(--bad)">Borrar</button></div></div>`;
 }
 function ficha2txt(c) {
   const r = c.repos && c.repos[0];
-  return [`### ${c.titulo}`, c.resumen, r ? `Repo: ${r.url} (★${r.stars})` : "", c.cuenta ? "Cuenta: " + c.cuenta : "", c.tipo === "Foto" ? "" : `Link: ${c.url}`, ...(c.extra || []).map(u => "Link: " + u)].filter(Boolean).join("\n");
+  return [`### ${c.titulo}`, c.resumen, r ? `Repo: ${r.url} (★${r.stars})` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => l.t + ": " + l.u), ...(c.puntos || []).map(x => "- " + x), c.cuenta ? "Cuenta: " + c.cuenta : "", c.tipo === "Foto" ? "" : `Link: ${c.url}`, ...(c.extra || []).map(u => "Link: " + u)].filter(Boolean).join("\n");
 }
 function todoTxt() {
   const g = {}; db.cards.filter(c => c.estado !== "pendiente").forEach(c => (g[c.categoria || "Sin clasificar"] ||= []).push(c));
@@ -510,6 +568,7 @@ $("#lista").addEventListener("click", async e => {
   const card = e.target.closest(".card"); if (!card) return; const c = db.cards.find(x => x.id === card.dataset.id); if (!c) return;
   const a = e.target.dataset.a;
   if (!a) { card.classList.toggle("open"); return; }
+  if (a === "abrirl") { const u = e.target.dataset.u; N ? N.abrir(u) : window.open(u); return; }
   if (a === "abrir") c.tipo === "Foto" ? aviso("Es una foto del chat, no tiene link") : N ? N.abrir(c.url) : window.open(c.url);
   if (a === "copiar") copiar(ficha2txt(c));
   if (a === "borrar") { db.cards = db.cards.filter(x => x !== c); guardar(); pintar(); }
