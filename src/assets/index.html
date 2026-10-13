@@ -204,7 +204,7 @@ async function chat(prompt, max = 900) {
   return null;
 }
 async function chatJson(prompt) {
-  const t = await chat(prompt); if (!t) return null;
+  const t = (await chat(prompt)) || (await chat(prompt)); if (!t) return null; // un reintento
   const a = t.indexOf("{"), b = t.lastIndexOf("}"); if (a < 0 || b < 0) return null;
   try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; }
 }
@@ -285,7 +285,7 @@ async function analizar(card, textoManual) {
   // repos: links de GitHub + candidatos «owner/name» del texto, confirmados con la API
   const cands = new Set();
   for (const m of (card.tipo === "GitHub" ? card.url + " " + texto : texto).matchAll(/github\.com\/([\w.-]+)\/([\w.-]+)/gi)) cands.add(m[1] + "/" + m[2].replace(/\.git$/, ""));
-  if (/github|repo|open.?source/i.test(texto)) for (const m of texto.matchAll(/(?<![\w/.@#-])([A-Za-z][\w-]{1,38}\/[A-Za-z][\w.-]{1,60})(?![\w/])/g)) if (!/^(https?|www)/i.test(m[1]) && !/\.(com|org|io|net|app)\b/i.test(m[1])) cands.add(m[1]);
+  if (card.tipo === "Foto" || /github|repo|open.?source/i.test(texto)) for (const m of texto.matchAll(/(?<![\w/.@#-])([A-Za-z][\w-]{1,38}\/[A-Za-z][\w.-]{1,60})(?![\w/])/g)) if (!/^(https?|www)/i.test(m[1]) && !/\.(com|org|io|net|app)\b/i.test(m[1])) cands.add(m[1]);
   const repos = [];
   for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g) repos.push(repoInfo(g)); }
   let ctx = texto.slice(0, 1800);
@@ -308,7 +308,7 @@ ${ctx}`);
   }
   const r0 = repos[0];
   card.repos = repos.map(r => ({ full: r.full, url: r.url, stars: r.stars, desc: r.desc, topics: r.topics }));
-  card.titulo = (ai && ai.titulo) || titulo || (r0 && r0.full.split("/")[1]) || texto.split("\n")[0].slice(0, 70) || card.url;
+  card.titulo = (ai && ai.titulo) || titulo || (r0 && r0.full.split("/")[1]) || (texto.split("\n").find(l => l.trim() && !/^(Cuenta:|Imagen:?)/i.test(l.trim())) || "").slice(0, 70) || card.url;
   card.resumen = (ai && ai.resumen) || (r0 && r0.desc) || texto.slice(0, 220);
   card.categoria = (ai && ai.categoria && ai.categoria.trim()) || (r0 && r0.topics[0]) || (card.tags[0] && card.tags[0].slice(1)) || seccionPorPalabras(texto);
   card.categoria = card.categoria.charAt(0).toUpperCase() + card.categoria.slice(1);
