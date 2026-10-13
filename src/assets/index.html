@@ -153,7 +153,7 @@ function sacarLinks(t) {
   for (const m of (t.match(RE_URL) || [])) { const u = limpiaUrl(m); const k = u.toLowerCase(); if (!vistos.has(k)) { vistos.add(k); out.push(u); } }
   return { links: out, total: (t.match(RE_URL) || []).length };
 }
-const tipoDe = u => RE_IG.test(u) ? "Instagram" : RE_YT.test(u) ? "YouTube" : RE_GH.test(u) ? "GitHub" : /reddit\.com/i.test(u) ? "Reddit" : /spotify\.com/i.test(u) ? "Spotify" : "Web";
+const tipoDe = u => u.startsWith("foto:") ? "Foto" : RE_IG.test(u) ? "Instagram" : RE_YT.test(u) ? "YouTube" : RE_GH.test(u) ? "GitHub" : /reddit\.com/i.test(u) ? "Reddit" : /spotify\.com/i.test(u) ? "Spotify" : "Web";
 
 // ============ GitHub ============
 const ghH = () => ({ Accept: "application/vnd.github+json", ...(db.cfg.github ? { Authorization: "Bearer " + db.cfg.github } : {}) });
@@ -209,6 +209,21 @@ async function chatJson(prompt) {
   try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; }
 }
 
+// ============ fotos del chat (IA de visión de NVIDIA) ============
+const MOD_VIS = ["meta/llama-3.2-90b-vision-instruct", "meta/llama-3.2-11b-vision-instruct", "microsoft/phi-4-multimodal-instruct"];
+const PROMPT_FOTO = "Mira la imagen. 1) Si ves un nombre de cuenta pública (@usuario) escribe primero «Cuenta: @usuario». 2) Transcribe TODO el texto visible tal cual está. 3) Termina con «Imagen: » y una frase de qué muestra (proyecto, repo, herramienta, tema). Incluye nombres de repos owner/name o URLs que veas. No inventes nada.";
+async function verFoto(nombre) {
+  if (!db.cfg.nvidia) return { error: "Para leer fotos pon la clave NVIDIA en Ajustes" };
+  const f = N ? await nat("foto", nombre) : { status: 0 };
+  if (f.status !== 200) return { error: "No pude abrir la foto" };
+  for (const m of MOD_VIS) {
+    const r = await http("https://integrate.api.nvidia.com/v1/chat/completions", { method: "POST", headers: { Authorization: "Bearer " + db.cfg.nvidia, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: [{ type: "text", text: PROMPT_FOTO }, { type: "image_url", image_url: { url: f.body } }] }], max_tokens: 700, temperature: 0.1 }) });
+    if (r.status === 401 || r.status === 403) return { error: "Clave NVIDIA rechazada" };
+    if (r.status === 200) { try { const t = (JSON.parse(r.body).choices[0].message.content || "").trim(); if (t) return { texto: t }; } catch (e) { } }
+  }
+  return { error: "La IA no pudo leer esta foto" };
+}
+
 // ============ lectura de cada tipo de link ============
 const decodeHtml = s => { const t = document.createElement("textarea"); t.innerHTML = s; return t.value; };
 const metaDe = (html, n) => { const m = html.match(new RegExp('<meta[^>]+(?:property|name)=["\']' + n + '["\'][^>]*content=["\']([^"\']*)["\']', "i")) || html.match(new RegExp('<meta[^>]+content=["\']([^"\']*)["\'][^>]+(?:property|name)=["\']' + n + '["\']', "i")); return m ? decodeHtml(m[1]) : ""; };
@@ -252,6 +267,11 @@ const hashtags = t => [...new Set((t.match(/#[\p{L}\d_]+/gu) || []).map(x => x.t
 
 async function analizar(card, textoManual) {
   ghAviso = ""; iaError = "";
+  if (card.tipo === "Foto" && !textoManual) {
+    const v = await verFoto(card.foto);
+    if (v.error) { Object.assign(card, { estado: "revisar", motivo: v.error, categoria: "Para revisar" }); return card; }
+    textoManual = v.texto; const cu = v.texto.match(/Cuenta:\s*(@[\w.]+)/i); if (cu) card.cuenta = cu[1];
+  }
   let texto = textoManual || "", titulo = "";
   if (!texto) {
     const l = card.tipo === "Instagram" ? await leerIG(card.url) : card.tipo === "YouTube" ? await leerYT(card.url) : card.tipo === "GitHub" ? { texto: "" } : await leerWeb(card.url);
@@ -352,13 +372,13 @@ function fichaHtml(c) {
   const r = c.repos && c.repos[0];
   const est = c.estado === "ok" ? "" : c.estado === "pendiente" ? '<span class="chip">en cola</span>' : '<span class="chip warn">revisar</span>';
   return `<div class="card" data-id="${c.id}"><h3>${esc(c.titulo)}</h3>${c.resumen ? `<p>${esc(c.resumen)}</p>` : ""}
-<div class="meta"><span class="chip">${esc(c.tipo)}</span>${r ? `<span class="chip ok">GitHub ✓ ${esc(r.full)} ★${miles(r.stars)}</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${est}</div>
+<div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${r ? `<span class="chip ok">GitHub ✓ ${esc(r.full)} ★${miles(r.stars)}</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${est}</div>
 ${c.motivo ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo)}</div>` : ""}
 <div class="acc"><button class="btn sm" data-a="abrir">Abrir link</button><button class="btn sm" data-a="copiar">Copiar</button><button class="btn sm" data-a="cat">Categoría</button><button class="btn sm" data-a="texto">Pegar texto</button><button class="btn sm" data-a="borrar" style="color:var(--bad)">Borrar</button></div></div>`;
 }
 function ficha2txt(c) {
   const r = c.repos && c.repos[0];
-  return [`### ${c.titulo}`, c.resumen, r ? `Repo: ${r.url} (★${r.stars})` : "", `Link: ${c.url}`, ...(c.extra || []).map(u => "Link: " + u)].filter(Boolean).join("\n");
+  return [`### ${c.titulo}`, c.resumen, r ? `Repo: ${r.url} (★${r.stars})` : "", c.cuenta ? "Cuenta: " + c.cuenta : "", c.tipo === "Foto" ? "" : `Link: ${c.url}`, ...(c.extra || []).map(u => "Link: " + u)].filter(Boolean).join("\n");
 }
 function todoTxt() {
   const g = {}; db.cards.filter(c => c.estado !== "pendiente").forEach(c => (g[c.categoria || "Sin clasificar"] ||= []).push(c));
@@ -397,7 +417,7 @@ $("#lista").addEventListener("click", async e => {
   const card = e.target.closest(".card"); if (!card) return; const c = db.cards.find(x => x.id === card.dataset.id); if (!c) return;
   const a = e.target.dataset.a;
   if (!a) { card.classList.toggle("open"); return; }
-  if (a === "abrir") N ? N.abrir(c.url) : window.open(c.url);
+  if (a === "abrir") c.tipo === "Foto" ? aviso("Es una foto del chat, no tiene link") : N ? N.abrir(c.url) : window.open(c.url);
   if (a === "copiar") copiar(ficha2txt(c));
   if (a === "borrar") { db.cards = db.cards.filter(x => x !== c); guardar(); pintar(); }
   if (a === "cat") { const v = await pregunta("Categoría de esta ficha", c.categoria); if (v && v.trim()) { c.categoria = v.trim(); guardar(); pintar(); } }
@@ -414,7 +434,16 @@ $("#bGuardar").onclick = async () => {
 $("#bBorrar").onclick = async () => { const v = await pregunta("Escribe BORRAR para eliminar todas las fichas", ""); if (v && v.trim().toUpperCase() === "BORRAR") { db.cards = []; guardar(); pintar(); aviso("Fichas borradas"); } };
 $$("nav button").forEach(b => b.onclick = () => cambiaTab(b.dataset.t));
 window.__atras = () => { const d = $("#dlg"); if (d.open) { d.close(); return true; } if (!$("#p-pegar").classList.contains("on")) { cambiaTab("pegar"); return true; } return false; };
-window.__compartido = t => { cambiaTab("pegar"); $("#txt").value += ($("#txt").value ? "\n" : "") + t; detectar(); aviso("Link recibido. Pulsa «Ordenar»."); };
+// Recibe lo compartido (texto, chat exportado de WhatsApp, fotos): saca links, crea fichas por foto y empieza a ordenar solo.
+window.__chat = (t, fs) => {
+  cambiaTab("pegar");
+  const r = encolar(sacarLinks(t).links), st = Date.now().toString(36);
+  for (const n of fs) db.cards.push({ id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+  guardar();
+  if (!r.nuevos && !fs.length) return aviso(r.repes ? "Esos links ya estaban guardados." : "No encontré links ni fotos.");
+  aviso(`Recibido: ${r.nuevos} links nuevos${r.repes ? `, ${r.repes} repetidos` : ""}, ${fs.length} fotos. Ordenando…`);
+  correr();
+};
 $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github;
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
 pintar(); detectar();

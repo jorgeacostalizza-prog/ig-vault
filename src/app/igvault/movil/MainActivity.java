@@ -17,8 +17,20 @@ import android.widget.Toast;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.util.Base64;
+import org.json.JSONArray;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -32,7 +44,11 @@ public class MainActivity extends Activity {
 
     WebView web;
     final Handler ui = new Handler(Looper.getMainLooper());
-    String compartido;
+    static final String BASE = "https://jorgeacostalizza-prog.github.io/ig-vault/";
+    static final String WEB = BASE + "src/assets/index.html";
+    static final int MAX_FOTOS = 40;
+    String compartido, fotos;
+    boolean cargada;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -45,29 +61,114 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         web.addJavascriptInterface(new Puente(), "Native");
         web.setWebViewClient(new WebViewClient() {
-            @Override public void onPageFinished(WebView v, String u) { enviarCompartido(); }
+            @Override public void onPageFinished(WebView v, String u) { cargada = true; enviarCompartido(); }
         });
         setContentView(web);
-        compartido = textoCompartido(getIntent());
-        web.loadUrl("file:///android_asset/index.html");
+        procesar(getIntent());
+        arranque();
     }
 
-    String textoCompartido(Intent i) {
-        return i != null && Intent.ACTION_SEND.equals(i.getAction()) ? i.getStringExtra(Intent.EXTRA_TEXT) : null;
+    /** Autoupdate: baja la interfaz publicada (2,5 s max), la guarda y la usa; sin red usa la ultima copia o la incluida en la APK. */
+    void arranque() {
+        new Thread(() -> {
+            File cache = new File(getFilesDir(), "index.html");
+            try {
+                HttpURLConnection c = (HttpURLConnection) new URL(WEB + "?t=" + System.currentTimeMillis()).openConnection();
+                c.setConnectTimeout(2500);
+                c.setReadTimeout(2500);
+                if (c.getResponseCode() == 200) {
+                    InputStream in = c.getInputStream();
+                    byte[] b = leer(in, 3000000);
+                    in.close();
+                    if (new String(b, "UTF-8").contains("</html>")) { FileOutputStream o = new FileOutputStream(cache); o.write(b); o.close(); }
+                }
+            } catch (Exception e) { }
+            String html = "";
+            try {
+                InputStream in = cache.exists() ? new FileInputStream(cache) : getAssets().open("index.html");
+                html = new String(leer(in, 3000000), "UTF-8");
+                in.close();
+            } catch (Exception e) { }
+            final String h = html;
+            ui.post(() -> web.loadDataWithBaseURL(BASE, h, "text/html", "UTF-8", null));
+        }).start();
+    }
+
+    static byte[] leer(InputStream in, int max) throws java.io.IOException {
+        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int n;
+        while (bo.size() < max && (n = in.read(buf)) > 0) bo.write(buf, 0, n);
+        return bo.toByteArray();
+    }
+
+    /** Recibe lo compartido: texto suelto, el archivo de "Exportar chat" de WhatsApp (.txt, o .zip con fotos) y fotos sueltas. */
+    void procesar(Intent i) {
+        compartido = null;
+        fotos = null;
+        if (i == null) return;
+        String a = i.getAction();
+        if (!Intent.ACTION_SEND.equals(a) && !Intent.ACTION_SEND_MULTIPLE.equals(a)) return;
+        final String previo = i.getStringExtra(Intent.EXTRA_TEXT);
+        final ArrayList<Uri> us = new ArrayList<>();
+        if (Intent.ACTION_SEND.equals(a)) { Uri u = i.getParcelableExtra(Intent.EXTRA_STREAM); if (u != null) us.add(u); }
+        else { ArrayList<Uri> l = i.getParcelableArrayListExtra(Intent.EXTRA_STREAM); if (l != null) us.addAll(l); }
+        if (us.isEmpty()) { compartido = previo; return; }
+        new Thread(() -> {
+            StringBuilder txt = new StringBuilder(previo == null ? "" : previo + "\n");
+            JSONArray fs = new JSONArray();
+            File dir = new File(getCacheDir(), "chat");
+            File[] viejos = dir.listFiles();
+            if (viejos != null) for (File f : viejos) f.delete();
+            dir.mkdirs();
+            for (Uri u : us) {
+                try {
+                    InputStream in = new BufferedInputStream(getContentResolver().openInputStream(u));
+                    in.mark(4);
+                    byte[] m = new byte[2];
+                    int r = in.read(m);
+                    in.reset();
+                    String tipo = getContentResolver().getType(u);
+                    if (r == 2 && m[0] == 'P' && m[1] == 'K') {
+                        ZipInputStream z = new ZipInputStream(in);
+                        ZipEntry e;
+                        while ((e = z.getNextEntry()) != null) {
+                            String n = e.getName().toLowerCase();
+                            if (n.endsWith(".txt")) txt.append(new String(leer(z, 5000000), "UTF-8")).append("\n");
+                            else if (fs.length() < MAX_FOTOS && n.matches(".*\\.(jpe?g|png|webp)$")) guardarFoto(z, dir, fs);
+                        }
+                    } else if (tipo != null && tipo.startsWith("image/")) {
+                        if (fs.length() < MAX_FOTOS) guardarFoto(in, dir, fs);
+                    } else txt.append(new String(leer(in, 5000000), "UTF-8")).append("\n");
+                    in.close();
+                } catch (Exception e) { }
+            }
+            compartido = txt.toString();
+            fotos = fs.toString();
+            ui.post(this::enviarCompartido);
+        }).start();
+    }
+
+    void guardarFoto(InputStream in, File dir, JSONArray fs) throws Exception {
+        String n = "f" + fs.length() + ".jpg";
+        FileOutputStream o = new FileOutputStream(new File(dir, n));
+        o.write(leer(in, 10000000));
+        o.close();
+        fs.put(n);
     }
 
     void enviarCompartido() {
-        if (compartido != null) {
-            web.evaluateJavascript("window.__compartido&&window.__compartido(" + JSONObject.quote(compartido) + ")", null);
-            compartido = null;
-        }
+        if (!cargada || (compartido == null && fotos == null)) return;
+        web.evaluateJavascript("window.__chat&&window.__chat(" + JSONObject.quote(compartido == null ? "" : compartido) + "," + (fotos == null ? "[]" : fotos) + ")", null);
+        compartido = null;
+        fotos = null;
     }
 
     @Override
     protected void onNewIntent(Intent i) {
         super.onNewIntent(i);
-        compartido = textoCompartido(i);
-        enviarCompartido();
+        procesar(i);
+        ui.post(this::enviarCompartido);
     }
 
     @Override
@@ -157,6 +258,29 @@ public class MainActivity extends Activity {
                 ui.postDelayed(fin, 20000);
                 w.loadUrl(url);
             });
+        }
+
+        /** Foto del chat reducida (max 1280 px, JPEG) como data URL, lista para un modelo de vision. */
+        @JavascriptInterface
+        public void foto(final int id, final String nombre) {
+            new Thread(() -> {
+                JSONObject out = new JSONObject();
+                try {
+                    String p = new File(new File(getCacheDir(), "chat"), new File(nombre).getName()).getPath();
+                    BitmapFactory.Options o = new BitmapFactory.Options();
+                    o.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(p, o);
+                    o.inSampleSize = Math.max(1, Math.max(o.outWidth, o.outHeight) / 1280);
+                    o.inJustDecodeBounds = false;
+                    Bitmap b = BitmapFactory.decodeFile(p, o);
+                    ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                    b.compress(Bitmap.CompressFormat.JPEG, 80, bo);
+                    out.put("status", 200).put("body", "data:image/jpeg;base64," + Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP));
+                } catch (Exception e) {
+                    try { out.put("status", 0).put("body", "").put("error", String.valueOf(e)); } catch (Exception x) { }
+                }
+                responder(id, out.toString());
+            }).start();
         }
 
         @JavascriptInterface
