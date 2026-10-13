@@ -172,6 +172,7 @@ async function ghRepo(full) {
   return null;
 }
 async function ghBuscar(nombre) {
+  if (nombre.replace(/\s+/g, "").length < 5 || /^(claude|kaggle|colab|codex|gemini|chatgpt|openai|anthropic|google|github|python|ollama|huggingface|hugging face|lightning|chrome|firefox|linux|windows|mac|android|ios|instagram|tiktok|youtube|nvidia|meta|llama|mistral|deepseek|cursor|vscode|node|docker)\b/i.test(nombre.trim())) return null; // marcas/plataformas: no son "el repo" del vídeo
   const r = await http("https://api.github.com/search/repositories?per_page=3&q=" + encodeURIComponent(nombre + " in:name"), { headers: ghH() });
   if (r.status !== 200) { if (r.status === 403) ghAviso = "GitHub limitó las consultas (pon un token en Ajustes)"; return null; }
   try { const it = JSON.parse(r.body).items || []; const n = nombre.toLowerCase().replace(/\s+/g, "-"); return it.find(x => x.name.toLowerCase() === n || x.name.toLowerCase() === nombre.toLowerCase()) || null; } catch (e) { return null; }
@@ -250,7 +251,7 @@ async function leerIG(url) {
   if (!t) { r = await pagina(base); t = capDeOg(r.og) || ""; if (!t && r.og && !MURO.test(r.og) && r.og.length > 40) t = r.og; }
   if (!t) { const h = await http(base); if (h.status === 200) t = capDeOg(metaDe(h.body, "og:description")); }
   t = t.replace(/\s+\n/g, "\n").trim();
-  const imgs = await imgsIG(base);
+  const imgs = (g.imgs && g.imgs.length > 1) ? g.imgs : await imgsIG(base);
   if (!imgs.length && g.img) imgs.push(g.img);
   if (!imgs.length && !g.video && (!t || (t.length < 25 && MURO.test(t)))) return { error: "Instagram no deja leer este post sin iniciar sesión" };
   if (t.length < 25 && MURO.test(t)) t = "";
@@ -266,6 +267,8 @@ async function gbIG(base) {
     const c = r.body.match(/"caption":\{"text":"((?:[^"\\]|\\.)*)"/); if (c) o.cap = dec(c[1]).trim();
     const v = r.body.match(/"video_versions":\[\{[^\]]*?"url":"((?:[^"\\]|\\.)*)"/); if (v) o.video = dec(v[1]);
     const i = r.body.match(/property="og:image" content="([^"]+)"/); if (i) o.img = i[1].replace(/&amp;/g, "&");
+    o.imgs = []; const k = r.body.indexOf('"carousel_media":['); // carrusel: portada de las primeras diapositivas de ESTE post
+    if (k > 0) for (const m of r.body.slice(k, k + 400000).matchAll(/"image_versions2":\{"candidates":\[\{"url":"((?:[^"\\]|\\.)*)"/g)) { const u = dec(m[1]); if (u && !o.imgs.includes(u)) o.imgs.push(u); if (o.imgs.length >= 3) break; }
   } catch (e) { }
   return o;
 }
@@ -386,7 +389,7 @@ ${ctx}`);
     if (ai && !repos.length) { // propuestas de la IA: solo valen si GitHub confirma que existen
       for (const p of (ai.proyectos || []).slice(0, 2)) {
         let g = p.repo && /^[\w.-]+\/[\w.-]+$/.test(p.repo) ? await ghRepo(p.repo) : null;
-        if (!g && p.nombre) g = await ghBuscar(p.nombre);
+        if (!g && p.nombre) { g = await ghBuscar(p.nombre); if (g && (g.stargazers_count || 0) < 20) g = null; } // por nombre solo vale un repo con tracción
         if (g) repos.push(repoInfo(g));
       }
     }
