@@ -133,6 +133,7 @@ async function http(url, { method = "GET", headers = {}, body = "" } = {}) {
 const pagina = url => N ? nat("pagina", url) : (window.__pagina ? window.__pagina(url) : Promise.resolve({}));
 
 // ============ datos ============
+const BASE_WEB = "https://jorgeacostalizza-prog.github.io/ig-vault/";
 let db = { cards: [], cfg: { nvidia: "", openrouter: "", github: "" } };
 try { const d = JSON.parse(localStorage.getItem("igv") || "null"); if (d) db = { ...db, ...d, cfg: { ...db.cfg, ...d.cfg } }; } catch (e) { }
 const guardar = () => { try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } };
@@ -617,12 +618,30 @@ window.__chat = (t, fs) => {
 };
 try { const k = N && N.claves ? JSON.parse(N.claves()) : {}; if (!db.cfg.nvidia && k.nvidia) db.cfg.nvidia = k.nvidia; if (!db.cfg.openrouter && k.openrouter) db.cfg.openrouter = k.openrouter; } catch (e) { }
 $("#grupo").value = db.grupo || "AI"; $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github;
-try { // semilla: investigación precargada en la APK; se mezcla una sola vez por versión
-  const sm = N && N.semilla ? N.semilla() : "";
-  if (sm) { const sd = JSON.parse(sm), ver = String(sd.ver || sd.cards.length); if (db.semilla !== ver) { const tiene = new Set(db.cards.map(c => c.url)); sd.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); db.semilla = ver; guardar(); } }
-} catch (e) { }
+// semilla: investigación precargada. Llega por autoactualización, cifrada (el repo es público); la clave sale de la que ya lleva la APK
+async function cargarSemilla() {
+  try {
+    let sm = "";
+    const k = (N && N.claves ? JSON.parse(N.claves()).nvidia : "") || db.cfg.nvidia;
+    if (k && crypto.subtle) {
+      const r = await http(BASE_WEB + "src/assets/semilla.enc?v=" + Date.now());
+      if (r.status === 200) {
+        const o = JSON.parse(r.body), b = x => Uint8Array.from(atob(x), c => c.charCodeAt(0));
+        const key = await crypto.subtle.importKey("raw", await crypto.subtle.digest("SHA-256", new TextEncoder().encode(k)), "AES-GCM", false, ["decrypt"]);
+        sm = new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: b(o.iv) }, key, b(o.ct)));
+      }
+    }
+    if (!sm && N && N.semilla) sm = N.semilla(); // respaldo: la que va dentro de la APK
+    if (!sm) return;
+    const sd = JSON.parse(sm), ver = String(sd.ver || sd.cards.length);
+    if (db.semilla === ver) return;
+    const tiene = new Set(db.cards.map(c => c.url));
+    sd.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); });
+    db.semilla = ver; guardar(); pintar();
+  } catch (e) { }
+}
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
-pintar(); detectar();
+pintar(); detectar(); cargarSemilla();
 if (db.cards.some(c => c.estado === "pendiente")) { aviso("Quedaban links a medias: continúo."); correr(); }
 </script>
 </body>
