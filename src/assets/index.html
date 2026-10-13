@@ -161,7 +161,14 @@ let ghAviso = "";
 async function ghRepo(full) {
   const r = await http("https://api.github.com/repos/" + full, { headers: ghH() });
   if (r.status === 200) { try { return JSON.parse(r.body); } catch (e) { } }
-  if (r.status === 403 || r.status === 429) ghAviso = "GitHub limitó las consultas (pon un token en Ajustes)";
+  if (r.status === 403 || r.status === 429) { // límite de la API: leo la página pública del repo (sin API)
+    const h = await http("https://github.com/" + full);
+    if (h.status === 200) {
+      const d = (metaDe(h.body, "og:description") || "").replace(/\s*-\s*[\w.-]+\/[\w.-]+\s*:?\s*/, " ").trim();
+      if (d || metaDe(h.body, "og:title")) return { full_name: full, description: d, stargazers_count: "?", topics: [], html_url: "https://github.com/" + full };
+    }
+    ghAviso = "GitHub limitó las consultas (pon un token en Ajustes)";
+  }
   return null;
 }
 async function ghBuscar(nombre) {
@@ -242,8 +249,34 @@ async function leerIG(url) {
   if (!t) { r = await pagina(base); t = capDeOg(r.og) || ""; if (!t && r.og && !MURO.test(r.og) && r.og.length > 40) t = r.og; }
   if (!t) { const h = await http(base); if (h.status === 200) t = capDeOg(metaDe(h.body, "og:description")); }
   t = t.replace(/\s+\n/g, "\n").trim();
-  if (!t || (t.length < 25 && MURO.test(t))) return { error: "Instagram no deja leer este post sin iniciar sesión" };
-  return { texto: t };
+  const imgs = await imgsIG(base);
+  if (!imgs.length && (!t || (t.length < 25 && MURO.test(t)))) return { error: "Instagram no deja leer este post sin iniciar sesión" };
+  if (t.length < 25 && MURO.test(t)) t = "";
+  return { texto: t, imgs };
+}
+// hasta 3 imágenes del post (portada/carrusel), sin tocar la parte nativa
+async function imgsIG(base) {
+  const out = [];
+  try {
+    const e = await http(base + "embed/captioned/");
+    if (e.status === 200) for (const m of e.body.matchAll(/<img[^>]+class="[^"]*EmbeddedMediaImage[^"]*"[^>]+src="([^"]+)"/gi)) out.push(decodeHtml(m[1]));
+    if (!out.length) { const h = await http(base); if (h.status === 200) { const o = metaDe(h.body, "og:image"); if (o) out.push(o); } }
+  } catch (e) { }
+  return [...new Set(out)].slice(0, 3);
+}
+// lee el texto que sale EN las imágenes (los reels ponen ahí la lista real)
+async function leerImgs(imgs) {
+  const provs = [];
+  if (db.cfg.openrouter) for (const m of MOD_VIS_OR) provs.push(["https://openrouter.ai/api/v1/chat/completions", db.cfg.openrouter, m]);
+  if (db.cfg.nvidia) provs.push(["https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, MOD_VIS[0]]);
+  const partes = [];
+  for (const u of imgs.slice(0, 2)) {
+    for (const [url, key, m] of provs) {
+      const x = await http(url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: [{ type: "text", text: PROMPT_FOTO }, { type: "image_url", image_url: { url: u } }] }], max_tokens: 500, temperature: 0.1 }) });
+      if (x.status === 200) { try { const t = (JSON.parse(x.body).choices[0].message.content || "").trim(); if (t) { partes.push(t); break; } } catch (e) { } }
+    }
+  }
+  return partes.join("\n");
 }
 async function leerYT(url) {
   const r = await http("https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent(url));
@@ -268,6 +301,9 @@ function seccionPorPalabras(t) {
 }
 const hashtags = t => [...new Set((t.match(/#[\p{L}\d_]+/gu) || []).map(x => x.toLowerCase()))].slice(0, 12);
 
+// quita frases-gancho (comenta X y te mando, sigueme, link en bio) para no resumirlas como contenido
+const GANCHO = /(comenta|comment\b|sígueme|síguenos|follow|link en (la )?bio|enlace en (la )?bio|te (lo )?mando|te env[ií]o|te paso|escr[ií]beme|dm\b|mensaje directo|suscr[ií]be|like y|guarda este)/i;
+const quitaGancho = t => t.split(/(?<=[.!?\n])\s+/).filter(f => !GANCHO.test(f)).join(" ").trim();
 async function analizar(card, textoManual) {
   ghAviso = ""; iaError = "";
   if (card.tipo === "Foto" && !textoManual) {
@@ -280,6 +316,8 @@ async function analizar(card, textoManual) {
     const l = card.tipo === "Instagram" ? await leerIG(card.url) : card.tipo === "YouTube" ? await leerYT(card.url) : card.tipo === "GitHub" ? { texto: "" } : await leerWeb(card.url);
     if (l.error) { Object.assign(card, { estado: "revisar", motivo: l.error, categoria: "Para revisar" }); if (card.tipo !== "GitHub") return card; }
     texto = l.texto || ""; titulo = l.titulo || "";
+    if (card.tipo === "Instagram") texto = quitaGancho(texto);
+    if (l.imgs && l.imgs.length) { card.imgs = l.imgs; const vi = await leerImgs(l.imgs); if (vi) texto += "\n[TEXTO EN LAS IMÁGENES DEL POST]\n" + vi; }
   }
   card.texto = texto.slice(0, 2500); card.tags = hashtags(texto);
   // repos: links de GitHub + candidatos «owner/name» del texto, confirmados con la API
@@ -295,7 +333,7 @@ async function analizar(card, textoManual) {
   if (hayIA() && ctx.trim()) {
     ai = await chatJson(`Eres un extractor. Debajo está el contenido de un link de ${card.tipo}. Responde SOLO JSON:
 {"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español: qué es y para qué sirve, usando SOLO lo que dice el texto","categoria":"una categoría corta","proyectos":[{"nombre":"...","repo":"owner/name o null"}]}
-Categorías que ya existen: ${JSON.stringify(cats)}. Reutiliza una si encaja; si no, crea una nueva de 1 a 3 palabras. Si el texto no da información: "resumen":"" y "categoria":"Sin clasificar". No inventes nada. Ordena, no descartes.
+Categorías que ya existen: ${JSON.stringify(cats)}. Reutiliza una si encaja; si no, crea una nueva de 1 a 3 palabras. Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO, no es el contenido. El resumen debe decir QUÉ herramientas/proyectos/ideas se explican (nómbralos si aparecen, también en el texto de las imágenes). Si el texto no da información: "resumen":"" y "categoria":"Sin clasificar". No inventes nada. Ordena, no descartes.
 CONTENIDO:
 ${ctx}`);
     if (ai && !repos.length) { // propuestas de la IA: solo valen si GitHub confirma que existen
@@ -308,8 +346,8 @@ ${ctx}`);
   }
   const r0 = repos[0];
   card.repos = repos.map(r => ({ full: r.full, url: r.url, stars: r.stars, desc: r.desc, topics: r.topics }));
-  card.titulo = (ai && ai.titulo) || titulo || (r0 && r0.full.split("/")[1]) || (texto.split("\n").find(l => l.trim() && !/^(Cuenta:|Imagen:?)/i.test(l.trim())) || "").slice(0, 70) || card.url;
-  card.resumen = (ai && ai.resumen) || (r0 && r0.desc) || texto.slice(0, 220);
+  card.titulo = (ai && ai.titulo) || titulo || (r0 && r0.full.split("/")[1]) || (card.tipo === "Instagram" && !texto.trim() ? "Post de Instagram (sin texto legible)" : "") || (texto.split("\n").find(l => l.trim() && !/^(Cuenta:|Imagen:?)/i.test(l.trim())) || "").slice(0, 70) || card.url;
+  card.resumen = (ai && ai.resumen) || (r0 && r0.desc) || texto.slice(0, 220) || (card.tipo === "Instagram" ? "El texto de este post solo traía un gancho (comenta...); no se pudo leer su contenido. Abre el enlace." : "");
   card.categoria = (ai && ai.categoria && ai.categoria.trim()) || (r0 && r0.topics[0]) || (card.tags[0] && card.tags[0].slice(1)) || seccionPorPalabras(texto);
   card.categoria = card.categoria.charAt(0).toUpperCase() + card.categoria.slice(1);
   card.fuente = ai ? (r0 ? "verificado" : "resumen IA") : (r0 ? "verificado" : "deducido");
@@ -374,7 +412,7 @@ function pintar() {
 function fichaHtml(c) {
   const r = c.repos && c.repos[0];
   const est = c.estado === "ok" ? "" : c.estado === "pendiente" ? '<span class="chip">en cola</span>' : '<span class="chip warn">revisar</span>';
-  return `<div class="card" data-id="${c.id}"><h3>${esc(c.titulo)}</h3>${c.resumen ? `<p>${esc(c.resumen)}</p>` : ""}
+  return `<div class="card" data-id="${c.id}"><h3>${esc(c.titulo)}</h3>${c.imgs && c.imgs.length ? `<div style="display:flex;gap:6px;overflow-x:auto;margin:6px 0">${c.imgs.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" style="height:96px;border-radius:8px;flex:none" onerror="this.remove()">`).join("")}</div>` : ""}${c.resumen ? `<p>${esc(c.resumen)}</p>` : ""}
 <div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${r ? `<span class="chip ok">GitHub ✓ ${esc(r.full)} ★${miles(r.stars)}</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${est}</div>
 ${c.motivo ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo)}</div>` : ""}
 <div class="acc"><button class="btn sm" data-a="abrir">Abrir link</button><button class="btn sm" data-a="copiar">Copiar</button><button class="btn sm" data-a="cat">Categoría</button><button class="btn sm" data-a="texto">Pegar texto</button><button class="btn sm" data-a="borrar" style="color:var(--bad)">Borrar</button></div></div>`;
