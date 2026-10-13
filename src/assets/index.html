@@ -341,12 +341,13 @@ async function analizar(card, textoManual) {
   for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g) repos.push(repoInfo(g)); }
   let ctx = texto.slice(0, 1800);
   for (const r of repos.slice(0, 2)) { const rd = await ghReadme(r.full); r.readme = rd; ctx += `\n[REPO VERIFICADO ${r.full} — ${r.desc} — README: ${rd.slice(0, 900)}]`; }
-  const cats = [...new Set(db.cards.map(c => c.categoria).filter(Boolean))].slice(0, 25);
+  const BASE_CATS = ["Repos de GitHub", "Herramientas de IA", "Programas y apps", "Webs y recursos", "Tutoriales y cursos", "Ideas y negocio"];
+  const cats = [...new Set([...BASE_CATS, ...db.cards.map(c => c.categoria).filter(c => c && !/^(Pendiente|Para revisar|Sin clasificar)$/.test(c))])].slice(0, 40);
   let ai = null;
   if (hayIA() && ctx.trim()) {
     ai = await chatJson(`Eres un extractor. Debajo está el contenido de un link de ${card.tipo}. Responde SOLO JSON:
 {"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español: qué es y para qué sirve, usando SOLO lo que dice el texto","categoria":"una categoría corta","proyectos":[{"nombre":"...","repo":"owner/name o null"}]}
-Categorías que ya existen: ${JSON.stringify(cats)}. Reutiliza una si encaja; si no, crea una nueva de 1 a 3 palabras. Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO, no es el contenido. El resumen debe decir QUÉ herramientas/proyectos/ideas se explican (nómbralos si aparecen, también en el texto de las imágenes). Si el texto no da información: "resumen":"" y "categoria":"Sin clasificar". No inventes nada. Ordena, no descartes.
+Categorías que ya existen: ${JSON.stringify(cats)}. Elige la que mejor encaje con lo que MUESTRAN el texto y las imágenes (repos de GitHub, herramientas de IA, programas…); crea una nueva de 1 a 3 palabras SOLO si ninguna encaja de verdad. Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO, no es el contenido. El resumen debe decir QUÉ herramientas/proyectos/ideas se explican (nómbralos si aparecen, también en el texto de las imágenes). Si el texto no da información: "resumen":"" y "categoria":"Sin clasificar". No inventes nada. Ordena, no descartes.
 CONTENIDO:
 ${ctx}`);
     if (ai && !repos.length) { // propuestas de la IA: solo valen si GitHub confirma que existen
@@ -363,6 +364,7 @@ ${ctx}`);
   card.resumen = (ai && ai.resumen) || (r0 && r0.desc) || texto.slice(0, 220) || (card.tipo === "Instagram" ? "El texto de este post solo traía un gancho (comenta...); no se pudo leer su contenido. Abre el enlace." : "");
   card.categoria = (ai && ai.categoria && ai.categoria.trim()) || (r0 && r0.topics[0]) || (card.tags[0] && card.tags[0].slice(1)) || seccionPorPalabras(texto);
   card.categoria = card.categoria.charAt(0).toUpperCase() + card.categoria.slice(1);
+  card.categoria = cats.find(k => k.toLowerCase() === card.categoria.toLowerCase()) || card.categoria;
   card.fuente = ai ? (r0 ? "verificado" : "resumen IA") : (r0 ? "verificado" : "deducido");
   card.estado = "ok"; card.motivo = "";
   if (hayIA() && !ai && ctx.trim()) card.motivo = "Sin IA ahora (" + iaError.slice(0, 90) + "): ordenado por GitHub/hashtags";
