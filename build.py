@@ -1,6 +1,6 @@
 """Construye IG Extractor.apk sin Gradle (aapt2 -> javac -> d8 -> zipalign -> apksigner). Mismo metodo que Coucou.
 Uso: python build.py   (deja la APK en 'Mis Android Apps\IG Extractor.apk')"""
-import os, shutil, subprocess, zipfile, secrets
+import os, shutil, subprocess, zipfile, secrets, json
 
 AQUI = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
 SRC, BUILD = AQUI + "/src", AQUI + "/build"
@@ -19,8 +19,12 @@ def run(cmd):
     return r.stdout
 
 
+CLAVES = SRC + "/assets/claves.json"  # solo dentro de la APK; esta en .gitignore y se borra al acabar
+
+
 def main():
     shutil.rmtree(BUILD, ignore_errors=True)
+    json.dump({"nvidia": os.environ.get("NVIDIA_API_KEY", ""), "openrouter": os.environ.get("OPENROUTER_API_KEY", "")}, open(CLAVES, "w"))
     for d in ("flat", "gen", "classes"):
         os.makedirs(BUILD + "/" + d)
     for base, _, fs in os.walk(SRC + "/res"):
@@ -51,6 +55,7 @@ def main():
     print(run([BT + "/apksigner.bat", "verify", "--verbose", final]).strip())
     os.makedirs(os.path.dirname(DESTINO), exist_ok=True)
     shutil.copy(final, DESTINO)
+    os.remove(CLAVES)
     print("LISTO:", DESTINO, os.path.getsize(final) // 1024, "KB")
 
 

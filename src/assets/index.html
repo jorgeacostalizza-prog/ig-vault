@@ -210,18 +210,21 @@ async function chatJson(prompt) {
 }
 
 // ============ fotos del chat (IA de visión de NVIDIA) ============
-const MOD_VIS = ["meta/llama-3.2-90b-vision-instruct", "meta/llama-3.2-11b-vision-instruct", "microsoft/phi-4-multimodal-instruct"];
+const MOD_VIS = ["meta/llama-3.2-11b-vision-instruct", "meta/llama-3.2-90b-vision-instruct", "google/gemma-4-31b-it"];
+const MOD_VIS_OR = ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"];
 const PROMPT_FOTO = "Mira la imagen. 1) Si ves un nombre de cuenta pública (@usuario) escribe primero «Cuenta: @usuario». 2) Transcribe TODO el texto visible tal cual está. 3) Termina con «Imagen: » y una frase de qué muestra (proyecto, repo, herramienta, tema). Incluye nombres de repos owner/name o URLs que veas. No inventes nada.";
 async function verFoto(nombre) {
-  if (!db.cfg.nvidia) return { error: "Para leer fotos pon la clave NVIDIA en Ajustes" };
+  const provs = [];
+  if (db.cfg.nvidia) for (const m of MOD_VIS) provs.push(["https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, m]);
+  if (db.cfg.openrouter) for (const m of MOD_VIS_OR) provs.push(["https://openrouter.ai/api/v1/chat/completions", db.cfg.openrouter, m]);
+  if (!provs.length) return { error: "Para leer fotos hace falta una clave de IA (Ajustes)" };
   const f = N ? await nat("foto", nombre) : { status: 0 };
   if (f.status !== 200) return { error: "No pude abrir la foto" };
-  for (const m of MOD_VIS) {
-    const r = await http("https://integrate.api.nvidia.com/v1/chat/completions", { method: "POST", headers: { Authorization: "Bearer " + db.cfg.nvidia, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: [{ type: "text", text: PROMPT_FOTO }, { type: "image_url", image_url: { url: f.body } }] }], max_tokens: 700, temperature: 0.1 }) });
-    if (r.status === 401 || r.status === 403) return { error: "Clave NVIDIA rechazada" };
+  for (const [url, key, m] of provs) {
+    const r = await http(url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: [{ type: "text", text: PROMPT_FOTO }, { type: "image_url", image_url: { url: f.body } }] }], max_tokens: 700, temperature: 0.1 }) });
     if (r.status === 200) { try { const t = (JSON.parse(r.body).choices[0].message.content || "").trim(); if (t) return { texto: t }; } catch (e) { } }
   }
-  return { error: "La IA no pudo leer esta foto" };
+  return { error: "La IA no pudo leer esta foto (límite o modelo no disponible)" };
 }
 
 // ============ lectura de cada tipo de link ============
@@ -444,6 +447,7 @@ window.__chat = (t, fs) => {
   aviso(`Recibido: ${r.nuevos} links nuevos${r.repes ? `, ${r.repes} repetidos` : ""}, ${fs.length} fotos. Ordenando…`);
   correr();
 };
+try { const k = N && N.claves ? JSON.parse(N.claves()) : {}; if (!db.cfg.nvidia && k.nvidia) db.cfg.nvidia = k.nvidia; if (!db.cfg.openrouter && k.openrouter) db.cfg.openrouter = k.openrouter; } catch (e) { }
 $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github;
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
 pintar(); detectar();
