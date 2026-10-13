@@ -267,8 +267,8 @@ async function imgsIG(base) {
 // lee el texto que sale EN las imágenes (los reels ponen ahí la lista real)
 async function leerImgs(imgs) {
   const provs = [];
+  if (db.cfg.nvidia) for (const m of MOD_VIS.slice(0, 2)) provs.push(["https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, m]);
   if (db.cfg.openrouter) for (const m of MOD_VIS_OR) provs.push(["https://openrouter.ai/api/v1/chat/completions", db.cfg.openrouter, m]);
-  if (db.cfg.nvidia) provs.push(["https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, MOD_VIS[0]]);
   const partes = [];
   for (const u of imgs.slice(0, 2)) {
     for (const [url, key, m] of provs) {
