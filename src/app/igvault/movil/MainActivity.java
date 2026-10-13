@@ -299,6 +299,12 @@ public class MainActivity extends Activity {
             }).start();
         }
 
+        /** Tarjetas ya investigadas, precargadas en la APK (no estan en el repo). */
+        @JavascriptInterface
+        public String semilla() {
+            try { InputStream in = getAssets().open("semilla.json"); String s = new String(leer(in, 20000000), "UTF-8"); in.close(); return s; } catch (Exception e) { return ""; }
+        }
+
         /** Claves guardadas dentro de la APK al compilar (no estan en el repo). */
         @JavascriptInterface
         public String claves() {

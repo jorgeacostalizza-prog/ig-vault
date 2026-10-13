@@ -60,6 +60,7 @@ dialog h2{margin:0 0 10px;font-size:18px}
 <header><h1>IG Vault</h1><span id="cuenta"></span></header>
 <main>
   <section class="pan on" id="p-pegar">
+    <input type="text" id="grupo" placeholder="Grupo principal (AI, Hacking Ethical…)" style="margin-bottom:8px">
     <textarea id="txt" placeholder="Pega aquí todos tus links de golpe (Instagram, YouTube, GitHub…), uno por línea o mezclados con texto. Yo saco los links solo." spellcheck="false"></textarea>
     <div class="nota" id="detect">Aún no hay links.</div>
     <div class="fila">
@@ -485,12 +486,13 @@ ${web ? "WEB OFICIAL (" + web.url + "): " + web.titulo + " — " + web.desc + " 
 // ============ cola ============
 let corriendo = false, parar = false;
 const claveUrl = u => { u = u.toLowerCase().replace(/^https?:\/\/(www\.|m\.)?/, "").replace(/#.*$/, ""); if (!/^youtu/.test(u)) u = u.replace(/\?.*$/, ""); return u.replace(/\/+$/, ""); };
+function grupoActual() { const g = (($("#grupo") || {}).value || "").trim() || "AI"; if (db.grupo !== g) { db.grupo = g; guardar(); } return g; }
 function encolar(links) {
   let nuevos = 0, repes = 0;
   for (const u of links) {
     const ya = db.cards.find(c => claveUrl(c.url) === claveUrl(u));
     if (ya) { repes++; continue; }
-    db.cards.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+    db.cards.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
     nuevos++;
   }
   guardar(); return { nuevos, repes };
@@ -524,15 +526,16 @@ async function correr() {
 function aviso(t) { const a = $("#aviso"); a.textContent = t; a.style.display = "block"; clearTimeout(aviso.t); aviso.t = setTimeout(() => a.style.display = "none", 4500); }
 function cambiaTab(t) { $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + t)); if (t === "fichas") pintar(); $("main").scrollTop = 0; }
 const miles = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : String(n);
+const ordenCat = (a, b) => ((a === "Para revisar") - (b === "Para revisar")) || (a === "Sin clasificar") - (b === "Sin clasificar") || a.localeCompare(b, "es");
 function pintar() {
   const q = $("#buscar").value.trim().toLowerCase();
   const cards = db.cards.filter(c => !q || [c.titulo, c.resumen, c.categoria, c.url, ...(c.tags || [])].join(" ").toLowerCase().includes(q));
   $("#cuenta").textContent = db.cards.length ? db.cards.length + " fichas" : "";
   if (!db.cards.length) { $("#lista").innerHTML = '<div class="vacio"><b>Todavía no hay fichas</b>Ve a «Pegar», mete tus links y pulsa «Ordenar».</div>'; return; }
-  const grupos = {}; cards.forEach(c => (grupos[c.categoria || "Sin clasificar"] ||= []).push(c));
-  const orden = Object.keys(grupos).sort((a, b) => ((a === "Para revisar") - (b === "Para revisar")) || (a === "Sin clasificar") - (b === "Sin clasificar") || a.localeCompare(b, "es"));
+  const gg = {}; cards.forEach(c => ((gg[c.grupo || "AI"] ||= {})[c.categoria || "Sin clasificar"] ||= []).push(c)); // grupo principal > categoría
   const abiertas = new Set($$("details[open]").map(d => d.dataset.k));
-  $("#lista").innerHTML = orden.map(k => `<details data-k="${esc(k)}" ${(abiertas.has(k) || q || !abiertas.size) ? "open" : ""}><summary>${esc(k)} <b>${grupos[k].length}</b></summary>${grupos[k].map(fichaHtml).join("")}</details>`).join("") || '<div class="vacio">Nada coincide con tu búsqueda.</div>';
+  const pintaCats = (grupos, pre) => Object.keys(grupos).sort(ordenCat).map(k => `<details data-k="${esc(pre + k)}" ${(abiertas.has(pre + k) || q || !abiertas.size) ? "open" : ""}><summary>${esc(k)} <b>${grupos[k].length}</b></summary>${grupos[k].map(fichaHtml).join("")}</details>`).join("");
+  $("#lista").innerHTML = Object.keys(gg).sort((a, b) => a.localeCompare(b, "es")).map(g => `<details class="grupo" data-k="G:${esc(g)}" ${(abiertas.has("G:" + g) || q || !abiertas.size) ? "open" : ""}><summary style="font-size:1.1em">📁 ${esc(g)} <b>${Object.values(gg[g]).reduce((n, a) => n + a.length, 0)}</b></summary>${pintaCats(gg[g], g + "/")}</details>`).join("") || '<div class="vacio">Nada que mostrar.</div>';
 }
 function fichaHtml(c) {
   const r = c.repos && c.repos[0];
@@ -613,7 +616,11 @@ window.__chat = (t, fs) => {
   correr();
 };
 try { const k = N && N.claves ? JSON.parse(N.claves()) : {}; if (!db.cfg.nvidia && k.nvidia) db.cfg.nvidia = k.nvidia; if (!db.cfg.openrouter && k.openrouter) db.cfg.openrouter = k.openrouter; } catch (e) { }
-$("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github;
+$("#grupo").value = db.grupo || "AI"; $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github;
+try { // semilla: investigación precargada en la APK; se mezcla una sola vez por versión
+  const sm = N && N.semilla ? N.semilla() : "";
+  if (sm) { const sd = JSON.parse(sm), ver = String(sd.ver || sd.cards.length); if (db.semilla !== ver) { const tiene = new Set(db.cards.map(c => c.url)); sd.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); db.semilla = ver; guardar(); } }
+} catch (e) { }
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
 pintar(); detectar();
 if (db.cards.some(c => c.estado === "pendiente")) { aviso("Quedaban links a medias: continúo."); correr(); }

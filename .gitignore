@@ -3,3 +3,4 @@ build/
 
 src/assets/claves.json
 *.idsig
+src/assets/semilla.json
