@@ -223,7 +223,7 @@ const PROMPT_FOTO = "Mira la imagen. 1) Si ves un nombre de cuenta pública (@us
 async function verFoto(nombre) {
   const provs = [];
   if (db.cfg.nvidia) for (const m of MOD_VIS) provs.push(["https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, m]);
-  if (db.cfg.openrouter) for (const m of MOD_VIS_OR) provs.push(["https://openrouter.ai/api/v1/chat/completions", db.cfg.openrouter, m]);
+  if (db.cfg.openrouter) for (const m of await modelosVisOR()) provs.push(["https://openrouter.ai/api/v1/chat/completions", db.cfg.openrouter, m]);
   if (!provs.length) return { error: "Para leer fotos hace falta una clave de IA (Ajustes)" };
   const f = N ? await nat("foto", nombre) : { status: 0 };
   if (f.status !== 200) return { error: "No pude abrir la foto" };
@@ -265,6 +265,19 @@ async function imgsIG(base) {
   return [...new Set(out)].slice(0, 3);
 }
 // lee el texto que sale EN las imágenes (los reels ponen ahí la lista real)
+let orVis = null;
+async function modelosVisOR() {
+  if (orVis) return orVis;
+  orVis = MOD_VIS_OR;
+  try {
+    const r = await http("https://openrouter.ai/api/v1/models");
+    if (r.status === 200) {
+      const v = JSON.parse(r.body).data.filter(m => /:free$/.test(m.id) && (m.architecture?.input_modalities || []).includes("image") && !/safety|guard/i.test(m.id)).map(m => m.id);
+      if (v.length) orVis = [...new Set([...MOD_VIS_OR.filter(m => v.includes(m)), ...v])].slice(0, 4);
+    }
+  } catch (e) { }
+  return orVis;
+}
 async function leerImgs(imgs) {
   const provs = [];
   if (db.cfg.nvidia) for (const m of MOD_VIS.slice(0, 2)) provs.push(["https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, m]);
@@ -360,10 +373,11 @@ ${ctx}`);
 
 // ============ cola ============
 let corriendo = false, parar = false;
+const claveUrl = u => { u = u.toLowerCase().replace(/^https?:\/\/(www\.|m\.)?/, "").replace(/#.*$/, ""); if (!/^youtu/.test(u)) u = u.replace(/\?.*$/, ""); return u.replace(/\/+$/, ""); };
 function encolar(links) {
   let nuevos = 0, repes = 0;
   for (const u of links) {
-    const ya = db.cards.find(c => c.url.toLowerCase() === u.toLowerCase());
+    const ya = db.cards.find(c => claveUrl(c.url) === claveUrl(u));
     if (ya) { repes++; continue; }
     db.cards.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
     nuevos++;
