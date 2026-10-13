@@ -19,6 +19,7 @@ public class Voz {
         if (v.length < 2000) return new String[]{"", "error descarga: vacio"};
         StringBuilder err = new StringBuilder();
         java.util.Set<String> muerto = new java.util.HashSet<>(); // proveedor con clave mala: no reintentar su otro modelo
+        int g400 = 0;
         for (String[] p : ORDEN) {
             String k = p[0].equals("groq") ? groq : gemini;
             if (k == null || k.isEmpty() || muerto.contains(p[0])) continue;
@@ -26,7 +27,9 @@ public class Voz {
                 String t = p[0].equals("groq") ? groq(v, k, p[1]) : gemini(java.util.Arrays.copyOf(v, Math.min(v.length, 3_000_000)), k, p[1]);
                 if (t != null && t.trim().length() > 0) return new String[]{p[1], t.trim()};
                 err.append(p[1]).append(":vacio ");
-            } catch (Exception e) { String m = String.valueOf(e.getMessage()); if (m.contains("401") || m.contains("403")) muerto.add(p[0]); err.append(p[1]).append(":").append(m).append(" "); }
+            } catch (Exception e) { String m = String.valueOf(e.getMessage());
+                if (p[0].equals("groq") && m.equals("HTTP 400") && ++g400 == 2) return new String[]{"", "sin audio (Groq 400)"}; // ambos modelos 400: no esperar a Gemini
+                if (m.contains("401") || m.contains("403")) muerto.add(p[0]); err.append(p[1]).append(":").append(m).append(" "); }
         }
         return new String[]{"", "error: " + (err.length() == 0 ? "sin claves de voz" : err)};
     }
