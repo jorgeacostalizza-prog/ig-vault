@@ -153,7 +153,7 @@ function sacarLinks(t) {
   for (const m of (t.match(RE_URL) || [])) { const u = limpiaUrl(m); const k = u.toLowerCase(); if (!vistos.has(k)) { vistos.add(k); out.push(u); } }
   return { links: out, total: (t.match(RE_URL) || []).length };
 }
-const tipoDe = u => u.startsWith("foto:") ? "Foto" : RE_IG.test(u) ? "Instagram" : RE_YT.test(u) ? "YouTube" : RE_GH.test(u) ? "GitHub" : /reddit\.com/i.test(u) ? "Reddit" : /spotify\.com/i.test(u) ? "Spotify" : "Web";
+const tipoDe = u => u.startsWith("foto:") ? "Foto" : RE_IG.test(u) ? "Instagram" : RE_YT.test(u) ? "YouTube" : RE_GH.test(u) ? "GitHub" : /tiktok\.com/i.test(u) ? "TikTok" : /(twitter|x)\.com\/\w+\/status\/\d+/i.test(u) ? "X" : /reddit\.com/i.test(u) ? "Reddit" : /spotify\.com/i.test(u) ? "Spotify" : "Web";
 
 // ============ GitHub ============
 const ghH = () => ({ Accept: "application/vnd.github+json", ...(db.cfg.github ? { Authorization: "Bearer " + db.cfg.github } : {}) });
@@ -331,6 +331,17 @@ async function leerYT(url) {
   if (r.status !== 200) return { error: "No pude leer este vídeo de YouTube (HTTP " + r.status + ")" };
   try { const j = JSON.parse(r.body); return { texto: j.title + " — canal " + j.author_name, titulo: j.title }; } catch (e) { return { error: "YouTube devolvió algo ilegible" }; }
 }
+async function leerTikTok(url) {
+  const r = await http("https://www.tikwm.com/api/?url=" + encodeURIComponent(url));
+  try { const d = JSON.parse(r.body).data; if (!d) throw 0; return { texto: d.title || "", titulo: (d.title || "").slice(0, 80), video: d.play, imgs: d.images && d.images.length ? d.images.slice(0, 3) : (d.cover ? [d.cover] : []) }; }
+  catch (e) { return { error: "No pude leer este TikTok" }; }
+}
+async function leerX(url) {
+  const m = url.match(/(?:twitter|x)\.com\/(\w+)\/status\/(\d+)/i);
+  const r = await http("https://api.fxtwitter.com/" + m[1] + "/status/" + m[2]);
+  try { const t = JSON.parse(r.body).tweet; if (!t) throw 0; const ph = ((t.media || {}).photos || []).map(x => x.url).slice(0, 3), vd = ((t.media || {}).videos || [])[0]; return { texto: t.text + " — @" + t.author.screen_name, titulo: t.text.slice(0, 80), video: vd && vd.url, imgs: ph }; }
+  catch (e) { return { error: "No pude leer este tuit" }; }
+}
 async function leerWeb(url) {
   const r = await http(url);
   if (r.status !== 200) return { error: "No pude abrir esta web (" + (r.status || r.error || "sin conexión") + ")" };
@@ -361,12 +372,15 @@ async function analizar(card, textoManual) {
   }
   let texto = textoManual || "", titulo = "";
   if (!texto) {
-    const l = card.tipo === "Instagram" ? await leerIG(card.url) : card.tipo === "YouTube" ? await leerYT(card.url) : card.tipo === "GitHub" ? { texto: "" } : await leerWeb(card.url);
+    const l = card.tipo === "Instagram" ? await leerIG(card.url) : card.tipo === "YouTube" ? await leerYT(card.url) : card.tipo === "TikTok" ? await leerTikTok(card.url) : card.tipo === "X" ? await leerX(card.url) : card.tipo === "GitHub" ? { texto: "" } : await leerWeb(card.url);
     if (l.error) { Object.assign(card, { estado: "revisar", motivo: l.error, categoria: "Para revisar" }); if (card.tipo !== "GitHub") return card; }
     texto = l.texto || ""; titulo = l.titulo || "";
     if (card.tipo === "Instagram") texto = quitaGancho(texto);
-    if (l.video) { const vz = await leerVoz(l.video); card.voz = vz ? "sí" : "no"; if (vz) texto += "\n[VOZ DEL VÍDEO, transcrita]\n" + vz.slice(0, 1300); }
-    if (l.imgs && l.imgs.length) { card.imgs = l.imgs; const vi = await leerImgs(l.imgs); if (vi) texto += "\n[TEXTO EN LAS IMÁGENES DEL POST]\n" + vi; }
+    if (l.imgs && l.imgs.length) card.imgs = l.imgs;
+    const [vz, vi] = await Promise.all([l.video ? leerVoz(l.video) : null, l.imgs && l.imgs.length ? leerImgs(l.imgs) : null]); // a la vez: ahorra segundos
+    if (l.video) card.voz = vz ? "sí" : "no";
+    if (vz) texto += "\n[VOZ DEL VÍDEO, transcrita]\n" + vz.slice(0, 1300);
+    if (vi) texto += "\n[TEXTO EN LAS IMÁGENES DEL POST]\n" + vi;
   }
   card.texto = texto.slice(0, 2500); card.tags = hashtags(texto);
   // repos: links de GitHub + candidatos «owner/name» del texto, confirmados con la API
@@ -382,7 +396,7 @@ async function analizar(card, textoManual) {
   let ai = null;
   if (hayIA() && ctx.trim()) {
     ai = await chatJson(`Eres un extractor. Debajo está el contenido de un link de ${card.tipo}. Responde SOLO JSON:
-{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español: qué es y para qué sirve, usando SOLO lo que dice el texto","categoria":"una categoría corta","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"web":"web oficial del proyecto/herramienta que se explica, si habla de un servicio o herramienta conocida (Kaggle, Notion…) pon su web principal; null solo si no hay ninguna"}
+{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español: qué es y para qué sirve, usando SOLO lo que dice el texto","categoria":"una categoría corta","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 palabras clave en minúscula, sin #"],"web":"web oficial del proyecto/herramienta que se explica, si habla de un servicio o herramienta conocida (Kaggle, Notion…) pon su web principal; null solo si no hay ninguna"}
 Categorías que ya existen: ${JSON.stringify(cats)}. Elige la que mejor encaje con lo que MUESTRAN el texto y las imágenes (repos de GitHub, herramientas de IA, programas…); crea una nueva de 1 a 3 palabras SOLO si ninguna encaja de verdad. Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO, no es el contenido. El resumen debe decir QUÉ herramientas/proyectos/ideas se explican (nómbralos si aparecen, también en el texto de las imágenes). Si el texto no da información: "resumen":"" y "categoria":"Sin clasificar". No inventes nada. Ordena, no descartes.
 CONTENIDO:
 ${ctx}`);
@@ -401,6 +415,7 @@ ${ctx}`);
   card.categoria = (ai && ai.categoria && ai.categoria.trim()) || (r0 && r0.topics[0]) || (card.tags[0] && card.tags[0].slice(1)) || seccionPorPalabras(texto);
   card.categoria = card.categoria.charAt(0).toUpperCase() + card.categoria.slice(1);
   card.categoria = cats.find(k => k.toLowerCase() === card.categoria.toLowerCase()) || card.categoria;
+  if (!card.tags.length && ai && Array.isArray(ai.tags)) card.tags = ai.tags.slice(0, 5).map(t => "#" + String(t).toLowerCase().replace(/^#/, "").replace(/\s+/g, ""));
   card.fuente = ai ? (r0 ? "verificado" : "resumen IA") : (r0 ? "verificado" : "deducido");
   try { await investigar(card, repos, ai, texto); } catch (e) { card.motivo = "No pude investigar a fondo: " + String(e).slice(0, 60); }
   card.estado = "ok"; card.motivo = "";
@@ -414,7 +429,7 @@ ${ctx}`);
 // ============ investigar: lo que el post COMENTA (no el post) ============
 const MALA_IMG = /shields\.io|badge|\.svg(\?|$)|github\.com\/[^/]+\/[^/]+\/(actions|workflows)|travis|codecov|sponsor|buymeacoffee|ko-fi|star-history|contrib\.rocks|emoji/i;
 const WEB_NO = /(^|\.)(instagram|facebook|fb|tiktok|youtube|youtu|twitter|x|t|linkedin|github|githubusercontent|wa|whatsapp|bit|linktr|linktree|beacons|google|apple|play\.google)\.(com|be|me|ee|ly|ee|co|io)$/i;
-const abs = (u, base) => { try { return new URL(u, base).href; } catch (e) { return ""; } };
+const abs = (u, base) => { if (!u) return ""; try { return new URL(u, base).href; } catch (e) { return ""; } };
 const sinTags = h => decodeHtml(h.replace(/<(script|style|noscript|svg)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
 async function readmeRaw(full) { // sin API (no gasta el límite de GitHub)
   for (const f of ["README.md", "readme.md", "README.rst", "README"]) {
@@ -453,7 +468,7 @@ async function investigar(card, repos, ai, texto) {
     for (const m of texto.matchAll(/https?:\/\/[^\s)"'<>]+/g)) cands.push(m[0].replace(/[.,;]+$/, ""));
     for (const u of cands.slice(0, 4)) { try { if (WEB_NO.test(new URL(u).hostname)) continue; } catch (e) { continue; } web = await leerProyectoWeb(u); if (web) break; }
   }
-  if (web) { add("Web oficial", web.url); if (web.img) imgs.push(web.img); }
+  if (web) { add("Web oficial", web.url); imgs.push(web.img || "https://image.thum.io/get/width/700/" + web.url); } // sin og:image: captura de la web
   if (r0 && imgs.length < 3) imgs.push("https://opengraph.githubassets.com/1/" + r0.full); // tarjeta del repo (siempre existe)
   const imgsP = [...new Set(imgs)].slice(0, 3);
   if (imgsP.length) { card.imgsPost = card.imgs || []; card.imgs = imgsP; }
