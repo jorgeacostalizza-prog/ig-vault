@@ -2,3 +2,4 @@ build/
 *.apk
 
 src/assets/claves.json
+*.idsig
