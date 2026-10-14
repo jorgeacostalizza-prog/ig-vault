@@ -48,6 +48,36 @@ summary b{background:var(--s2);border-radius:20px;padding:2px 10px;font-size:13p
 .card.open .acc{display:flex}
 .vacio{text-align:center;color:var(--mut);padding:48px 12px}
 .vacio b{display:block;font-size:18px;color:var(--tx);margin-bottom:6px}
+.card{position:relative}
+.agarre{position:absolute;left:2px;top:8px;bottom:8px;width:30px;border:0;background:none;color:var(--mut);font-size:22px;line-height:1;touch-action:none;cursor:grab}
+.card.seleta{outline:2px solid var(--ac)}
+.card.soltando{opacity:.3}
+details.destino{outline:2px dashed var(--ac);outline-offset:3px;border-radius:14px}
+#arrastrando{position:fixed;z-index:30;pointer-events:none;width:min(80vw,330px);transform:rotate(-2deg);filter:drop-shadow(0 12px 22px #000a)}
+#hoja{position:fixed;inset:0;z-index:20;background:var(--bg);display:none;flex-direction:column}
+#hoja.on{display:flex}
+#hojaC{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 16px 24px}
+#hojaP{display:flex;gap:10px;padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);background:var(--s1);border-top:1px solid var(--ln)}
+#hojaP .btn{flex:1}
+#hT{flex:1;font-size:19px;font-weight:700}
+.hcamp{width:100%;background:var(--s1);color:var(--tx);border:1px solid var(--ln);border-radius:14px;padding:13px;font:16px/1.45 system-ui;-webkit-appearance:none;appearance:none}
+.hcamp:focus{outline:2px solid var(--ac);outline-offset:1px}
+textarea.hcamp{min-height:110px}
+#hE{width:100%;height:38vh;border:0;background:transparent;color:var(--tx);font:16px/1.5 system-ui;resize:none;padding:2px}
+#hE:focus{outline:none}
+.het{display:block;font-weight:700;font-size:14px;color:var(--mut);letter-spacing:.3px;text-transform:uppercase;margin:20px 2px 7px}
+.hp{color:var(--mut);font-size:13px;margin:6px 2px}
+.lnk{display:flex;gap:7px;align-items:center;margin:7px 0}
+.lnk .t{flex:0 0 92px}
+.lnk .u{flex:1;min-width:0}
+.lnk .x{flex:none;width:46px;min-height:46px;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--bad);font-size:20px}
+.dest{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.dest button{min-height:48px;padding:0 15px;border-radius:14px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 14px/1.2 system-ui}
+.dest button.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}
+.chips button{min-height:42px;padding:0 13px;border-radius:21px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 13px system-ui}
+.notas{margin-top:8px;padding:10px 12px;border-left:3px solid var(--ac);background:var(--s1);border-radius:0 12px 12px 0;font-size:14.5px;white-space:pre-wrap;opacity:.95}
+.sema{font-size:11px;opacity:.7;margin-left:4px}
 label{display:block;font-weight:600;margin:16px 2px 6px}
 dialog{border:1px solid var(--ln);border-radius:18px;background:var(--s1);color:var(--tx);width:min(92vw,520px);padding:16px}
 dialog::backdrop{background:#0008}
@@ -80,6 +110,7 @@ dialog h2{margin:0 0 10px;font-size:18px}
     <div class="fila">
       <button class="btn sm" id="bCopiar">Copiar todo</button>
       <button class="btn sm" id="bComp">Compartir</button>
+      <button class="btn sm" id="bLinksMasivos">🔎 Buscar links</button>
       <button class="btn sm" id="bReint">Reintentar fallidas</button>
     </div>
     <div id="lista"></div>
@@ -102,6 +133,27 @@ dialog h2{margin:0 0 10px;font-size:18px}
   </section>
 </main>
 <div id="aviso"></div>
+<div id="hoja">
+  <header><button class="btn sm" id="hX" style="flex:0 0 auto">✕</button><div id="hT">Editar</div><button class="btn sm" id="hL" style="flex:0 0 auto">Buscar links</button></header>
+  <div id="hojaC">
+    <span class="het">Título</span>
+    <input class="hcamp" id="hTit" placeholder="Nombre de la ficha">
+    <span class="het">Sección</span>
+    <input class="hcamp" id="hGru" placeholder="Grupo (carpeta)">
+    <input class="hcamp" id="hCat" placeholder="Categoría" style="margin-top:8px">
+    <div class="dest" id="hDest"></div>
+    <span class="het">Resumen</span>
+    <textarea class="hcamp" id="hRes" rows="4" placeholder="Escribe aquí lo que explique la ficha…"></textarea>
+    <span class="het">Tus notas</span>
+    <textarea class="hcamp" id="hNota" rows="4" placeholder="Lo que tú quieras apuntar: para qué sirve, cuándo usarlo, ideas tuyas…"></textarea>
+    <span class="het">Links</span>
+    <div id="hLnks"></div>
+    <div class="fila"><button class="btn sm" id="hAddL">+ Añadir link</button><button class="btn sm" id="hInv">Investigar lo que falta</button></div>
+    <span class="het">Etiquetas</span>
+    <input class="hcamp" id="hTags" placeholder="#una #etiqueta #otra">
+  </div>
+  <div id="hojaP"><button class="btn" id="hNo">Cancelar</button><button class="btn pri" id="hSi">Guardar</button></div>
+</div>
 <nav>
   <button data-t="pegar" class="on"><span class="i">＋</span>Pegar</button>
   <button data-t="fichas"><span class="i">☰</span>Fichas</button>
@@ -475,6 +527,9 @@ async function investigar(card, repos, ai, texto) {
   const imgsP = [...new Set(imgs)].slice(0, 3);
   if (imgsP.length) { card.imgsPost = card.imgs || []; card.imgs = imgsP; }
   card.links = links;
+  // si no hay ningún link (o solo el repo), se buscan y comprueban las webs oficiales de lo que menciona
+  const hb = new Set((card.links || []).map(l => l.u.replace(/\/$/, "").toLowerCase()));
+  if (hb.size < 2 || (hb.size === 1 && r0)) await buscarLinksOficiales(card);
   if (!hayIA()) return;
   const ex = await chatJson(`Eres un divulgador técnico. Un post habla de un proyecto, servicio, skill o idea. Explica bien lo que quiere decir usando SOLO el material de abajo (no inventes nada; si falta un dato, no lo menciones). Si es una skill, plugin o instalación, di cómo se instala o se activa y el comando exacto si aparece. Responde SOLO JSON:
 {"explicacion":"4 a 6 frases en español claro: qué es, qué problema resuelve, cómo se instala o se usa (comandos o requisitos si el README los da), para quién sirve y límites o coste si se mencionan","puntos":["3 a 4 puntos cortos con lo más útil"]}
@@ -483,6 +538,214 @@ ${r0 ? "README de " + r0.full + ": " + md.replace(/!\[[^\]]*\]\([^)]*\)/g, "").r
 ${web ? "WEB OFICIAL (" + web.url + "): " + web.titulo + " — " + web.desc + " " + web.texto.slice(0, 1200) : ""}`);
   if (ex && ex.explicacion && ex.explicacion.length > 60) { card.resumen = ex.explicacion; if (Array.isArray(ex.puntos)) card.puntos = ex.puntos.slice(0, 4).map(String); card.fuente = "investigado"; }
 }
+
+// ============ buscar el link oficial de cada cosa que se menciona ============
+// Un link solo entra si se ha comprobado que responde de verdad y que su título habla del tema.
+const CONOCIDOS = {
+  openai: "https://openai.com", anthropic: "https://www.anthropic.com", claude: "https://claude.ai",
+  chatgpt: "https://chatgpt.com", gemini: "https://gemini.google.com", copilot: "https://copilot.microsoft.com",
+  kaggle: "https://www.kaggle.com", huggingface: "https://huggingface.co", notion: "https://www.notion.so",
+  perplexity: "https://www.perplexity.ai", cursor: "https://cursor.com", windsurf: "https://windsurf.com",
+  ollama: "https://ollama.com", lmstudio: "https://lmstudio.ai", vercel: "https://vercel.com",
+  supabase: "https://supabase.com", docker: "https://www.docker.com", react: "https://react.dev",
+  nextjs: "https://nextjs.org", python: "https://python.org", udemy: "https://www.udemy.com",
+  coursera: "https://www.coursera.org", steam: "https://store.steampowered.com", nvidia: "https://www.nvidia.com",
+  openaiwhisper: "https://github.com/openai/whisper", spotify: "https://open.spotify.com",
+  obsidian: "https://obsidian.md", canva: "https://www.canva.com", elevenlabs: "https://elevenlabs.io",
+  midjourney: "https://www.midjourney.com", runway: "https://runwayml.com", figma: "https://www.figma.com",
+  trello: "https://trello.com", gitlab: "https://gitlab.com", cloudflare: "https://cloudflare.com",
+  aws: "https://aws.amazon.com", googlecloud: "https://cloud.google.com", langchain: "https://www.langchain.com",
+  llamaindex: "https://www.llamaindex.ai", pytorch: "https://pytorch.org", tensorflow: "https://www.tensorflow.org",
+  numpy: "https://numpy.org", pandas: "https://pandas.pydata.org", wordpress: "https://wordpress.org",
+  shopify: "https://www.shopify.com", stripe: "https://stripe.com", paypal: "https://www.paypal.com",
+  twilio: "https://www.twilio.com", airtable: "https://airtable.com", miro: "https://miro.com",
+  powerbi: "https://www.microsoft.com/power-platform/products/power-bi", linux: "https://www.kernel.org",
+  ffmpeg: "https://ffmpeg.org", blender: "https://www.blender.org", godot: "https://godotengine.org",
+  unity: "https://unity.com", unrealengine: "https://www.unrealengine.com", davinci: "https://www.blackmagicdesign.com/products/davinciresolve"
+};
+const sinAcentos = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const sinTLD = /^(?:\w+\.)+(?:com|net|org|io|ai|app|dev|co|me|xyz|tech|cloud|sh|gg|so|site|page|blog|tools|fun|pro|info|biz|tv|fm|ly|be|eu|us)$/i;
+const BASURA = /^(?:[a-z]+ ){0,2}(?:ai|ia|app|apps|tool|tools|repo|repos|project|proyecto|skill|skills|plugin|model|modelo|agente|agentes|ia|cliente|user|users|data|dataset|api|app|web|webs|site|sitio|pagina|página|post|posts|video|videos|reel|reels|error|errores|tip|tips|truco|trucos|guia|guía|tutorial|curso|canal|comunidad|grupo|equipo|startup|startups|producto|productos|toolbox|stack|framework|library|libreria|librería|code|codigo|código|programa|software|herramienta|herramientas|projecto|proyectos|metodo|método|sistema|sistemas|base|databases|database|flow|flujo|agent|agents|assistant|asistente|server|servidor|client|networking|storage|memory|memoria|voice|voz|imagen|imagenes|imágenes|video|videoclip|song|disco|ep|album|álbum|track|beat|remix|feat|con|feat)$/i;
+const UA_BOT = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36";
+const tokeniza = n => [...new Set(sinAcentos(n).replace(/[^a-z0-9\s.+-]/g, " ").split(/[\s._/+-]+/))].filter(t => t.length >= 4 && !BASURA.test(t));
+function esGenerico(u) {
+  try { const h = new URL(u).hostname.replace(/^www\./, ""); return !sinTLD.test(h) || /^(google|bing|duckduckgo|yahoo|yandex|baidu|ecosia|brave|amazon|ebay|aliexpress|facebook|twitter|x|tiktok|pinterest|instagram|reddit|linkedin|medium|substack|etsy|wikipedia|youtube|spotify|netflix|twitch|discord|telegram|whatsapp|tiktokv|paypal|stripe)\./i.test(h); }
+  catch (e) { return true; }
+}
+async function verificar(u, nombre) {
+  const base = /^https?:/i.test(u) ? u : "https://" + u;
+  if (esGenerico(base)) return "";
+  try {
+    const r = await http(base, { headers: { "User-Agent": UA_BOT, "Accept": "text/html,application/xhtml+xml" } });
+    if (r.status !== 200 && !(r.status >= 300 && r.status < 400)) return "";
+    const fin = r.url || base;
+    if (esGenerico(fin)) return "";
+    const b = r.body || "";
+    const tit = sinAcentos(decodeHtml((b.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [, ""])[1])).replace(/\s*[|–—-]\s*[^|–—-]{0,40}$/, "");
+    const desc = sinAcentos(metaDe(b, "og:description") || metaDe(b, "description"));
+    const htok = sinAcentos(new URL(fin).hostname.replace(/^www\./, ""));
+const tok = tokeniza(nombre);
+    if (!tok.length) return (tit || desc) ? fin : "";
+    const mezcla = `${tit} ${desc} ${htok}`;
+    return tok.some(t => mezcla.includes(t)) ? fin : ""; // al menos una palabra del nombre tiene que aparecer en la página
+  } catch (e) { return ""; }
+}
+async function buscarEnDuck(nombre) {
+  const q = encodeURIComponent(tokeniza(nombre).slice(0, 5).join(" ") + " oficial");
+  for (const base of ["https://html.duckduckgo.com/html/?q=", "https://lite.duckduckgo.com/lite/?q="]) {
+    try {
+      const r = await http(base + q, { headers: { "User-Agent": UA_BOT, "Accept-Language": "es,en;q=0.8" } });
+      if (r.status !== 200) continue;
+      const vs = [...new Set([...r.body.matchAll(/uddg=([^&"']+)/g)].map(m => decodeURIComponent(m[1])))].filter(u => /^https?:\/\//i.test(u) && !/duckduckgo\.com|\/y\.js|ad_domain|\/y\.js\?/i.test(u));
+      if (vs.length) return vs.slice(0, 6);
+    } catch (e) { }
+    await dormir(400);
+  }
+  return [];
+}
+// Extrae nombres de proyectos/servicios del texto: «así», Owner/repo, Title Case y VERSALITAS.
+function candidatos(card) {
+  const txt = [card.titulo, card.resumen, (card.puntos || []).join(" "), (card.texto || "")].join("\n");
+  const out = [];
+  const push = n => { const x = String(n || "").trim().replace(/\s+/g, " ").replace(/[.,;:¡!¿?()"“”'’]+$/, ""); if (x.length >= 3 && x.length <= 60 && /[A-Za-z]/.test(x) && !out.some(y => y.toLowerCase() === x.toLowerCase())) out.push(x); };
+  for (const m of txt.matchAll(/github\.com\/([\w.-]+\/[\w.-]+)/gi)) push(m[1].replace(/\.git$/, ""));
+  for (const m of txt.matchAll(/(?<![\w/.@#-])([A-Z][\w-]{1,24}\/[A-Z][\w.-]{1,40})(?![\w/])/g)) push(m[1]);
+  for (const m of txt.matchAll(/(?:^|[\n:;.!?]|\]\s)\s*([A-ZÁÉÍÓÚÑ][\wÀ-ÿ+.-]*(?:\s+[A-ZÁÉÍÓÚÑ][\wÀ-ÿ+.-]*){0,3})/g)) { const s = m[1].trim(); if (s.split(" ").length >= 2 || s.length >= 6) push(s); }
+  for (const m of txt.matchAll(/\b([A-ZÁÉÍÓÚÑ]{3,12})\b/g)) push(m[1]);
+  return out.filter(n => { const k = sinAcentos(n).replace(/[^a-z0-9]/g, ""); return k.length >= 4 && !BASURA.test(n) && !/^\d+$/.test(k); });
+}
+const etiquetaDe = u => { const h = (() => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } })(); if (/^github\.com$/.test(h)) return "GitHub"; if (/npmjs\.com$/.test(h)) return "npm"; if (/pypi\.org$/.test(h)) return "PyPI"; if (/\.readthedocs\.io$|docs?\./.test(h)) return "Docs"; if (/youtu\.be|youtube\.com/.test(h)) return "Vídeo"; if (/medium\.com|substack\.com|dev\.to|hashnode/.test(h)) return "Artículo"; return "Web oficial"; };
+// Rellena card.links con los links oficiales comprobados de lo que menciona la ficha.
+async function buscarLinksOficiales(card, { forzar = false } = {}) {
+  if (!card || card.estado === "pendiente") return [];
+  card.links = card.links || [];
+  const ya = new Set(card.links.map(l => l.u.replace(/\/$/, "").toLowerCase()));
+  const meter = (t, u) => { if (!u || ya.has(u.replace(/\/$/, "").toLowerCase())) return false; ya.add(u.replace(/\/$/, "").toLowerCase()); card.links.push({ t, u }); return true; };
+  let n0 = card.links.length, usados = [];
+  if (!forzar) meter("GitHub", (card.repos && card.repos[0] && card.repos[0].url) || "");
+  const nombres = candidatos(card).slice(0, forzar ? 6 : 4);
+  for (const n of nombres) {
+    if (card.links.length >= 6) break;
+    const k = sinAcentos(n).replace(/[^a-z0-9]/g, "");
+    if (CONOCIDOS[k] && meter(etiquetaDe(CONOCIDOS[k]), CONOCIDOS[k])) { usados.push(n); continue; }
+    if (CONOCIDOS[sinAcentos(n).split(" ")[0]]) continue; // genérico (openai, claude…): ya está
+    let ok = "";
+    for (const u of [`https://github.com/${n}`, `https://${k}.com`, `https://${k}.ai`, `https://${k}.app`, `https://${k}.io`, `https://${k}.org`, `https://www.npmjs.com/package/${k}`]) {
+      ok = await verificar(u, n); if (ok) break;
+    }
+    if (!ok) for (const u of await buscarEnDuck(n)) { ok = await verificar(u, n); if (ok) break; }
+    if (ok) { meter(etiquetaDe(ok), ok); usados.push(n); }
+  }
+  if (!forzar && card.links.length) card.links = card.links.slice(0, 8);
+  card.buscado = usados.join(" · "); // se ve debajo de los links: qué se buscó y qué se encontró
+  return card.links.slice(n0);
+}
+
+// ============ editor de ficha: escribir, mover y buscar links ============
+let editando = null, arrastre = null;
+const seccionDe = (g, c) => String(g || "AI").trim() + " \u0001 " + String(c || "Sin clasificar").trim();
+function secciones() {
+  const m = new Map();
+  for (const c of db.cards) m.set(seccionDe(c.grupo, c.categoria), { g: c.grupo || "AI", c: c.categoria || "Sin clasificar", n: 0 });
+  for (const v of m.values()) v.n = db.cards.filter(c => seccionDe(c.grupo, c.categoria) === seccionDe(v.g, v.c)).length;
+  return [...m.values()].sort((a, b) => a.g.localeCompare(b.g, "es") || a.c.localeCompare(b.c, "es"));
+}
+function pintarDestino(sel) {
+  const s = seccionDe($("#hGru").value, $("#hCat").value);
+  $("#hDest").innerHTML = secciones().map(d => `<button data-g="${esc(d.g)}" data-c="${esc(d.c)}" class="${seccionDe(d.g, d.c) === s ? "on" : ""}">${esc(d.g)} › ${esc(d.c)} <span class="sema">${d.n}</span></button>`).join("") + `<button data-g="" data-c="">+ Nueva…</button>`;
+}
+function pintarLinksHoja() {
+  const l = (editando.links || []);
+  $("#hLnks").innerHTML = l.map((x, i) => `<div class="lnk"><input class="hcamp t" data-li="${i}" data-lk="t" value="${esc(x.t)}" placeholder="Nombre"><input class="hcamp u" data-li="${i}" data-lk="u" value="${esc(x.u)}" placeholder="https://…"><button class="x" data-lx="${i}" aria-label="Quitar">✕</button></div>`).join("") || '<p class="hp">Sin links. Pulsa «Buscar links» y la app investiga y comprueba las webs oficiales de lo que menciona.</p>';
+}
+function abrirEditor(c) {
+  editando = c;
+  $("#hT").textContent = "Editar ficha";
+  $("#hTit").value = c.titulo === c.url ? "" : c.titulo || "";
+  $("#hGru").value = c.grupo || "AI";
+  $("#hCat").value = c.categoria && c.categoria !== "Pendiente" ? c.categoria : "";
+  $("#hRes").value = c.resumen || "";
+  $("#hNota").value = c.notas || "";
+  $("#hTags").value = (c.tags || []).map(t => String(t).replace(/^#/, "")).join(", ");
+  pintarLinksHoja(); pintarDestino();
+  $("#hoja").classList.add("on"); document.body.style.overflow = "hidden";
+  setTimeout(() => { try { $("#hTit").focus(); } catch (e) { } }, 120);
+}
+function cerrarEditor() { $("#hoja").classList.remove("on"); document.body.style.overflow = ""; editando = null; }
+function leerLinksHoja() {
+  const l = [];
+  $$("#hLnks .lnk").forEach(row => {
+    const t = ($(".t", row).value || "").trim(), u = ($(".u", row).value || "").trim();
+    if (u || t) l.push({ t: t || etiquetaDe(u), u });
+  });
+  return l;
+}
+function guardarEditor() {
+  const c = editando; if (!c) return;
+  c.titulo = ($("#hTit").value.trim() || c.titulo || c.url).slice(0, 120);
+  c.grupo = ($("#hGru").value.trim() || "AI");
+  c.categoria = ($("#hCat").value.trim() || "Sin clasificar");
+  c.resumen = $("#hRes").value.trim();
+  c.notas = $("#hNota").value.trim();
+  c.tags = [...new Set(($("#hTags").value.split(/[,\s]+/).map(t => t.trim().replace(/^#/, "")).filter(Boolean)))].slice(0, 10).map(t => "#" + t);
+  c.links = leerLinksHoja().filter(l => /^https?:\/\//i.test(l.u) || l.u === "");
+  c.links = c.links.filter(l => l.u);
+  guardar(); cerrarEditor(); pintar(); aviso("Guardado");
+}
+function mover(c, g, cat) {
+  if (!g && !cat) return;
+  if (g) c.grupo = String(g).trim() || "AI";
+  if (cat) c.categoria = String(cat).trim() || "Sin clasificar";
+  guardar(); pintar(); aviso("Movida a " + c.grupo + " › " + c.categoria);
+}
+async function pedirLinks(c, forzar = true) {
+  if (!c) return;
+  aviso("Buscando y comprobando links…");
+  const nuevos = await buscarLinksOficiales(c, { forzar });
+  guardar();
+  if (editando === c) { pintarLinksHoja(); $("#hTit").value = c.titulo === c.url ? "" : c.titulo; }
+  pintar();
+  aviso(nuevos.length ? `${nuevos.length} link(s) nuevo(s): ` + nuevos.map(l => l.u.replace(/^https?:\/\//, "").slice(0, 40)).join(", ") : "No encontré ninguna web oficial de lo que menciona (se probaron nombres y buscador)");
+}
+
+// ---- arrastre con el dedo: soltar una ficha dentro de otra sección ----
+function iniciarArrastre(e, c) {
+  if (arrastre) return;
+  const el = document.createElement("div");
+  el.id = "arrastrando"; el.innerHTML = `<div class="card" style="border-color:var(--ac)"><h3 style="font-size:15px">${esc(c.titulo)}</h3></div>`;
+  document.body.appendChild(el);
+  const origen = e.target.closest(".card"); origen.classList.add("soltando");
+  arrastre = { c, el, origen, x: e.clientX, y: e.clientY };
+  moverCaja(e.clientX, e.clientY);
+}
+function moverCaja(x, y) {
+  const a = arrastre; if (!a) return;
+  a.el.style.left = Math.max(6, Math.min(x - 30, innerWidth - a.el.offsetWidth - 6)) + "px";
+  a.el.style.top = Math.max(6, y - 26) + "px";
+  $$("details.destino").forEach(d => d.classList.remove("destino"));
+  const bajo = document.elementFromPoint(x, y); if (!bajo) return;
+  const d = bajo.closest("details[data-g]"); if (d) d.classList.add("destino");
+}
+function soltarArrastre(x, y) {
+  const a = arrastre; if (!a) return;
+  arrastre = null; a.el.remove(); a.origen.classList.remove("soltando");
+  const bajo = document.elementFromPoint(x, y); if (!bajo) return pintar();
+  const d = bajo.closest("details[data-g]"); if (!d) return pintar();
+  $$("details.destino").forEach(x2 => x2.classList.remove("destino"));
+  if (d.dataset.k && d.dataset.k.startsWith("G:")) mover(a.c, d.dataset.k.slice(2), null);
+  else mover(a.c, d.dataset.g, d.dataset.c);
+  pintar();
+}
+$("#lista").addEventListener("pointerdown", e => {
+  if (e.target.dataset.a !== "arrastrar") return;
+  e.preventDefault();
+  const c = db.cards.find(x => x.id === (e.target.closest(".card") || {}).dataset?.id); if (!c) return;
+  iniciarArrastre(e, c);
+  const mv = ev => { ev.preventDefault(); moverCaja(ev.clientX, ev.clientY); };
+  const up = ev => { window.removeEventListener("pointermove", mv); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up); soltarArrastre(ev.clientX, ev.clientY); };
+  window.addEventListener("pointermove", mv, { passive: false });
+  window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up);
+});
 
 // ============ cola ============
 let corriendo = false, parar = false;
@@ -535,20 +798,21 @@ function pintar() {
   if (!db.cards.length) { $("#lista").innerHTML = '<div class="vacio"><b>Todavía no hay fichas</b>Ve a «Pegar», mete tus links y pulsa «Ordenar».</div>'; return; }
   const gg = {}; cards.forEach(c => ((gg[c.grupo || "AI"] ||= {})[c.categoria || "Sin clasificar"] ||= []).push(c)); // grupo principal > categoría
   const abiertas = new Set($$("details[open]").map(d => d.dataset.k));
-  const pintaCats = (grupos, pre) => Object.keys(grupos).sort(ordenCat).map(k => `<details data-k="${esc(pre + k)}" ${(abiertas.has(pre + k) || q || !abiertas.size) ? "open" : ""}><summary>${esc(k)} <b>${grupos[k].length}</b></summary>${grupos[k].map(fichaHtml).join("")}</details>`).join("");
-  $("#lista").innerHTML = Object.keys(gg).sort((a, b) => a.localeCompare(b, "es")).map(g => `<details class="grupo" data-k="G:${esc(g)}" ${(abiertas.has("G:" + g) || q || !abiertas.size) ? "open" : ""}><summary style="font-size:1.1em">📁 ${esc(g)} <b>${Object.values(gg[g]).reduce((n, a) => n + a.length, 0)}</b></summary>${pintaCats(gg[g], g + "/")}</details>`).join("") || '<div class="vacio">Nada que mostrar.</div>';
+  const pintaCats = (grupos, pre) => Object.keys(grupos).sort(ordenCat).map(k => `<details data-k="${esc(pre + k)}" data-g="${esc(pre.slice(0, -1))}" data-c="${esc(k)}" ${(abiertas.has(pre + k) || q || !abiertas.size) ? "open" : ""}><summary>${esc(k)} <b>${grupos[k].length}</b></summary>${grupos[k].map(fichaHtml).join("")}</details>`).join("");
+  $("#lista").innerHTML = Object.keys(gg).sort((a, b) => a.localeCompare(b, "es")).map(g => `<details class="grupo" data-k="G:${esc(g)}" data-g="${esc(g)}" data-c="" ${(abiertas.has("G:" + g) || q || !abiertas.size) ? "open" : ""}><summary style="font-size:1.1em">📁 ${esc(g)} <b>${Object.values(gg[g]).reduce((n, a) => n + a.length, 0)}</b></summary>${pintaCats(gg[g], g + "/")}</details>`).join("") || '<div class="vacio">Nada que mostrar.</div>';
 }
 function fichaHtml(c) {
   const r = c.repos && c.repos[0];
   const est = c.estado === "ok" ? "" : c.estado === "pendiente" ? '<span class="chip">en cola</span>' : '<span class="chip warn">revisar</span>';
-  return `<div class="card" data-id="${c.id}"><h3>${esc(c.titulo)}</h3>${c.imgs && c.imgs.length ? `<div style="display:flex;gap:6px;overflow-x:auto;margin:6px 0">${c.imgs.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" style="height:96px;border-radius:8px;flex:none" onerror="this.remove()">`).join("")}</div>` : ""}${c.resumen ? `<p>${esc(c.resumen)}</p>` : ""}${c.puntos && c.puntos.length ? `<ul style="margin:4px 0 6px 18px;padding:0">${c.puntos.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+  return `<div class="card" data-id="${c.id}"><button class="agarre" data-a="arrastrar" aria-label="Mover a otra sección">⠿</button><h3>${esc(c.titulo)}</h3>${c.imgs && c.imgs.length ? `<div style="display:flex;gap:6px;overflow-x:auto;margin:6px 0">${c.imgs.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" style="height:96px;border-radius:8px;flex:none" onerror="this.remove()">`).join("")}</div>` : ""}${c.resumen ? `<p>${esc(c.resumen)}</p>` : ""}${c.puntos && c.puntos.length ? `<ul style="margin:4px 0 6px 18px;padding:0">${c.puntos.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${c.notas ? `<div class="notas">${esc(c.notas)}</div>` : ""}
 ${c.links && c.links.length ? `<div class="acc">${c.links.map(l => `<button class="btn sm" data-a="abrirl" data-u="${esc(l.u)}">${esc(l.t)} ↗</button>`).join("")}</div>` : ""}<div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${r ? `<span class="chip ok">GitHub ✓ ${esc(r.full)} ★${miles(r.stars)}</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${est}</div>
 ${c.motivo ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo)}</div>` : ""}
-<div class="acc"><button class="btn sm" data-a="abrir">Ver post</button><button class="btn sm" data-a="copiar">Copiar</button><button class="btn sm" data-a="cat">Categoría</button><button class="btn sm" data-a="texto">Pegar texto</button><button class="btn sm" data-a="borrar" style="color:var(--bad)">Borrar</button></div></div>`;
+${c.buscado && c.links && c.links.length ? `<div class="nota">🔎 ${esc(c.buscado)}</div>` : ""}
+<div class="acc"><button class="btn sm" data-a="editar">✏️ Editar</button><button class="btn sm" data-a="mover">↔️ Mover</button><button class="btn sm" data-a="links">🔎 Links</button><button class="btn sm" data-a="abrir">Ver post</button><button class="btn sm" data-a="copiar">Copiar</button><button class="btn sm" data-a="texto">Pegar texto</button><button class="btn sm" data-a="borrar" style="color:var(--bad)">Borrar</button></div></div>`;
 }
 function ficha2txt(c) {
   const r = c.repos && c.repos[0];
-  return [`### ${c.titulo}`, c.resumen, r ? `Repo: ${r.url} (★${r.stars})` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => l.t + ": " + l.u), ...(c.puntos || []).map(x => "- " + x), c.cuenta ? "Cuenta: " + c.cuenta : "", c.tipo === "Foto" ? "" : `Link: ${c.url}`, ...(c.extra || []).map(u => "Link: " + u)].filter(Boolean).join("\n");
+  return [`### ${c.titulo}`, c.resumen, r ? `Repo: ${r.url} (★${r.stars})` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => l.t + ": " + l.u), ...(c.puntos || []).map(x => "- " + x), c.notas ? "**Mis notas:** " + c.notas : "", c.cuenta ? "Cuenta: " + c.cuenta : "", c.tipo === "Foto" ? "" : `Link: ${c.url}`, ...(c.extra || []).map(u => "Link: " + u)].filter(Boolean).join("\n");
 }
 function todoTxt() {
   const g = {}; db.cards.filter(c => c.estado !== "pendiente").forEach(c => (g[c.categoria || "Sin clasificar"] ||= []).push(c));
@@ -583,11 +847,23 @@ $("#buscar").addEventListener("input", pintar);
 $("#bCopiar").onclick = () => db.cards.length ? copiar(todoTxt()) : aviso("No hay fichas");
 $("#bComp").onclick = () => db.cards.length ? (N ? N.compartir(todoTxt(), "IG Vault") : copiar(todoTxt())) : aviso("No hay fichas");
 $("#bReint").onclick = () => { const f = db.cards.filter(c => c.estado === "revisar"); if (!f.length) return aviso("No hay fallidas"); f.forEach(c => c.estado = "pendiente"); guardar(); cambiaTab("pegar"); correr(); };
+$("#bLinksMasivos").onclick = async () => {
+  const f = db.cards.filter(c => c.estado === "ok" && (!c.links || !c.links.length || c.links.length < 2));
+  if (!f.length) return aviso("Todas las fichas ya tienen links investigationados");
+  aviso(`Buscando links en ${f.length} fichas…`);
+  let n = 0;
+  for (const c of f) { $("#bLinksMasivos").disabled = true; n += (await buscarLinksOficiales(c, { forzar: true })).length; guardar(); pintar(); await dormir(200); }
+  $("#bLinksMasivos").disabled = false;
+  aviso(`Investigadas ${f.length} fichas: ${n} links nuevos encontrados`);
+};
 $("#lista").addEventListener("click", async e => {
   const card = e.target.closest(".card"); if (!card) return; const c = db.cards.find(x => x.id === card.dataset.id); if (!c) return;
   const a = e.target.dataset.a;
   if (!a) { card.classList.toggle("open"); return; }
   if (a === "abrirl") { const u = e.target.dataset.u; N ? N.abrir(u) : window.open(u); return; }
+  if (a === "editar") { abrirEditor(c); return; }
+  if (a === "mover") { abrirEditor(c); $("#hGru").focus(); return; }
+  if (a === "links") { pedirLinks(c); return; }
   if (a === "abrir") c.tipo === "Foto" ? aviso("Es una foto del chat, no tiene link") : N ? N.abrir(c.url) : window.open(c.url);
   if (a === "copiar") copiar(ficha2txt(c));
   if (a === "borrar") { db.cards = db.cards.filter(x => x !== c); guardar(); pintar(); }
@@ -604,7 +880,27 @@ $("#bGuardar").onclick = async () => {
 };
 $("#bBorrar").onclick = async () => { const v = await pregunta("Escribe BORRAR para eliminar todas las fichas", ""); if (v && v.trim().toUpperCase() === "BORRAR") { db.cards = []; guardar(); pintar(); aviso("Fichas borradas"); } };
 $$("nav button").forEach(b => b.onclick = () => cambiaTab(b.dataset.t));
-window.__atras = () => { const d = $("#dlg"); if (d.open) { d.close(); return true; } if (!$("#p-pegar").classList.contains("on")) { cambiaTab("pegar"); return true; } return false; };
+// ---- hoja de edición ----
+$("#hX").onclick = $("#hNo").onclick = cerrarEditor;
+$("#hSi").onclick = guardarEditor;
+$("#hL").onclick = $("#hInv").onclick = () => { if (editando) pedirLinks(editando); };
+$("#hAddL").onclick = () => { if (!editando) return; editando.links = editando.links || []; editando.links.push({ t: "", u: "" }); pintarLinksHoja(); const u = $$("#hLnks .lnk .u").pop(); if (u) u.focus(); };
+$("#hLnks").addEventListener("input", e => { if (!editando) return; const i = e.target.dataset.li; if (i === undefined) return; (editando.links[i] = editando.links[i] || { t: "", u: "" })[e.target.dataset.lk] = e.target.value; });
+$("#hLnks").addEventListener("click", e => { const i = e.target.dataset.lx; if (i === undefined || !editando) return; editando.links.splice(+i, 1); pintarLinksHoja(); });
+$("#hGru").addEventListener("input", pintarDestino);
+$("#hCat").addEventListener("input", pintarDestino);
+$("#hDest").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b || !editando) return;
+  if (b.dataset.g === "" && b.dataset.c === "") { $("#hCat").value = ""; $("#hCat").focus(); return pintarDestino(); }
+  $("#hGru").value = b.dataset.g; $("#hCat").value = b.dataset.c; pintarDestino();
+});
+window.__atras = () => {
+  if (arrastre) { soltarArrastre(0, 0); return true; }
+  if (editando) { cerrarEditor(); return true; }
+  const d = $("#dlg"); if (d.open) { d.close(); return true; }
+  if (!$("#p-pegar").classList.contains("on")) { cambiaTab("pegar"); return true; }
+  return false;
+};
 // Recibe lo compartido (texto, chat exportado de WhatsApp, fotos): saca links, crea fichas por foto y empieza a ordenar solo.
 window.__chat = (t, fs) => {
   cambiaTab("pegar");
