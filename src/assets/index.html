@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark light">
-<title>IG Vault</title>
+<title>IG Extractor</title>
 <style>
 :root{--bg:#0f1115;--s1:#171a21;--s2:#1f232c;--tx:#eceef2;--mut:#9aa1ae;--ac:#f5a524;--acx:#1a1200;--ok:#3ecf8e;--warn:#f5a524;--bad:#ff6b6b;--ln:#2a2f3a}
 @media(prefers-color-scheme:light){:root{--bg:#f4f5f7;--s1:#fff;--s2:#eceef2;--tx:#14171c;--mut:#5d6573;--ac:#c77d00;--acx:#fff;--ok:#12805a;--warn:#9a6200;--bad:#c93b3b;--ln:#dfe2e8}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,Roboto,"Segoe UI",sans-serif}
 body{display:flex;flex-direction:column}
+.cuerpo{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0}
 header{padding:calc(env(safe-area-inset-top) + 14px) 16px 8px;display:flex;align-items:baseline;justify-content:space-between}
 header h1{margin:0;font-size:22px;letter-spacing:-.3px}
 header span{color:var(--mut);font-size:13px}
@@ -49,11 +50,6 @@ summary b{background:var(--s2);border-radius:20px;padding:2px 10px;font-size:13p
 .vacio{text-align:center;color:var(--mut);padding:48px 12px}
 .vacio b{display:block;font-size:18px;color:var(--tx);margin-bottom:6px}
 .card{position:relative}
-.agarre{position:absolute;left:2px;top:8px;bottom:8px;width:30px;border:0;background:none;color:var(--mut);font-size:22px;line-height:1;touch-action:none;cursor:grab}
-.card.seleta{outline:2px solid var(--ac)}
-.card.soltando{opacity:.3}
-details.destino{outline:2px dashed var(--ac);outline-offset:3px;border-radius:14px}
-#arrastrando{position:fixed;z-index:30;pointer-events:none;width:min(80vw,330px);transform:rotate(-2deg);filter:drop-shadow(0 12px 22px #000a)}
 #hoja{position:fixed;inset:0;z-index:20;background:var(--bg);display:none;flex-direction:column}
 #hoja.on{display:flex}
 #hojaC{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 16px 24px}
@@ -82,12 +78,47 @@ label{display:block;font-weight:600;margin:16px 2px 6px}
 dialog{border:1px solid var(--ln);border-radius:18px;background:var(--s1);color:var(--tx);width:min(92vw,520px);padding:16px}
 dialog::backdrop{background:#0008}
 dialog h2{margin:0 0 10px;font-size:18px}
-#aviso{position:fixed;left:16px;right:16px;bottom:80px;background:var(--s2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px;display:none;z-index:5}
+#aviso{position:fixed;left:16px;right:16px;bottom:80px;max-width:560px;margin:0 auto;box-shadow:0 8px 24px #0006;background:var(--s2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px;display:none;z-index:5}
 .sello{text-align:center;color:var(--mut);font-size:13px;margin-top:28px}
+
+.card h3{cursor:pointer}
+.cab{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.rel{flex:none;font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid var(--ln);color:var(--mut);white-space:nowrap}
+.rel.r5,.rel.r4{color:var(--acx);background:var(--ac);border-color:var(--ac)}.rel.r3{color:var(--ac);border-color:var(--ac)}
+.gal{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.gal a{display:block;flex:none}.gal img{height:112px;max-width:190px;object-fit:cover;border-radius:10px;border:1px solid var(--ln);display:block}
+.enl{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px}
+.lk{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 14px system-ui;text-decoration:none}
+.lk.ig{border-color:#c13584;color:var(--tx)}.lk.gh{border-color:var(--ok)}.lk.cc{background:var(--ac);color:var(--acx);border-color:var(--ac);cursor:pointer}
+.lk:hover{filter:brightness(1.12)}
+.bl{margin:8px 0 2px}.bl b{display:block;font-size:12.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+.bl ul,.bl ol{margin:0 0 0 20px;padding:0}.bl li{margin:2px 0;font-size:14.5px}
+.card:not(.open) .bl{display:none}
+.card .mas{display:none}.card.open .mas{display:block}
+.filtros{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 2px}
+.filtros button{min-height:38px;padding:0 13px;border-radius:19px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 13px system-ui}
+.filtros button.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.cc-t{width:100%;min-height:42vh;font:13.5px/1.45 ui-monospace,Consolas,monospace}
+@media(min-width:900px){
+  body{flex-direction:row}
+  nav{position:static;order:-1;flex-direction:column;width:210px;flex:none;border-top:0;border-right:1px solid var(--ln);padding:18px 10px;gap:6px;justify-content:flex-start}
+  nav button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;min-height:48px;padding:0 16px;border-radius:12px;font-size:15px}
+  nav button.on{background:var(--s2)}
+  header{padding:22px 32px 8px}
+  main{padding:4px 32px 48px}
+  .pan{max-width:1180px}
+  #p-pegar,#p-ajustes{max-width:760px}
+  textarea{min-height:30vh}
+  .secc{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:12px;align-items:start}
+  .secc .card{margin:0}
+  #aviso{bottom:24px}
+  #hojaC{max-width:760px;margin:0 auto;width:100%}
+}
 </style>
 </head>
 <body>
-<header><h1>IG Vault</h1><span id="cuenta"></span></header>
+<div class="cuerpo">
+<header><h1>IG Extractor</h1><span id="cuenta"></span></header>
 <main>
   <section class="pan on" id="p-pegar">
     <input type="text" id="grupo" placeholder="Grupo principal (AI, Hacking Ethical…)" style="margin-bottom:8px">
@@ -108,11 +139,14 @@ dialog h2{margin:0 0 10px;font-size:18px}
   <section class="pan" id="p-fichas">
     <input type="search" id="buscar" placeholder="Buscar en tus fichas…">
     <div class="fila">
+      <button class="btn sm pri" id="bClaude">🧠 Copiar para Claude Code</button>
+      <button class="btn sm" id="bDup">🧹 Quitar duplicados</button>
       <button class="btn sm" id="bCopiar">Copiar todo</button>
       <button class="btn sm" id="bComp">Compartir</button>
       <button class="btn sm" id="bLinksMasivos">🔎 Buscar links</button>
       <button class="btn sm" id="bReint">Reintentar fallidas</button>
     </div>
+    <div class="filtros" id="filtros"></div>
     <div id="lista"></div>
   </section>
 
@@ -123,15 +157,22 @@ dialog h2{margin:0 0 10px;font-size:18px}
     <input type="password" id="kOr" autocomplete="off" placeholder="sk-or-…">
     <label for="kGh">Token GitHub (opcional, evita límites)</label>
     <input type="password" id="kGh" autocomplete="off" placeholder="ghp_…">
-    <div class="nota">Las claves se guardan solo en este móvil. No se envían a ningún sitio salvo a su propio proveedor.</div>
+    <label for="kGq">Clave Groq (voz de los vídeos, gratis)</label>
+    <input type="password" id="kGq" autocomplete="off" placeholder="gsk_… (solo PC/web; en el móvil ya va incluida)">
+    <label for="kInt">Mis intereses (para marcar lo más relevante)</label>
+    <textarea id="kInt" rows="3" placeholder="claude, agentes, mcp, gratis, open source…"></textarea>
+    <div class="nota">Las fichas que hablen de esto suben arriba con ★. Separa con comas.</div>
+    <div class="nota">Las claves se guardan solo en este dispositivo. No se envían a ningún sitio salvo a su propio proveedor.</div>
     <div class="fila">
       <button class="btn pri" id="bGuardar">Guardar y probar</button>
     </div>
     <div class="nota" id="kEstado"></div>
+    <div class="fila"><button class="btn" id="bReclas">♻ Reclasificar todo con el algoritmo nuevo</button></div>
     <div class="fila"><button class="btn" id="bBorrar" style="color:var(--bad)">Borrar todas las fichas</button></div>
-    <div class="sello">IG Vault · #Finnky Pirat!</div>
+    <div class="sello">IG Extractor · #Finnky Pirat!</div>
   </section>
 </main>
+</div>
 <div id="aviso"></div>
 <div id="hoja">
   <header><button class="btn sm" id="hX" style="flex:0 0 auto">✕</button><div id="hT">Editar</div><button class="btn sm" id="hL" style="flex:0 0 auto">Buscar links</button></header>
@@ -159,6 +200,13 @@ dialog h2{margin:0 0 10px;font-size:18px}
   <button data-t="fichas"><span class="i">☰</span>Fichas</button>
   <button data-t="ajustes"><span class="i">⚙</span>Ajustes</button>
 </nav>
+<dialog id="dcc"><h2>Para pegar en Claude Code</h2>
+  <div class="chips" id="ccT"></div>
+  <textarea id="ccTxt" class="cc-t" spellcheck="false"></textarea>
+  <div class="fila"><button class="btn" id="ccNo">Cerrar</button><button class="btn pri" id="ccCopia">📋 Copiar</button></div></dialog>
+<dialog id="dmv"><h2>Mover a otra sección</h2><div class="dest" id="mvD"></div>
+  <input type="text" id="mvN" placeholder="O escribe una nueva: Grupo › Categoría" style="margin-top:8px">
+  <div class="fila"><button class="btn" id="mvNo">Cancelar</button><button class="btn pri" id="mvSi">Mover</button></div></dialog>
 <dialog id="dlg"><h2 id="dT"></h2><div id="dC"></div>
   <div class="fila"><button class="btn" id="dNo">Cancelar</button><button class="btn pri" id="dSi">Aceptar</button></div></dialog>
 
@@ -166,6 +214,9 @@ dialog h2{margin:0 0 10px;font-size:18px}
 "use strict";
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const N = window.Native;
+let SRV = false; // en PC: servidor local que hace de puente (evita el bloqueo CORS)
+const srvListo = N ? Promise.resolve() : fetch("/api/ping").then(r => r.json()).then(j => { SRV = !!(j && j.ok); }).catch(() => { });
+const postSrv = async (ruta, o) => { try { return await (await fetch(ruta, { method: "POST", body: JSON.stringify(o) })).json(); } catch (e) { return { status: 0, body: "", error: String(e) }; } };
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const dormir = ms => new Promise(r => setTimeout(r, ms));
 
@@ -179,6 +230,8 @@ const nat = (fn, ...a) => new Promise(res => {
 });
 async function http(url, { method = "GET", headers = {}, body = "" } = {}) {
   if (N) return nat("http", method, url, JSON.stringify(headers), body);
+  await srvListo;
+  if (SRV) return postSrv("/api/http", { method, url, headers, body });
   try { const r = await fetch(url, { method, headers, body: body || undefined }); return { status: r.status, url: r.url, body: await r.text() }; }
   catch (e) { return { status: 0, body: "", error: String(e) }; }
 }
@@ -186,7 +239,7 @@ const pagina = url => N ? nat("pagina", url) : (window.__pagina ? window.__pagin
 
 // ============ datos ============
 const BASE_WEB = "https://jorgeacostalizza-prog.github.io/ig-vault/";
-let db = { cards: [], cfg: { nvidia: "", openrouter: "", github: "" } };
+let db = { cards: [], cfg: { nvidia: "", openrouter: "", github: "", groq: "", intereses: "" } };
 try { const d = JSON.parse(localStorage.getItem("igv") || "null"); if (d) db = { ...db, ...d, cfg: { ...db.cfg, ...d.cfg } }; } catch (e) { }
 const guardar = () => { try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } };
 
@@ -324,7 +377,7 @@ async function gbIG(base) {
     const i = r.body.match(/property="og:image" content="([^"]+)"/); if (i) o.img = i[1].replace(/&amp;/g, "&");
     const cm = r.body.match(/"edge_media_to_comment":\{"count":(\d+)\}/); if (cm) o.comments = parseInt(cm[1], 10);
     o.imgs = []; const k = r.body.indexOf('"carousel_media":['); // carrusel: portada de las primeras diapositivas de ESTE post
-    if (k > 0) for (const m of r.body.slice(k, k + 400000).matchAll(/"image_versions2":\{"candidates":\[\{"url":"((?:[^"\\]|\\.)*)"/g)) { const u = dec(m[1]); if (u && !o.imgs.includes(u)) o.imgs.push(u); if (o.imgs.length >= 3) break; }
+    if (k > 0) for (const m of r.body.slice(k, k + 400000).matchAll(/"image_versions2":\{"candidates":\[\{"url":"((?:[^"\\]|\\.)*)"/g)) { const u = dec(m[1]); if (u && !o.imgs.includes(u)) o.imgs.push(u); if (o.imgs.length >= 8) break; }
   } catch (e) { }
   return o;
 }
@@ -340,8 +393,10 @@ async function videoIG(base) {
 let vozError = "";
 async function leerVoz(urlVideo) {
   vozError = "";
-  if (!urlVideo || !N || !N.voz) return "";
-  const r = await nat("voz", urlVideo);
+  if (!urlVideo) return "";
+  let r;
+  if (N && N.voz) r = await nat("voz", urlVideo);
+  else { await srvListo; if (!SRV) return ""; r = await postSrv("/api/voz", { url: urlVideo, groq: db.cfg.groq || "" }); }
   if (r.status === 200 && r.body) return r.body;
   vozError = r.body || r.error || "sin voz"; return "";
 }
@@ -353,7 +408,7 @@ async function imgsIG(base) {
     if (e.status === 200) for (const m of e.body.matchAll(/<img[^>]+class="[^"]*EmbeddedMediaImage[^"]*"[^>]+src="([^"]+)"/gi)) out.push(decodeHtml(m[1]));
     if (!out.length) { const h = await http(base); if (h.status === 200) { const o = metaDe(h.body, "og:image"); if (o) out.push(o); } }
   } catch (e) { }
-  return [...new Set(out)].slice(0, 3);
+  return [...new Set(out)].slice(0, 8);
 }
 // lee el texto que sale EN las imágenes (los reels ponen ahí la lista real)
 let orVis = null;
@@ -374,7 +429,7 @@ async function leerImgs(imgs) {
   if (db.cfg.nvidia) for (const m of MOD_VIS.slice(0, 2)) provs.push(["https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, m]);
   if (db.cfg.openrouter) for (const m of MOD_VIS_OR) provs.push(["https://openrouter.ai/api/v1/chat/completions", db.cfg.openrouter, m]);
   const partes = [];
-  for (const u of imgs.slice(0, 2)) {
+  for (const u of imgs.slice(0, 3)) {
     for (const [url, key, m] of provs) {
       const x = await http(url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: [{ type: "text", text: PROMPT_FOTO }, { type: "image_url", image_url: { url: u } }] }], max_tokens: 500, temperature: 0.1 }) });
       if (x.status === 200) { try { const t = (JSON.parse(x.body).choices[0].message.content || "").trim(); if (t) { partes.push(t); break; } } catch (e) { } }
@@ -408,11 +463,53 @@ async function leerWeb(url) {
 }
 
 // ============ procesar un link ============
-const SECC = { "Repos y herramientas IA": ["ia ", " ai", "llm", "agent", "gpt", "claude", "mcp", "modelo", "open source", "rag", "prompt", "framework"], "Hacking y seguridad": ["hack", "pentest", "exploit", "seguridad", "security", "malware", "osint", "vpn", "tor", "ctf", "privacidad"], "Trucos y tutoriales": ["truco", "tutorial", "tip", "cómo", "como ", "guía", "guia", "aprende", "learn", "how to"], "Música": ["música", "musica", "canción", "spotify", "beat", "dj ", "track"] };
-function seccionPorPalabras(t) {
-  t = " " + t.toLowerCase() + " "; let best = "Sin clasificar", n = 0;
-  for (const [k, ws] of Object.entries(SECC)) { const c = ws.filter(w => t.includes(w)).length; if (c > n) { n = c; best = k; } }
+// ---- categorías fijas: webs, recursos, tutoriales, cursos, IA, repositorios, programas y apps ----
+const CATS = ["Repositorios", "Inteligencia artificial", "Programas y apps", "Webs", "Recursos", "Tutoriales", "Cursos", "Otros"];
+const CAT_VIEJAS = { "repos de github": "Repositorios", "repos y herramientas ia": "Inteligencia artificial", "herramientas de ia": "Inteligencia artificial", "webs y recursos": "Webs", "tutoriales y cursos": "Tutoriales", "trucos y tutoriales": "Tutoriales", "ideas y negocio": "Recursos", "sin clasificar": "Otros", "pendiente": "Pendiente", "para revisar": "Para revisar" };
+const normCat = c => { const k = String(c || "").trim().toLowerCase(); return CAT_VIEJAS[k] || CATS.find(x => x.toLowerCase() === k) || null; };
+const REGLAS = {
+  "Repositorios": [/github\.com\/[\w.-]+\/[\w.-]+/i, /\brepo(sitorios?)?\b/i, /open.?source|c[oó]digo abierto/i],
+  "Inteligencia artificial": [/\b(ia|ai|llms?|gpt|claude|gemini|agentes?|agents?|mcp|rag|prompts?|openai|anthropic|chatgpt|copilot|codex|whisper|nvidia|inteligencia artificial|machine learning|modelos?)\b/i, /\b(skills?|embeddings?|fine.?tun\w*|vibe ?cod\w*)\b/i],
+  "Programas y apps": [/\b(apps?|aplicaci[oó]n|programa|software|extensi[oó]n|plugin|apk|ejecutable|instalar|instalador|descargar|escritorio|windows)\b/i, /\b(cli|terminal|desktop|android|ios)\b/i],
+  "Webs": [/\b(web|p[aá]gina|sitio|website|online|plataforma|navegador)\b/i],
+  "Recursos": [/\b(recursos?|plantillas?|templates?|packs?|listas?|colecci[oó]n|cheat ?sheet|dataset|libro|ebook|pdf|recopilaci[oó]n|awesome)\b/i],
+  "Tutoriales": [/\b(tutorial|c[oó]mo|how to|paso a paso|trucos?|tips?|aprende|learn|gu[ií]a|configura\w*|ense[ñn]a)\b/i],
+  "Cursos": [/\b(cursos?|courses?|clases?|masterclass|bootcamp|certificaci[oó]n|formaci[oó]n|roadmap|temario)\b/i, /udemy|coursera|platzi|domestika|edx\.org|skillshare|khanacademy/i]
+};
+function clasificar(c, aiCat) { // puntúa cada categoría con señales claras; gana la que más suma
+  const blob = [c.titulo, c.resumen, (c.puntos || []).join(" "), (c.tags || []).join(" "), (c.texto || "").slice(0, 900), c.url, ...(c.links || []).map(l => l.u)].join(" \n ");
+  const sc = Object.fromEntries(CATS.map(k => [k, 0]));
+  for (const [k, rs] of Object.entries(REGLAS)) for (const r of rs) { const m = blob.match(new RegExp(r.source, r.flags + "g")); if (m) sc[k] += Math.min(2, m.length); }
+  if (c.repos && c.repos.length) sc["Repositorios"] += 4;
+  if (c.tipo === "GitHub") sc["Repositorios"] += 5;
+  if (/udemy|coursera|platzi|domestika|edx\.org|skillshare/i.test(blob)) sc["Cursos"] += 5;
+  if (c.tipo === "YouTube" && /\b(tutorial|c[oó]mo|curso)\b/i.test(blob)) sc["Tutoriales"] += 2;
+  const a = normCat(aiCat); if (a && sc[a] !== undefined) sc[a] += 4;
+  let best = "Otros", n = 0; for (const k of CATS) if (k !== "Otros" && sc[k] > n) { n = sc[k]; best = k; }
   return best;
+}
+// ---- relevancia para Jorge ----
+const INTERESES_BASE = "claude, claude code, agente, mcp, skill, gratis, free, open source, código abierto, github, api, automatiz, android, apk, token, whisper, llm, rag, codex, gemini, nvidia, openrouter, seguridad, privacidad, bot, scraping, playwright, obsidian, memoria, n8n, cursor, prompt";
+const interesesLista = () => (db.cfg.intereses && db.cfg.intereses.trim() ? db.cfg.intereses : INTERESES_BASE).split(",").map(x => sinAcentos(x.trim())).filter(x => x.length > 1);
+const ETQ_REL = ["", "Poco", "Normal", "Interesante", "Muy relevante", "Imprescindible"];
+function relevancia(c) {
+  if (c.fav) return { n: 5, pts: 99 };
+  if (c.estado !== "ok") return { n: 0, pts: 0 };
+  const blob = sinAcentos([c.titulo, c.resumen, (c.puntos || []).join(" "), (c.tags || []).join(" "), c.categoria].join(" "));
+  let pts = Math.min(5, new Set(interesesLista().filter(w => blob.includes(w))).size);
+  const r = c.repos && c.repos[0];
+  if (r) { pts += 1; const st = Number(r.stars) || 0; pts += st >= 10000 ? 3 : st >= 1000 ? 2 : st >= 100 ? 1 : 0; }
+  if ((c.links || []).length >= 2) pts += 1;
+  if (c.fuente === "investigado") pts += 1;
+  if (c.relIA) pts += (Number(c.relIA) || 3) - 3;
+  if (!c.resumen) pts -= 2;
+  return { n: pts <= 1 ? 1 : pts <= 3 ? 2 : pts <= 5 ? 3 : pts <= 7 ? 4 : 5, pts };
+}
+// ---- que la IA no se invente cosas: lo que dice tiene que salir del material ----
+const raices = t => new Set(sinAcentos(t).split(/[^a-z0-9]+/).filter(w => w.length >= 5).map(w => w.slice(0, 5)));
+function fundado(salida, fuente) {
+  const w = [...raices(salida)]; if (w.length < 5) return true;
+  const f = raices(fuente); return w.filter(x => f.has(x)).length / w.length >= 0.22;
 }
 const hashtags = t => [...new Set((t.match(/#[\p{L}\d_]+/gu) || []).map(x => x.toLowerCase()))].slice(0, 12);
 
@@ -435,6 +532,7 @@ async function analizar(card, textoManual) {
     if (l.imgs && l.imgs.length) card.imgs = l.imgs;
     const [vz, vi] = await Promise.all([l.video ? leerVoz(l.video) : null, l.imgs && l.imgs.length ? leerImgs(l.imgs) : null]); // a la vez: ahorra segundos
     if (l.video) card.voz = vz ? "sí" : "no";
+    card.vio = { voz: !!vz, imgs: !!vi, video: !!l.video };
     if (vz) texto += "\n[VOZ DEL VÍDEO, transcrita]\n" + vz.slice(0, 1300);
     if (vi) texto += "\n[TEXTO EN LAS IMÁGENES DEL POST]\n" + vi;
   }
@@ -447,13 +545,11 @@ async function analizar(card, textoManual) {
   for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g) repos.push(repoInfo(g)); }
   let ctx = texto.slice(0, 1800);
   for (const r of repos.slice(0, 2)) { const rd = await ghReadme(r.full); r.readme = rd; ctx += `\n[REPO VERIFICADO ${r.full} — ${r.desc} — README: ${rd.slice(0, 900)}]`; }
-  const BASE_CATS = ["Repos de GitHub", "Herramientas de IA", "Programas y apps", "Webs y recursos", "Tutoriales y cursos", "Ideas y negocio"];
-  const cats = [...new Set([...BASE_CATS, ...db.cards.map(c => c.categoria).filter(c => c && !/^(Pendiente|Para revisar|Sin clasificar)$/.test(c))])].slice(0, 40);
   let ai = null;
   if (hayIA() && ctx.trim()) {
-    ai = await chatJson(`Eres un extractor. Debajo está el contenido de un link de ${card.tipo}. Responde SOLO JSON:
-{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español: qué es y para qué sirve, usando SOLO lo que dice el texto","categoria":"una categoría corta","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 palabras clave en minúscula, sin #"],"web":"web oficial del proyecto/herramienta que se explica, si habla de un servicio o herramienta conocida (Kaggle, Notion…) pon su web principal; null solo si no hay ninguna"}
-Categorías que ya existen: ${JSON.stringify(cats)}. Elige la que mejor encaje con lo que MUESTRAN el texto y las imágenes (repos de GitHub, herramientas de IA, programas…); crea una nueva de 1 a 3 palabras SOLO si ninguna encaja de verdad. Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO, no es el contenido. El resumen debe decir QUÉ herramientas/proyectos/ideas se explican (nómbralos si aparecen, también en el texto de las imágenes). Si el texto no da información: "resumen":"" y "categoria":"Sin clasificar". No inventes nada. Ordena, no descartes.
+    ai = await chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
+{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español claro: QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","relevancia":3,"proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 palabras clave en minúscula, sin #"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null"}
+Reglas: (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) relevancia 1-5 = lo útil que es para un desarrollador que usa Claude Code, agentes de IA, herramientas gratis/open source y automatización. (6) Si no hay información útil: "resumen":"" y "categoria":"Otros".
 CONTENIDO:
 ${ctx}`);
     if (ai && !repos.length) { // propuestas de la IA: solo valen si GitHub confirma que existen
@@ -464,17 +560,17 @@ ${ctx}`);
       }
     }
   }
+  if (ai && ai.resumen && !fundado(ai.resumen + " " + (ai.titulo || ""), ctx + " " + card.url)) { ai.resumen = ""; ai.titulo = ""; card.motivo = "La IA dijo algo que no sale del post; lo descarté"; } // anti-invención
   const r0 = repos[0];
   card.repos = repos.map(r => ({ full: r.full, url: r.url, stars: r.stars, desc: r.desc, topics: r.topics }));
   card.titulo = (ai && ai.titulo) || titulo || (r0 && r0.full.split("/")[1]) || (card.tipo === "Instagram" && !texto.trim() ? "Post de Instagram (sin texto legible)" : "") || (texto.split("\n").find(l => l.trim() && !/^(Cuenta:|Imagen:?)/i.test(l.trim())) || "").slice(0, 70) || card.url;
+  card.relIA = ai && Number(ai.relevancia) ? Math.max(1, Math.min(5, Number(ai.relevancia))) : 0;
   card.resumen = (ai && ai.resumen) || (r0 && r0.desc) || texto.slice(0, 220) || (card.tipo === "Instagram" ? "El texto de este post solo traía un gancho (comenta...); no se pudo leer su contenido. Abre el enlace." : "");
-  card.categoria = (ai && ai.categoria && ai.categoria.trim()) || (r0 && r0.topics[0]) || (card.tags[0] && card.tags[0].slice(1)) || seccionPorPalabras(texto);
-  card.categoria = card.categoria.charAt(0).toUpperCase() + card.categoria.slice(1);
-  card.categoria = cats.find(k => k.toLowerCase() === card.categoria.toLowerCase()) || card.categoria;
+  card.categoria = clasificar(card, ai && ai.categoria);
   if (!card.tags.length && ai && Array.isArray(ai.tags)) card.tags = ai.tags.slice(0, 5).map(t => "#" + String(t).toLowerCase().replace(/^#/, "").replace(/\s+/g, ""));
   card.fuente = ai ? (r0 ? "verificado" : "resumen IA") : (r0 ? "verificado" : "deducido");
   try { await investigar(card, repos, ai, texto); } catch (e) { card.motivo = "No pude investigar a fondo: " + String(e).slice(0, 60); }
-  card.estado = "ok"; card.motivo = "";
+  card.estado = "ok"; if (!/descart/.test(card.motivo || "")) card.motivo = "";
   if (hayIA() && !ai && ctx.trim()) card.motivo = "Sin IA ahora (" + iaError.slice(0, 90) + "): ordenado por GitHub/hashtags";
   if (ghAviso) card.motivo = (card.motivo ? card.motivo + " · " : "") + ghAviso;
   if (!texto.trim() && !r0) { card.estado = "revisar"; card.categoria = "Para revisar"; card.motivo = card.motivo || "No encontré texto en este link"; }
@@ -507,6 +603,11 @@ async function leerProyectoWeb(url) {
   const img = abs(metaDe(h, "og:image") || metaDe(h, "twitter:image") || "", url);
   return { url: r.url || url, titulo: decodeHtml((h.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [, ""])[1]).trim(), desc: metaDe(h, "og:description") || metaDe(h, "description") || "", texto: sinTags(h).slice(0, 1800), img };
 }
+function webRelevante(web, card, r0) {
+  const tok = tokeniza(card.titulo + " " + (r0 ? r0.full.replace("/", " ") : "")); if (!tok.length) return false;
+  const m = sinAcentos(web.titulo + " " + web.desc + " " + new URL(web.url).hostname);
+  return tok.some(t => m.includes(t));
+}
 async function investigar(card, repos, ai, texto) {
   const links = [], imgs = [], add = (t, u) => { if (u && !links.some(l => l.u === u)) links.push({ t, u }); };
   let md = "", web = null;
@@ -522,23 +623,32 @@ async function investigar(card, repos, ai, texto) {
     const cands = [];
     if (ai && typeof ai.web === "string" && /^https?:\/\//.test(ai.web)) cands.push(ai.web);
     for (const m of texto.matchAll(/https?:\/\/[^\s)"'<>]+/g)) cands.push(m[0].replace(/[.,;]+$/, ""));
-    for (const u of cands.slice(0, 4)) { try { if (WEB_NO.test(new URL(u).hostname)) continue; } catch (e) { continue; } web = await leerProyectoWeb(u); if (web) break; }
+    for (const u of cands.slice(0, 4)) {
+      try { if (WEB_NO.test(new URL(u).hostname)) continue; } catch (e) { continue; }
+      web = await leerProyectoWeb(u);
+      if (web && !(texto.includes(u) || webRelevante(web, card, r0))) web = null; // una web que no habla de esto no entra (adiós a «videojuegos» de la nada)
+      if (web) break;
+    }
   }
   if (web) { add("Web oficial", web.url); imgs.push(web.img || "https://image.thum.io/get/width/700/" + web.url); } // sin og:image: captura de la web
   if (r0 && imgs.length < 3) imgs.push("https://opengraph.githubassets.com/1/" + r0.full); // tarjeta del repo (siempre existe)
-  const imgsP = [...new Set(imgs)].slice(0, 3);
-  if (imgsP.length) { card.imgsPost = card.imgs || []; card.imgs = imgsP; }
+  card.imgs = [...new Set([...(card.imgs || []), ...imgs])].slice(0, 8); // primero las del post, luego repo/web: nunca se pierden
   card.links = links;
   // si no hay ningún link (o solo el repo), se buscan y comprueban las webs oficiales de lo que menciona
   const hb = new Set((card.links || []).map(l => l.u.replace(/\/$/, "").toLowerCase()));
   if (hb.size < 2 || (hb.size === 1 && r0)) await buscarLinksOficiales(card);
   if (!hayIA()) return;
-  const ex = await chatJson(`Eres un divulgador técnico. Un post habla de un proyecto, servicio, skill o idea. Explica bien lo que quiere decir usando SOLO el material de abajo (no inventes nada; si falta un dato, no lo menciones). Si es una skill, plugin o instalación, di cómo se instala o se activa y el comando exacto si aparece. Responde SOLO JSON:
-{"explicacion":"4 a 6 frases en español claro: qué es, qué problema resuelve, cómo se instala o se usa (comandos o requisitos si el README los da), para quién sirve y límites o coste si se mencionan","puntos":["3 a 4 puntos cortos con lo más útil"]}
-POST (texto y voz): ${texto.slice(0, 1200)}
+  const material = `${texto.slice(0, 2600)}\n${r0 ? md : ""}\n${web ? web.titulo + " " + web.desc + " " + web.texto : ""}`;
+  const ex = await chatJson(`Eres un divulgador técnico. Un post de Instagram habla de un proyecto, herramienta, skill o idea. Explícalo para que alguien lo entienda SIN ver el vídeo. Usa SOLO el material de abajo; si algo no está, no lo menciones. Si parte del material no tiene relación con el post (otro tema), IGNÓRALA. Responde SOLO JSON:
+{"explicacion":"4 a 6 frases en español claro: qué es, qué problema resuelve y para quién","puntos":["TODOS los puntos, pasos, ideas o herramientas que el post enumera (hasta 8); cada uno: nombre + una frase"],"skills":["si el post crea o propone skills/plugins/comandos para Claude: nombre — qué hace (hasta 5); si no hay, []"],"como":["pasos para instalarlo o usarlo (hasta 6), con el comando EXACTO solo si aparece en el material; si no aparecen, []"],"limites":"coste, requisitos o límites si se mencionan; si no, \"\""}
+POST (texto, voz del vídeo y texto de las imágenes): ${texto.slice(0, 2600)}
 ${r0 ? "README de " + r0.full + ": " + md.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 3500) : ""}
 ${web ? "WEB OFICIAL (" + web.url + "): " + web.titulo + " — " + web.desc + " " + web.texto.slice(0, 1200) : ""}`);
-  if (ex && ex.explicacion && ex.explicacion.length > 60) { card.resumen = ex.explicacion; if (Array.isArray(ex.puntos)) card.puntos = ex.puntos.slice(0, 4).map(String); card.fuente = "investigado"; }
+  const lista = (v, n) => Array.isArray(v) ? v.map(x => String(x || "").trim()).filter(x => x.length > 3).slice(0, n) : [];
+  if (ex && ex.explicacion && ex.explicacion.length > 60 && fundado(ex.explicacion, material + " " + card.titulo)) {
+    card.resumen = ex.explicacion; card.fuente = "investigado";
+    card.puntos = lista(ex.puntos, 8); card.skills = lista(ex.skills, 5); card.como = lista(ex.como, 6); card.limites = String(ex.limites || "").slice(0, 300);
+  }
 }
 
 // ============ buscar el link oficial de cada cosa que se menciona ============
@@ -588,8 +698,8 @@ async function verificar(u, nombre) {
     const htok = sinAcentos(new URL(fin).hostname.replace(/^www\./, ""));
 const tok = tokeniza(nombre);
     if (!tok.length) return (tit || desc) ? fin : "";
-    const mezcla = `${tit} ${desc} ${htok}`;
-    return tok.some(t => mezcla.includes(t)) ? fin : ""; // al menos una palabra del nombre tiene que aparecer en la página
+    const fuerte = `${tit} ${htok}`, need = tok.length >= 3 ? 2 : 1; // nombres largos: 2 palabras en título/host; cortos: 1
+    return (tok.filter(t => fuerte.includes(t)).length >= need || (need === 1 && desc.includes(tok[0]))) ? fin : "";
   } catch (e) { return ""; }
 }
 async function buscarEnDuck(nombre) {
@@ -644,7 +754,7 @@ async function buscarLinksOficiales(card, { forzar = false } = {}) {
 }
 
 // ============ editor de ficha: escribir, mover y buscar links ============
-let editando = null, arrastre = null;
+let editando = null;
 const seccionDe = (g, c) => String(g || "AI").trim() + " \u0001 " + String(c || "Sin clasificar").trim();
 function secciones() {
   const m = new Map();
@@ -692,13 +802,13 @@ function guardarEditor() {
   c.tags = [...new Set(($("#hTags").value.split(/[,\s]+/).map(t => t.trim().replace(/^#/, "")).filter(Boolean)))].slice(0, 10).map(t => "#" + t);
   c.links = leerLinksHoja().filter(l => /^https?:\/\//i.test(l.u) || l.u === "");
   c.links = c.links.filter(l => l.u);
-  guardar(); cerrarEditor(); pintar(); aviso("Guardado");
+  c.manual = true; guardar(); cerrarEditor(); pintar(); aviso("Guardado");
 }
 function mover(c, g, cat) {
   if (!g && !cat) return;
   if (g) c.grupo = String(g).trim() || "AI";
   if (cat) c.categoria = String(cat).trim() || "Sin clasificar";
-  guardar(); pintar(); aviso("Movida a " + c.grupo + " › " + c.categoria);
+  c.manual = true; guardar(); pintar(); aviso("Movida a " + c.grupo + " › " + c.categoria);
 }
 async function pedirLinks(c, forzar = true) {
   if (!c) return;
@@ -710,79 +820,52 @@ async function pedirLinks(c, forzar = true) {
   aviso(nuevos.length ? `${nuevos.length} link(s) nuevo(s): ` + nuevos.map(l => l.u.replace(/^https?:\/\//, "").slice(0, 40)).join(", ") : "No encontré ninguna web oficial de lo que menciona (se probaron nombres y buscador)");
 }
 
-// ayuda: el detalle real debajo del punto (ignora toasts y overlays)
-function detalleBajo(x, y) {
-  const cands = [...$$("details[data-g]")].map(d => {
-    const r = d.getBoundingClientRect();
-    return { d, r, dentro: x >= r.left && x <= r.right && y >= r.top && y <= r.bottom, area: r.width * r.height };
-  }).filter(o => o.dentro);
-  if (!cands.length) return null;
-  cands.sort((a, b) => a.area - b.area);
-  return cands[0].d;
-}
-// ---- arrastre con el dedo: soltar una ficha dentro de otra sección ----
-function iniciarArrastre(e, c) {
-  if (arrastre) return;
-  const el = document.createElement("div");
-  el.id = "arrastrando"; el.innerHTML = `<div class="card" style="border-color:var(--ac)"><h3 style="font-size:15px">${esc(c.titulo)}</h3></div>`;
-  document.body.appendChild(el);
-  const origen = e.target.closest(".card"); origen.classList.add("soltando");
-  arrastre = { c, el, origen, x: e.clientX, y: e.clientY };
-  moverCaja(e.clientX, e.clientY);
-}
-function moverCaja(x, y) {
-  const a = arrastre; if (!a) return;
-  a.el.style.left = Math.max(6, Math.min(x - 30, innerWidth - a.el.offsetWidth - 6)) + "px";
-  a.el.style.top = Math.max(6, y - 26) + "px";
-  $$("details.destino").forEach(d => d.classList.remove("destino"));
-  const bajo = document.elementFromPoint(x, y);
-  let d = (bajo && bajo.closest) ? bajo.closest("details[data-g]") : null;
-  if (!d) d = detalleBajo(x, y);
-  if (d) d.classList.add("destino");
-}
-function soltarArrastre(x, y) {
-  const a = arrastre; if (!a) return;
-  arrastre = null; a.el.remove(); a.origen.classList.remove("soltando");
-  let d = detalleBajo(x, y);
-  if (!d) { const bajo = document.elementFromPoint(x, y); if (bajo) d = bajo.closest("details[data-g]"); }
-  if (!d) return pintar();
-  $$("details.destino").forEach(x2 => x2.classList.remove("destino"));
-  if (d.dataset.k && d.dataset.k.startsWith("G:")) mover(a.c, d.dataset.k.slice(2), null);
-  else mover(a.c, d.dataset.g, d.dataset.c);
-  pintar();
-}
-$("#lista").addEventListener("pointerdown", e => {
-  if (e.target.dataset.a !== "arrastrar") return;
-  e.preventDefault();
-  const c = db.cards.find(x => x.id === (e.target.closest(".card") || {}).dataset?.id); if (!c) return;
-  iniciarArrastre(e, c);
-  const mv = ev => { ev.preventDefault(); moverCaja(ev.clientX, ev.clientY); };
-  const up = ev => { window.removeEventListener("pointermove", mv); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up); soltarArrastre(ev.clientX, ev.clientY); };
-  window.addEventListener("pointermove", mv, { passive: false });
-  window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up);
-});
-
 // ============ cola ============
 let corriendo = false, parar = false;
-const claveUrl = u => { u = u.toLowerCase().replace(/^https?:\/\/(www\.|m\.)?/, "").replace(/#.*$/, ""); if (!/^youtu/.test(u)) u = u.replace(/\?.*$/, ""); return u.replace(/\/+$/, ""); };
+const claveUrl = u => { // misma publicación aunque cambie la forma del link (utm, igsh, www, barra final, reel/p…)
+  u = String(u || "").trim(); const ig = u.match(RE_IG); if (ig) return "ig:" + ig[2]; const yt = u.match(RE_YT); if (yt) return "yt:" + yt[1];
+  const gh = u.match(/github\.com\/([\w.-]+)\/([\w.-]+)/i); if (gh) return "gh:" + (gh[1] + "/" + gh[2].replace(/\.git$/i, "")).toLowerCase();
+  const [pth, q = ""] = u.toLowerCase().replace(/^https?:\/\/(www\.|m\.)?/, "").replace(/#.*$/, "").split("?");
+  const keep = q.split("&").filter(x => x && !/^(utm_|igsh|igshid|fbclid|gclid|si=|feature=|ref=|s=|t=)/.test(x)).sort().join("&");
+  return pth.replace(/\/+$/, "") + (keep ? "?" + keep : "");
+};
+const clavesDe = c => { const k = new Set([claveUrl(c.url), ...(c.extra || []).map(claveUrl)]); const r = c.repos && c.repos[0]; if (r) k.add("gh:" + r.full.toLowerCase()); return k; };
+const yaGuardada = u => { const k = claveUrl(u); return db.cards.find(c => clavesDe(c).has(k)); };
 function grupoActual() { const g = (($("#grupo") || {}).value || "").trim() || "AI"; if (db.grupo !== g) { db.grupo = g; guardar(); } return g; }
 function encolar(links) {
   let nuevos = 0, repes = 0;
   for (const u of links) {
-    const ya = db.cards.find(c => claveUrl(c.url) === claveUrl(u));
+    const ya = yaGuardada(u);
     if (ya) { repes++; continue; }
     db.cards.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
     nuevos++;
   }
   guardar(); return { nuevos, repes };
 }
-function unirRepetidos() { // mismo repo verificado → una sola ficha con varios links
-  const por = {};
-  for (const c of [...db.cards]) {
-    const k = c.repos && c.repos[0] && c.repos[0].full.toLowerCase(); if (!k) continue;
-    if (por[k] && por[k] !== c) { por[k].extra = [...new Set([...(por[k].extra || []), c.url, ...(c.extra || [])])]; db.cards = db.cards.filter(x => x !== c); } else por[k] = c;
+const completa = c => (c.resumen || "").length + 40 * (c.links || []).length + 60 * (c.notas ? 1 : 0) + 30 * (c.imgs || []).length + (c.estado === "ok" ? 200 : 0) + (c.manual ? 100 : 0);
+function fusionar(arr) { // deja la ficha más completa y le pasa los links, imágenes y notas de las demás
+  arr.sort((a, b) => completa(b) - completa(a)); const w = arr[0];
+  for (const o of arr.slice(1)) {
+    w.extra = [...new Set([...(w.extra || []), o.url, ...(o.extra || [])])].filter(u => claveUrl(u) !== claveUrl(w.url) && !String(u).startsWith("foto:"));
+    const vistos = new Set((w.links || []).map(l => l.u)); (o.links || []).forEach(l => { if (!vistos.has(l.u)) { (w.links ||= []).push(l); vistos.add(l.u); } });
+    w.tags = [...new Set([...(w.tags || []), ...(o.tags || [])])].slice(0, 12); w.imgs = [...new Set([...(w.imgs || []), ...(o.imgs || [])])].slice(0, 8);
+    if (o.notas && o.notas !== w.notas) w.notas = [w.notas, o.notas].filter(Boolean).join("\n");
+    if (o.fav) w.fav = true;
+    db.cards = db.cards.filter(x => x !== o);
   }
+  return w;
 }
+function gruposDup(conTitulo) {
+  const cards = db.cards.filter(c => c.estado !== "pendiente"), pad = cards.map((_, i) => i), f = i => pad[i] === i ? i : (pad[i] = f(pad[i]));
+  const idx = new Map(), tit = new Map();
+  cards.forEach((c, i) => {
+    for (const k of clavesDe(c)) { if (idx.has(k)) pad[f(i)] = f(idx.get(k)); else idx.set(k, i); }
+    const t = sinAcentos(c.titulo).replace(/[^a-z0-9]/g, ""); // mismo título largo y mismo tipo = misma cosa
+    if (conTitulo && c.tipo !== "Foto" && c.titulo !== c.url && t.length >= 14) { const kt = c.tipo + t; if (tit.has(kt)) pad[f(i)] = f(tit.get(kt)); else tit.set(kt, i); }
+  });
+  const g = {}; cards.forEach((c, i) => (g[f(i)] ||= []).push(c)); return Object.values(g).filter(a => a.length > 1);
+}
+const unirRepetidos = () => gruposDup().forEach(fusionar);
 async function correr() {
   if (corriendo) return; corriendo = true; parar = false; $("#prog").style.display = "block"; $("#bParar").disabled = false; muertos = {};
   const todo = db.cards.filter(c => c.estado === "pendiente").length; let hechos = 0;
@@ -806,32 +889,58 @@ function aviso(t) { const a = $("#aviso"); a.textContent = t; a.style.display = 
 function cambiaTab(t) { $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + t)); if (t === "fichas") pintar(); $("main").scrollTop = 0; }
 const miles = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : String(n);
 const ordenCat = (a, b) => ((a === "Para revisar") - (b === "Para revisar")) || (a === "Sin clasificar") - (b === "Sin clasificar") || a.localeCompare(b, "es");
+let filtro = "todo";
+const FILTROS = [["todo", "Todo"], ["rel", "★ Más relevantes"], ["repo", "Con GitHub"], ["rev", "Para revisar"]];
+function pasaFiltro(c, f = filtro) {
+  if (f === "rel") return c.estado === "ok" && relevancia(c).n >= 4;
+  if (f === "repo") return !!(c.repos && c.repos.length);
+  if (f === "rev") return c.estado === "revisar";
+  return true;
+}
+const visibles = () => { const q = $("#buscar").value.trim().toLowerCase(); return db.cards.filter(c => pasaFiltro(c) && (!q || [c.titulo, c.resumen, c.categoria, c.url, ...(c.tags || []), ...(c.repos || []).map(r => r.full), ...(c.puntos || [])].join(" ").toLowerCase().includes(q))); };
+const porRel = (a, b) => (relevancia(b).n - relevancia(a).n) || String(a.titulo).localeCompare(String(b.titulo), "es");
 function pintar() {
   const q = $("#buscar").value.trim().toLowerCase();
-  const cards = db.cards.filter(c => !q || [c.titulo, c.resumen, c.categoria, c.url, ...(c.tags || [])].join(" ").toLowerCase().includes(q));
+  const cards = visibles();
   $("#cuenta").textContent = db.cards.length ? db.cards.length + " fichas" : "";
+  $("#filtros").innerHTML = FILTROS.map(([k, t]) => `<button data-f="${k}" class="${filtro === k ? "on" : ""}">${t}${k === "todo" ? "" : ` (${db.cards.filter(c => pasaFiltro(c, k)).length})`}</button>`).join("");
   if (!db.cards.length) { $("#lista").innerHTML = '<div class="vacio"><b>Todavía no hay fichas</b>Ve a «Pegar», mete tus links y pulsa «Ordenar».</div>'; return; }
-  const gg = {}; cards.forEach(c => ((gg[c.grupo || "AI"] ||= {})[c.categoria || "Sin clasificar"] ||= []).push(c)); // grupo principal > categoría
-  const abiertas = new Set($$("details[open]").map(d => d.dataset.k));
-  const pintaCats = (grupos, pre) => Object.keys(grupos).sort(ordenCat).map(k => `<details data-k="${esc(pre + k)}" data-g="${esc(pre.slice(0, -1))}" data-c="${esc(k)}" ${(abiertas.has(pre + k) || q || !abiertas.size) ? "open" : ""}><summary>${esc(k)} <b>${grupos[k].length}</b></summary>${grupos[k].map(fichaHtml).join("")}</details>`).join("");
-  $("#lista").innerHTML = Object.keys(gg).sort((a, b) => a.localeCompare(b, "es")).map(g => `<details class="grupo" data-k="G:${esc(g)}" data-g="${esc(g)}" data-c="" ${(abiertas.has("G:" + g) || q || !abiertas.size) ? "open" : ""}><summary style="font-size:1.1em">📁 ${esc(g)} <b>${Object.values(gg[g]).reduce((n, a) => n + a.length, 0)}</b></summary>${pintaCats(gg[g], g + "/")}</details>`).join("") || '<div class="vacio">Nada que mostrar.</div>';
+  const gg = {}; cards.forEach(c => ((gg[c.grupo || "AI"] ||= {})[c.categoria || "Otros"] ||= []).push(c)); // grupo principal > categoría
+  const cerradas = new Set($$("#lista details:not([open])").map(d => d.dataset.k)); // lo nuevo nace abierto; solo recuerdo lo que cerraste
+  const pintaCats = (grupos, pre) => Object.keys(grupos).sort(ordenCat).map(k => `<details data-k="${esc(pre + k)}" ${(!cerradas.has(pre + k) || q) ? "open" : ""}><summary>${esc(k)} <b>${grupos[k].length}</b></summary><div class="secc">${grupos[k].sort(porRel).map(fichaHtml).join("")}</div></details>`).join("");
+  $("#lista").innerHTML = Object.keys(gg).sort((a, b) => a.localeCompare(b, "es")).map(g => `<details class="grupo" data-k="G:${esc(g)}" ${(!cerradas.has("G:" + g) || q) ? "open" : ""}><summary style="font-size:1.1em">📁 ${esc(g)} <b>${Object.values(gg[g]).reduce((n, a) => n + a.length, 0)}</b></summary>${pintaCats(gg[g], g + "/")}</details>`).join("") || '<div class="vacio">Nada que mostrar con este filtro.</div>';
+}
+const lista = (t, a, ord) => a && a.length ? `<div class="bl"><b>${t}</b><${ord ? "ol" : "ul"}>${a.map(x => `<li>${esc(x)}</li>`).join("")}</${ord ? "ol" : "ul"}></div>` : "";
+function enlacesDe(c) { // SIEMPRE se ve el link del post original y el del repo/web a donde lleva
+  const out = [], vistos = new Set(), add = (cls, t, u) => { if (!u || !/^https?:/i.test(u)) return; const k = claveUrl(u); if (vistos.has(k)) return; vistos.add(k); out.push(`<a class="lk ${cls}" data-a="ext" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`); };
+  if (c.tipo !== "Foto") add("ig", c.tipo === "Instagram" ? "📷 Instagram original" : "🔗 Link original (" + c.tipo + ")", c.url);
+  for (const r of (c.repos || []).slice(0, 2)) add("gh", "GitHub " + r.full + (r.stars && r.stars !== "?" ? " ★" + miles(r.stars) : ""), r.url);
+  for (const l of (c.links || [])) add("", l.t, l.u);
+  for (const u of (c.extra || []).slice(0, 3)) add("", "Otro link", u);
+  return out.join("");
 }
 function fichaHtml(c) {
-  const r = c.repos && c.repos[0];
+  const rl = relevancia(c), vio = c.vio || {};
   const est = c.estado === "ok" ? "" : c.estado === "pendiente" ? '<span class="chip">en cola</span>' : '<span class="chip warn">revisar</span>';
-  return `<div class="card" data-id="${c.id}"><button class="agarre" data-a="arrastrar" aria-label="Mover a otra sección">⠿</button><h3>${esc(c.titulo)}</h3>${c.imgs && c.imgs.length ? `<div style="display:flex;gap:6px;overflow-x:auto;margin:6px 0">${c.imgs.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" style="height:96px;border-radius:8px;flex:none" onerror="this.remove()">`).join("")}</div>` : ""}${c.resumen ? `<p>${esc(c.resumen)}</p>` : ""}${c.puntos && c.puntos.length ? `<ul style="margin:4px 0 6px 18px;padding:0">${c.puntos.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${c.notas ? `<div class="notas">${esc(c.notas)}</div>` : ""}
-${c.links && c.links.length ? `<div class="acc">${c.links.map(l => `<button class="btn sm" data-a="abrirl" data-u="${esc(l.u)}">${esc(l.t)} ↗</button>`).join("")}</div>` : ""}<div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${r ? `<span class="chip ok">GitHub ✓ ${esc(r.full)} ★${miles(r.stars)}</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${est}</div>
+  const gal = c.imgs && c.imgs.length ? `<div class="gal">${c.imgs.slice(0, 8).map(u => `<a data-a="ext" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.closest('a').remove()"></a>`).join("")}</div>` : "";
+  const aprendido = [vio.voz ? "🎙 voz del vídeo" : c.voz === "no" ? "🔇 sin voz" : "", vio.imgs ? "🖼 texto de las imágenes" : "", c.repos && c.repos.length ? "📦 README" : ""].filter(Boolean).map(t => `<span class="chip">${t}</span>`).join("");
+  const hayMas = (c.puntos || []).length || (c.como || []).length || (c.skills || []).length || c.limites || c.notas;
+  return `<div class="card" data-id="${c.id}"><div class="cab"><h3 data-a="toggle">${esc(c.titulo)}</h3>${rl.n ? `<span class="rel r${rl.n}">${c.fav ? "⭐ " : ""}${ETQ_REL[rl.n]}</span>` : ""}</div>${gal}${c.resumen ? `<p class="res">${esc(c.resumen)}</p>` : ""}
+<div class="mas">${lista("Puntos clave", c.puntos)}${lista("Skills que propone", c.skills)}${lista("Cómo usarlo / instalarlo", c.como, true)}${c.limites ? `<div class="bl"><b>Requisitos y límites</b>${esc(c.limites)}</div>` : ""}${c.notas ? `<div class="notas">${esc(c.notas)}</div>` : ""}</div>
+<div class="enl">${enlacesDe(c)}${c.estado === "ok" ? '<button class="lk cc" data-a="claude">🧠 Para Claude Code</button>' : ""}</div>
+<div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${aprendido}${est}</div>
 ${c.motivo ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo)}</div>` : ""}
-${c.buscado && c.links && c.links.length ? `<div class="nota">🔎 ${esc(c.buscado)}</div>` : ""}
-<div class="acc"><button class="btn sm" data-a="editar">✏️ Editar</button><button class="btn sm" data-a="mover">↔️ Mover</button><button class="btn sm" data-a="links">🔎 Links</button><button class="btn sm" data-a="abrir">Ver post</button><button class="btn sm" data-a="copiar">Copiar</button><button class="btn sm" data-a="texto">Pegar texto</button><button class="btn sm" data-a="borrar" style="color:var(--bad)">Borrar</button></div></div>`;
+${c.buscado && c.links && c.links.length ? `<div class="nota">🔎 Buscado: ${esc(c.buscado)}</div>` : ""}
+<div class="fila" style="margin:8px 0 0"><button class="btn sm" data-a="toggle">${hayMas ? "Ver todo ▾" : "Más ▾"}</button><button class="btn sm" data-a="editar">✏️ Editar</button><button class="btn sm" data-a="mover">↔️ Mover</button></div>
+<div class="acc"><button class="btn sm" data-a="fav">${c.fav ? "★ Quitar favorita" : "☆ Favorita"}</button><button class="btn sm" data-a="links">🔎 Buscar links</button><button class="btn sm" data-a="copiar">Copiar</button><button class="btn sm" data-a="texto">Pegar texto</button><button class="btn sm" data-a="borrar" style="color:var(--bad)">Borrar</button></div></div>`;
 }
 function ficha2txt(c) {
   const r = c.repos && c.repos[0];
-  return [`### ${c.titulo}`, c.resumen, r ? `Repo: ${r.url} (★${r.stars})` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => l.t + ": " + l.u), ...(c.puntos || []).map(x => "- " + x), c.notas ? "**Mis notas:** " + c.notas : "", c.cuenta ? "Cuenta: " + c.cuenta : "", c.tipo === "Foto" ? "" : `Link: ${c.url}`, ...(c.extra || []).map(u => "Link: " + u)].filter(Boolean).join("\n");
+  return [`### ${c.titulo}`, c.resumen, ...(c.puntos || []).map(x => "- " + x), ...(c.como || []).map((x, i) => `${i + 1}. ${x}`), ...(c.skills || []).map(x => "- Skill: " + x), r ? `Repo: ${r.url} (★${r.stars})` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => l.t + ": " + l.u), c.notas ? "**Mis notas:** " + c.notas : "", c.cuenta ? "Cuenta: " + c.cuenta : "", c.tipo === "Foto" ? "" : `Post original: ${c.url}`, ...(c.extra || []).map(u => "Otro link: " + u)].filter(Boolean).join("\n");
 }
 function todoTxt() {
   const g = {}; db.cards.filter(c => c.estado !== "pendiente").forEach(c => (g[c.categoria || "Sin clasificar"] ||= []).push(c));
-  return `# IG Vault — ${db.cards.length} fichas\n\n` + Object.keys(g).sort((a, b) => a.localeCompare(b, "es")).map(k => `## ${k} (${g[k].length})\n\n` + g[k].map(ficha2txt).join("\n\n")).join("\n\n");
+  return `# IG Extractor — ${db.cards.length} fichas\n\n` + Object.keys(g).sort((a, b) => a.localeCompare(b, "es")).map(k => `## ${k} (${g[k].length})\n\n` + g[k].map(ficha2txt).join("\n\n")).join("\n\n");
 }
 function pregunta(titulo, valor, largo) {
   return new Promise(res => {
@@ -840,12 +949,77 @@ function pregunta(titulo, valor, largo) {
     $("#dSi").onclick = () => fin($("#dIn").value); $("#dNo").onclick = () => fin(null); d.oncancel = () => res(null); d.showModal();
   });
 }
-const copiar = t => N ? N.copiar(t) : navigator.clipboard.writeText(t).then(() => aviso("Copiado"));
+const copiar = t => { if (N) return N.copiar(t); const ok = () => aviso("Copiado"); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(ok, () => { const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand("copy"); ok(); } catch (e) { aviso("No pude copiar"); } a.remove(); }); };
+function abrir(u) { if (N) N.abrir(u); else if (SRV) postSrv("/api/abrir", { url: u }); else window.open(u, "_blank", "noopener"); }
+document.addEventListener("click", e => { const a = e.target.closest && e.target.closest("a[data-a=ext]"); if (a && (N || SRV)) { e.preventDefault(); abrir(a.href); } });
+
+// ============ para Claude Code ============
+const TAREAS = {
+  evaluar: ["Evaluar", "Investiga los enlaces de arriba y dime en 5 líneas qué hace de verdad, si encaja en mis proyectos y cómo lo integrarías. No instales nada todavía."],
+  instalar: ["Instalar y probar", "Instálalo siguiendo el README oficial, pruébalo con un comando real y pégame la salida. Si falla 3 veces, para y explícame el error exacto."],
+  skill: ["Crear skill", "Crea una skill de Claude Code (SKILL.md) a partir de esto: qué hace, cuándo debe activarse y los pasos. Guárdala en ~/.claude/skills/ y enséñame el resultado."],
+  priorizar: ["Priorizar", "Ordena estos elementos por utilidad para mis proyectos, dime cuáles instalar primero y por qué, en una tabla corta."]
+};
+function promptCC(cards, tarea) {
+  const bloque = (c, i) => {
+    const r = c.repos && c.repos[0], rl = relevancia(c);
+    return [`### ${cards.length > 1 ? (i + 1) + ". " : ""}${c.titulo}  (${c.categoria}${rl.n ? " · relevancia: " + ETQ_REL[rl.n] : ""})`, c.resumen ? "Qué es: " + c.resumen : "",
+      c.puntos && c.puntos.length ? "Puntos clave:\n" + c.puntos.map(x => "- " + x).join("\n") : "", c.skills && c.skills.length ? "Skills que propone:\n" + c.skills.map(x => "- " + x).join("\n") : "",
+      c.como && c.como.length ? "Cómo se usa / instala (según lo extraído):\n" + c.como.map((x, j) => `${j + 1}. ${x}`).join("\n") : "", c.limites ? "Requisitos/límites: " + c.limites : "",
+      "Enlaces:", c.tipo !== "Foto" ? `- Post original (${c.tipo}): ${c.url}` : "", r ? `- GitHub: ${r.url}${r.stars && r.stars !== "?" ? " (★" + r.stars + ")" : ""}` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => `- ${l.t}: ${l.u}`),
+      c.notas ? "Mis notas: " + c.notas : ""].filter(Boolean).join("\n");
+  };
+  return `# Tarea para Claude Code\nTe paso ${cards.length} elemento${cards.length > 1 ? "s" : ""} que guardé de Instagram con IG Extractor. Los datos se extrajeron automáticamente: pueden tener fallos, compruébalos en los enlaces antes de fiarte.\n\n${cards.map(bloque).join("\n\n")}\n\n## Qué quiero que hagas\n${TAREAS[tarea][1]}\n\nReglas: no inventes comandos ni datos; si no puedes verificar algo, dilo.`;
+}
+let ccCards = [], ccTarea = "evaluar";
+function pintaCC() {
+  $("#ccT").innerHTML = Object.entries(TAREAS).map(([k, v]) => `<button data-k="${k}" style="${k === ccTarea ? "background:var(--ac);color:var(--acx);border-color:var(--ac)" : ""}">${v[0]}</button>`).join("");
+  $("#ccTxt").value = promptCC(ccCards, ccTarea);
+}
+function abrirCC(cards, tarea) { ccCards = cards; ccTarea = tarea || (cards.length > 1 ? "priorizar" : "evaluar"); pintaCC(); $("#dcc").showModal(); }
+$("#ccT").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { ccTarea = b.dataset.k; pintaCC(); } });
+$("#ccCopia").onclick = () => { copiar($("#ccTxt").value); $("#dcc").close(); };
+$("#ccNo").onclick = () => $("#dcc").close();
+$("#bClaude").onclick = () => { const todas = visibles().filter(c => c.estado === "ok"); if (!todas.length) return aviso("No hay fichas listas para copiar"); abrirCC(todas.sort(porRel).slice(0, 30)); if (todas.length > 30) aviso("Van las 30 más relevantes (de " + todas.length + ")"); };
+// ============ mover (sin arrastrar: un botón y eliges) ============
+let mvCard = null, mvSel = null;
+function abrirMover(c) {
+  mvCard = c; mvSel = null; $("#mvN").value = "";
+  $("#mvD").innerHTML = secciones().map(d => `<button data-g="${esc(d.g)}" data-c="${esc(d.c)}" class="${seccionDe(d.g, d.c) === seccionDe(c.grupo, c.categoria) ? "on" : ""}">${esc(d.g)} › ${esc(d.c)} <span class="sema">${d.n}</span></button>`).join("");
+  $("#dmv").showModal();
+}
+$("#mvD").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; mvSel = { g: b.dataset.g, c: b.dataset.c }; $$("#mvD button").forEach(x => x.classList.toggle("on", x === b)); $("#mvN").value = ""; });
+$("#mvNo").onclick = () => $("#dmv").close();
+$("#mvSi").onclick = () => {
+  const t = $("#mvN").value.trim(); let g, cat;
+  if (t) { const p = t.split(/[›>\/]/).map(x => x.trim()).filter(Boolean); g = p.length > 1 ? p[0] : mvCard.grupo; cat = p.length > 1 ? p[1] : p[0]; } else if (mvSel) { g = mvSel.g; cat = mvSel.c; } else return aviso("Elige una sección o escribe una nueva");
+  $("#dmv").close(); mover(mvCard, g, cat);
+};
+// ============ duplicados y reclasificar ============
+function confirmar(titulo, html) {
+  return new Promise(res => { $("#dT").textContent = titulo; $("#dC").innerHTML = html; const d = $("#dlg"); $("#dSi").onclick = () => { d.close(); res(true); }; $("#dNo").onclick = () => { d.close(); res(false); }; d.oncancel = () => res(false); d.showModal(); });
+}
+async function quitarDuplicados() {
+  const gs = gruposDup(true); if (!gs.length) return aviso("No hay fichas duplicadas 👍");
+  const n = gs.reduce((t, a) => t + a.length - 1, 0);
+  const ej = gs.slice(0, 5).map(a => `<li>${esc(a[0].titulo.slice(0, 60))} <span class="sema">×${a.length}</span></li>`).join("");
+  if (!await confirmar("Quitar duplicados", `<p>Encontré <b>${n}</b> ficha${n > 1 ? "s" : ""} repetida${n > 1 ? "s" : ""} en ${gs.length} grupo${gs.length > 1 ? "s" : ""}. Dejo la más completa y le paso los links, imágenes y notas de las otras.</p><ul>${ej}</ul>`)) return;
+  gs.forEach(fusionar); guardar(); pintar(); aviso(`Listo: ${n} duplicada${n > 1 ? "s" : ""} fusionada${n > 1 ? "s" : ""}`);
+}
+function reclasificar() { // algoritmo nuevo sobre lo ya guardado (sin red); respeta lo que moviste a mano
+  let n = 0;
+  for (const c of db.cards) {
+    if (c.estado !== "ok" || c.manual) continue;
+    const nueva = clasificar(c, c.categoria); if (nueva !== c.categoria) { c.categoria = nueva; n++; }
+  }
+  guardar(); pintar(); return n;
+}
+function migrarCats() { let n = 0; for (const c of db.cards) { const v = normCat(c.categoria); if (v && v !== c.categoria) { c.categoria = v; n++; } } if (n) guardar(); }
 
 // ============ eventos ============
 function detectar() {
   const { links, total } = sacarLinks($("#txt").value);
-  const nuevos = links.filter(u => !db.cards.some(c => c.url.toLowerCase() === u.toLowerCase())).length;
+  const nuevos = links.filter(u => !yaGuardada(u)).length;
   $("#detect").textContent = !links.length ? "Aún no hay links." : `${links.length} links detectados${total > links.length ? ` (${total - links.length} repetidos quitados)` : ""}${nuevos < links.length ? ` · ${links.length - nuevos} ya estaban guardados` : ""}.`;
 }
 $("#txt").addEventListener("input", detectar);
@@ -860,7 +1034,7 @@ $("#bOrdenar").onclick = () => {
 $("#bParar").onclick = () => { parar = true; $("#bParar").disabled = true; };
 $("#buscar").addEventListener("input", pintar);
 $("#bCopiar").onclick = () => db.cards.length ? copiar(todoTxt()) : aviso("No hay fichas");
-$("#bComp").onclick = () => db.cards.length ? (N ? N.compartir(todoTxt(), "IG Vault") : copiar(todoTxt())) : aviso("No hay fichas");
+$("#bComp").onclick = () => db.cards.length ? (N ? N.compartir(todoTxt(), "IG Extractor") : copiar(todoTxt())) : aviso("No hay fichas");
 $("#bReint").onclick = () => { const f = db.cards.filter(c => c.estado === "revisar"); if (!f.length) return aviso("No hay fallidas"); f.forEach(c => c.estado = "pendiente"); guardar(); cambiaTab("pegar"); correr(); };
 $("#bLinksMasivos").onclick = async () => {
   const f = db.cards.filter(c => c.estado === "ok" && (!c.links || !c.links.length || c.links.length < 2));
@@ -873,26 +1047,29 @@ $("#bLinksMasivos").onclick = async () => {
 };
 $("#lista").addEventListener("click", async e => {
   const card = e.target.closest(".card"); if (!card) return; const c = db.cards.find(x => x.id === card.dataset.id); if (!c) return;
-  const a = e.target.dataset.a;
-  if (!a) { card.classList.toggle("open"); return; }
-  if (a === "abrirl") { const u = e.target.dataset.u; N ? N.abrir(u) : window.open(u); return; }
-  if (a === "editar") { abrirEditor(c); return; }
-  if (a === "mover") { abrirEditor(c); $("#hGru").focus(); return; }
-  if (a === "links") { pedirLinks(c); return; }
-  if (a === "abrir") c.tipo === "Foto" ? aviso("Es una foto del chat, no tiene link") : N ? N.abrir(c.url) : window.open(c.url);
+  const el = e.target.closest("[data-a]"), a = el && el.dataset.a;
+  if (a === "ext") return; // enlace de verdad: el navegador lo abre solo
+  if (!a || a === "toggle") { card.classList.toggle("open"); const t = card.querySelector("button[data-a=toggle]"); if (t) t.textContent = card.classList.contains("open") ? "Ver menos ▴" : "Ver todo ▾"; return; }
+  if (a === "editar") return abrirEditor(c);
+  if (a === "mover") return abrirMover(c);
+  if (a === "claude") return abrirCC([c]);
+  if (a === "links") return pedirLinks(c);
+  if (a === "fav") { c.fav = !c.fav; guardar(); return pintar(); }
   if (a === "copiar") copiar(ficha2txt(c));
-  if (a === "borrar") { db.cards = db.cards.filter(x => x !== c); guardar(); pintar(); }
-  if (a === "cat") { const v = await pregunta("Categoría de esta ficha", c.categoria); if (v && v.trim()) { c.categoria = v.trim(); guardar(); pintar(); } }
+  if (a === "borrar") { if (await confirmar("Borrar ficha", `<p>¿Borrar «${esc(c.titulo.slice(0, 70))}»?</p>`)) { db.cards = db.cards.filter(x => x !== c); guardar(); pintar(); } }
   if (a === "texto") { const v = await pregunta("Pega aquí el texto del post (la descripción)", c.texto || "", true); if (v && v.trim()) { c.estado = "pendiente"; guardar(); cambiaTab("pegar"); $("#prog").style.display = "block"; await analizar(c, v.trim()); guardar(); $("#prog").style.display = "none"; cambiaTab("fichas"); } }
 });
+$("#filtros").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { filtro = b.dataset.f; pintar(); } });
+$("#bDup").onclick = quitarDuplicados;
 $("#bGuardar").onclick = async () => {
-  db.cfg = { nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim() }; guardar(); muertos = {};
+  db.cfg = { nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim(), groq: $("#kGq").value.trim(), intereses: $("#kInt").value.trim() }; guardar(); muertos = {}; pintar();
   $("#kEstado").textContent = "Probando…";
   const out = [];
   if (db.cfg.nvidia || db.cfg.openrouter) { const t = await chat("Responde solo: ok", 20); out.push(t ? "IA ✓ funciona" : "IA ✗ " + iaError); } else out.push("IA: sin claves (modo básico)");
   if (db.cfg.github) { const r = await http("https://api.github.com/rate_limit", { headers: ghH() }); out.push(r.status === 200 ? "GitHub ✓" : "GitHub ✗ token rechazado"); }
   $("#kEstado").textContent = out.join(" · ");
 };
+$("#bReclas").onclick = () => aviso(`Reclasificadas ${reclasificar()} fichas (las que moviste a mano no se tocan)`);
 $("#bBorrar").onclick = async () => { const v = await pregunta("Escribe BORRAR para eliminar todas las fichas", ""); if (v && v.trim().toUpperCase() === "BORRAR") { db.cards = []; guardar(); pintar(); aviso("Fichas borradas"); } };
 $$("nav button").forEach(b => b.onclick = () => cambiaTab(b.dataset.t));
 // ---- hoja de edición ----
@@ -910,7 +1087,8 @@ $("#hDest").addEventListener("click", e => {
   $("#hGru").value = b.dataset.g; $("#hCat").value = b.dataset.c; pintarDestino();
 });
 window.__atras = () => {
-  if (arrastre) { soltarArrastre(0, 0); return true; }
+  if ($("#dcc").open) { $("#dcc").close(); return true; }
+  if ($("#dmv").open) { $("#dmv").close(); return true; }
   if (editando) { cerrarEditor(); return true; }
   const d = $("#dlg"); if (d.open) { d.close(); return true; }
   if (!$("#p-pegar").classList.contains("on")) { cambiaTab("pegar"); return true; }
@@ -928,7 +1106,8 @@ window.__chat = (t, fs) => {
   correr();
 };
 try { const k = N && N.claves ? JSON.parse(N.claves()) : {}; if (!db.cfg.nvidia && k.nvidia) db.cfg.nvidia = k.nvidia; if (!db.cfg.openrouter && k.openrouter) db.cfg.openrouter = k.openrouter; } catch (e) { }
-$("#grupo").value = db.grupo || "AI"; $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github;
+$("#grupo").value = db.grupo || "AI"; $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github; $("#kGq").value = db.cfg.groq || ""; $("#kInt").value = db.cfg.intereses || "";
+srvListo.then(async () => { if (!SRV) return; try { const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } });
 // semilla: investigación precargada. Llega por autoactualización, cifrada (el repo es público); la clave sale de la que ya lleva la APK
 async function cargarSemilla() {
   try {
@@ -952,7 +1131,7 @@ async function cargarSemilla() {
   } catch (e) { }
 }
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
-pintar(); detectar(); cargarSemilla();
+migrarCats(); unirRepetidos(); pintar(); detectar(); cargarSemilla();
 if (db.cards.some(c => c.estado === "pendiente")) { aviso("Quedaban links a medias: continúo."); correr(); }
 </script>
 </body>
