@@ -305,6 +305,7 @@ async function leerIG(url) {
   if (!t) { r = await pagina(base); t = capDeOg(r.og) || ""; if (!t && r.og && !MURO.test(r.og) && r.og.length > 40) t = r.og; }
   if (!t) { const h = await http(base); if (h.status === 200) t = capDeOg(metaDe(h.body, "og:description")); }
   t = t.replace(/\s+\n/g, "\n").trim();
+  if (g.comments != null && g.comments > 0) t = (t ? t + "\n" : "") + "Comentarios: " + g.comments;
   const imgs = (g.imgs && g.imgs.length > 1) ? g.imgs : await imgsIG(base);
   if (!imgs.length && g.img) imgs.push(g.img);
   if (!imgs.length && !g.video && (!t || (t.length < 25 && MURO.test(t)))) return { error: "Instagram no deja leer este post sin iniciar sesión" };
@@ -321,6 +322,7 @@ async function gbIG(base) {
     const c = r.body.match(/"caption":\{"text":"((?:[^"\\]|\\.)*)"/); if (c) o.cap = dec(c[1]).trim();
     const v = r.body.match(/"video_versions":\[\{[^\]]*?"url":"((?:[^"\\]|\\.)*)"/); if (v) o.video = dec(v[1]);
     const i = r.body.match(/property="og:image" content="([^"]+)"/); if (i) o.img = i[1].replace(/&amp;/g, "&");
+    const cm = r.body.match(/"edge_media_to_comment":\{"count":(\d+)\}/); if (cm) o.comments = parseInt(cm[1], 10);
     o.imgs = []; const k = r.body.indexOf('"carousel_media":['); // carrusel: portada de las primeras diapositivas de ESTE post
     if (k > 0) for (const m of r.body.slice(k, k + 400000).matchAll(/"image_versions2":\{"candidates":\[\{"url":"((?:[^"\\]|\\.)*)"/g)) { const u = dec(m[1]); if (u && !o.imgs.includes(u)) o.imgs.push(u); if (o.imgs.length >= 3) break; }
   } catch (e) { }
@@ -708,6 +710,16 @@ async function pedirLinks(c, forzar = true) {
   aviso(nuevos.length ? `${nuevos.length} link(s) nuevo(s): ` + nuevos.map(l => l.u.replace(/^https?:\/\//, "").slice(0, 40)).join(", ") : "No encontré ninguna web oficial de lo que menciona (se probaron nombres y buscador)");
 }
 
+// ayuda: el detalle real debajo del punto (ignora toasts y overlays)
+function detalleBajo(x, y) {
+  const cands = [...$$("details[data-g]")].map(d => {
+    const r = d.getBoundingClientRect();
+    return { d, r, dentro: x >= r.left && x <= r.right && y >= r.top && y <= r.bottom, area: r.width * r.height };
+  }).filter(o => o.dentro);
+  if (!cands.length) return null;
+  cands.sort((a, b) => a.area - b.area);
+  return cands[0].d;
+}
 // ---- arrastre con el dedo: soltar una ficha dentro de otra sección ----
 function iniciarArrastre(e, c) {
   if (arrastre) return;
@@ -723,14 +735,17 @@ function moverCaja(x, y) {
   a.el.style.left = Math.max(6, Math.min(x - 30, innerWidth - a.el.offsetWidth - 6)) + "px";
   a.el.style.top = Math.max(6, y - 26) + "px";
   $$("details.destino").forEach(d => d.classList.remove("destino"));
-  const bajo = document.elementFromPoint(x, y); if (!bajo) return;
-  const d = bajo.closest("details[data-g]"); if (d) d.classList.add("destino");
+  const bajo = document.elementFromPoint(x, y);
+  let d = (bajo && bajo.closest) ? bajo.closest("details[data-g]") : null;
+  if (!d) d = detalleBajo(x, y);
+  if (d) d.classList.add("destino");
 }
 function soltarArrastre(x, y) {
   const a = arrastre; if (!a) return;
   arrastre = null; a.el.remove(); a.origen.classList.remove("soltando");
-  const bajo = document.elementFromPoint(x, y); if (!bajo) return pintar();
-  const d = bajo.closest("details[data-g]"); if (!d) return pintar();
+  let d = detalleBajo(x, y);
+  if (!d) { const bajo = document.elementFromPoint(x, y); if (bajo) d = bajo.closest("details[data-g]"); }
+  if (!d) return pintar();
   $$("details.destino").forEach(x2 => x2.classList.remove("destino"));
   if (d.dataset.k && d.dataset.k.startsWith("G:")) mover(a.c, d.dataset.k.slice(2), null);
   else mover(a.c, d.dataset.g, d.dataset.c);
