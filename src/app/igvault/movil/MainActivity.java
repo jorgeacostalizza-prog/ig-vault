@@ -299,6 +299,41 @@ public class MainActivity extends Activity {
             }).start();
         }
 
+        /** Fotogramas del video en el movil (MediaMetadataRetriever): 4 JPEG repartidos por el video, como data URLs. */
+        @JavascriptInterface
+        public void frames(final int id, final String videoUrl) {
+            new Thread(() -> {
+                JSONObject out = new JSONObject();
+                File f = null;
+                try {
+                    byte[] v = Voz.bajar(videoUrl);
+                    f = new File(getCacheDir(), "frames.mp4");
+                    java.io.FileOutputStream fo = new java.io.FileOutputStream(f);
+                    fo.write(v);
+                    fo.close();
+                    android.media.MediaMetadataRetriever mr = new android.media.MediaMetadataRetriever();
+                    mr.setDataSource(f.getPath());
+                    long dur = Long.parseLong(mr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION));
+                    org.json.JSONArray arr = new org.json.JSONArray();
+                    for (int i = 0; i < 4; i++) {
+                        Bitmap b = mr.getFrameAtTime(Math.max(200, dur * (2 * i + 1) / 8) * 1000, android.media.MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+                        if (b == null) continue;
+                        int w = b.getWidth(), h = b.getHeight(), m = Math.max(w, h);
+                        if (m > 720) b = Bitmap.createScaledBitmap(b, w * 720 / m, h * 720 / m, true);
+                        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                        b.compress(Bitmap.CompressFormat.JPEG, 70, bo);
+                        arr.put("data:image/jpeg;base64," + Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP));
+                    }
+                    mr.release();
+                    out.put("status", arr.length() > 0 ? 200 : 0).put("frames", arr);
+                } catch (Exception e) {
+                    try { out.put("status", 0).put("frames", new org.json.JSONArray()).put("error", String.valueOf(e)); } catch (Exception x) { }
+                }
+                if (f != null) f.delete();
+                responder(id, out.toString());
+            }).start();
+        }
+
         /** Tarjetas ya investigadas, precargadas en la APK (no estan en el repo). */
         @JavascriptInterface
         public String semilla() {

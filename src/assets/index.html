@@ -114,6 +114,11 @@ dialog h2{margin:0 0 10px;font-size:18px}
   #aviso{bottom:24px}
   #hojaC{max-width:760px;margin:0 auto;width:100%}
 }
+.blq{background:var(--s1);border:1px solid var(--ln);border-radius:14px;padding:10px 14px;margin:8px 0}
+.blq .barra{margin:6px 0}
+.chip.bad{color:var(--bad);border-color:var(--bad)}
+.lk.roto{text-decoration:line-through;opacity:.6;border-color:var(--bad)}
+.sem li{margin:10px 0}.sem small{display:block;color:var(--mut)}
 </style>
 </head>
 <body>
@@ -129,10 +134,12 @@ dialog h2{margin:0 0 10px;font-size:18px}
       <button class="btn pri" id="bOrdenar">Ordenar mis links</button>
     </div>
     <div class="prog" id="prog" style="display:none">
-      <div id="progT">…</div><div class="barra"><i id="progB"></i></div>
+      <div id="progT">…</div>
       <div class="nota" id="progS"></div>
-      <button class="btn sm" id="bParar">Parar</button>
+      <button class="btn sm" id="bParar">⏸ Pausar</button>
     </div>
+    <div id="bloques"></div>
+    <div class="nota">Puedes pegar otro lote mientras trabaja: se añade como bloque nuevo y espera su turno.</div>
     <div class="nota">Sin clave de IA también ordeno por GitHub y hashtags. Con clave (Ajustes) escribo resumen y categoría de cada uno.</div>
   </section>
 
@@ -140,7 +147,10 @@ dialog h2{margin:0 0 10px;font-size:18px}
     <input type="search" id="buscar" placeholder="Buscar en tus fichas…">
     <div class="fila">
       <button class="btn sm pri" id="bClaude">🧠 Copiar para Claude Code</button>
+      <button class="btn sm pri" id="bSemana">📅 Priorizar mi semana</button>
       <button class="btn sm" id="bDup">🧹 Quitar duplicados</button>
+      <button class="btn sm" id="bComprobar">🩺 Comprobar enlaces y repos</button>
+      <button class="btn sm" id="bObs">📓 Exportar a Obsidian</button>
       <button class="btn sm" id="bCopiar">Copiar todo</button>
       <button class="btn sm" id="bComp">Compartir</button>
       <button class="btn sm" id="bLinksMasivos">🔎 Buscar links</button>
@@ -225,7 +235,7 @@ let seq = 0; const pend = {};
 window.__r = (id, s) => { const f = pend[id]; if (f) { delete pend[id]; try { f(JSON.parse(s)); } catch (e) { f({}); } } };
 const nat = (fn, ...a) => new Promise(res => {
   const id = ++seq; pend[id] = res;
-  setTimeout(() => { if (pend[id]) { delete pend[id]; res({ status: 0, body: "", error: "tiempo agotado" }); } }, fn === "voz" ? 110000 : 45000);
+  setTimeout(() => { if (pend[id]) { delete pend[id]; res({ status: 0, body: "", error: "tiempo agotado" }); } }, fn === "voz" || fn === "frames" ? 110000 : 45000);
   N[fn](id, ...a);
 });
 async function http(url, { method = "GET", headers = {}, body = "" } = {}) {
@@ -265,8 +275,10 @@ const tipoDe = u => u.startsWith("foto:") ? "Foto" : RE_IG.test(u) ? "Instagram"
 // ============ GitHub ============
 const ghH = () => ({ Accept: "application/vnd.github+json", ...(db.cfg.github ? { Authorization: "Bearer " + db.cfg.github } : {}) });
 let ghAviso = "";
+let ghEstado = 0;
 async function ghRepo(full) {
   const r = await http("https://api.github.com/repos/" + full, { headers: ghH() });
+  ghEstado = r.status;
   if (r.status === 200) { try { return JSON.parse(r.body); } catch (e) { } }
   if (r.status === 403 || r.status === 429) { // límite de la API: leo la página pública del repo (sin API)
     const h = await http("https://github.com/" + full);
@@ -288,7 +300,7 @@ async function ghReadme(full) {
   const r = await http("https://api.github.com/repos/" + full + "/readme", { headers: { ...ghH(), Accept: "application/vnd.github.raw+json" } });
   return r.status === 200 ? r.body.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 1500) : "";
 }
-const repoInfo = g => ({ full: g.full_name, desc: g.description || "", stars: g.stargazers_count, topics: g.topics || [], url: g.html_url, lang: g.language || "", home: g.homepage || "" });
+const repoInfo = g => ({ pushed: g.pushed_at || "", archived: !!g.archived, full: g.full_name, desc: g.description || "", stars: g.stargazers_count, topics: g.topics || [], url: g.html_url, lang: g.language || "", home: g.homepage || "" });
 
 // ============ IA en la nube ============
 const MOD_NV = ["nvidia/nemotron-3-super-120b-a12b", "z-ai/glm-5.3-flash", "nvidia/nemotron-3.5-lightning-30b-a3b"];
@@ -400,6 +412,15 @@ async function leerVoz(urlVideo) {
   if (r.status === 200 && r.body) return r.body;
   vozError = r.body || r.error || "sin voz"; return "";
 }
+// fotogramas del vídeo (ffmpeg en PC, MediaMetadataRetriever en el móvil): lo que SE VE, no solo lo que se dice
+async function leerFrames(urlVideo) {
+  if (!urlVideo) return [];
+  let r;
+  if (N && N.frames) r = await nat("frames", urlVideo);
+  else { await srvListo; if (!SRV) return []; r = await postSrv("/api/frames", { url: urlVideo, n: 4 }); }
+  return r && r.status === 200 && Array.isArray(r.frames) ? r.frames : [];
+}
+const PROMPT_VIDEO = "Es un fotograma de un vídeo (reel). Transcribe TODO el texto visible (títulos, listas, código, comandos, URLs, nombres de repos y herramientas) y di en una frase qué se muestra (app, web, terminal, diapositiva…). No inventes nada. Si solo hay una persona hablando sin texto, responde únicamente: persona hablando.";
 // hasta 3 imágenes del post (portada/carrusel), sin tocar la parte nativa
 async function imgsIG(base) {
   const out = [];
@@ -424,14 +445,14 @@ async function modelosVisOR() {
   } catch (e) { }
   return orVis;
 }
-async function leerImgs(imgs) {
+async function leerImgs(imgs, prompt = PROMPT_FOTO, max = 3) {
   const provs = [];
   if (db.cfg.nvidia) for (const m of MOD_VIS.slice(0, 2)) provs.push(["https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, m]);
   if (db.cfg.openrouter) for (const m of MOD_VIS_OR) provs.push(["https://openrouter.ai/api/v1/chat/completions", db.cfg.openrouter, m]);
   const partes = [];
-  for (const u of imgs.slice(0, 3)) {
+  for (const u of imgs.slice(0, max)) {
     for (const [url, key, m] of provs) {
-      const x = await http(url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: [{ type: "text", text: PROMPT_FOTO }, { type: "image_url", image_url: { url: u } }] }], max_tokens: 500, temperature: 0.1 }) });
+      const x = await http(url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: u } }] }], max_tokens: 500, temperature: 0.1 }) });
       if (x.status === 200) { try { const t = (JSON.parse(x.body).choices[0].message.content || "").trim(); if (t) { partes.push(t); break; } } catch (e) { } }
     }
   }
@@ -499,11 +520,20 @@ function relevancia(c) {
   let pts = Math.min(5, new Set(interesesLista().filter(w => blob.includes(w))).size);
   const r = c.repos && c.repos[0];
   if (r) { pts += 1; const st = Number(r.stars) || 0; pts += st >= 10000 ? 3 : st >= 1000 ? 2 : st >= 100 ? 1 : 0; }
+  if (r && estadoRepo(r) && estadoRepo(r).cls === "bad") pts -= 3; // repo abandonado: baja
   if ((c.links || []).length >= 2) pts += 1;
   if (c.fuente === "investigado") pts += 1;
   if (c.relIA) pts += (Number(c.relIA) || 3) - 3;
   if (!c.resumen) pts -= 2;
   return { n: pts <= 1 ? 1 : pts <= 3 ? 2 : pts <= 5 ? 3 : pts <= 7 ? 4 : 5, pts };
+}
+const mesesDesde = iso => iso ? (Date.now() - Date.parse(iso)) / 2.63e9 : null;
+function estadoRepo(r) {
+  if (!r) return null; if (r.archived) return { t: "🗄 Repo archivado (abandonado)", cls: "bad" };
+  const m = mesesDesde(r.pushed); if (m == null || isNaN(m)) return null;
+  if (m > 12) return { t: `⚠ Obsoleto: sin cambios hace ${Math.round(m)} meses`, cls: "bad" };
+  if (m > 6) return { t: `⚠ Poco activo (${Math.round(m)} meses sin cambios)`, cls: "warn" };
+  return { t: "🟢 Activo", cls: "ok" };
 }
 // ---- que la IA no se invente cosas: lo que dice tiene que salir del material ----
 const raices = t => new Set(sinAcentos(t).split(/[^a-z0-9]+/).filter(w => w.length >= 5).map(w => w.slice(0, 5)));
@@ -530,20 +560,22 @@ async function analizar(card, textoManual) {
     texto = l.texto || ""; titulo = l.titulo || "";
     if (card.tipo === "Instagram") texto = quitaGancho(texto);
     if (l.imgs && l.imgs.length) card.imgs = l.imgs;
-    const [vz, vi] = await Promise.all([l.video ? leerVoz(l.video) : null, l.imgs && l.imgs.length ? leerImgs(l.imgs) : null]); // a la vez: ahorra segundos
+    const [vz, vi, fr] = await Promise.all([l.video ? leerVoz(l.video) : null, l.imgs && l.imgs.length ? leerImgs(l.imgs) : null, l.video ? leerFrames(l.video).then(f => f.length ? leerImgs(f, PROMPT_VIDEO, 4) : "") : null]); // a la vez: ahorra segundos
     if (l.video) card.voz = vz ? "sí" : "no";
-    card.vio = { voz: !!vz, imgs: !!vi, video: !!l.video };
+    const vf = (fr || "").split("\n").filter(x => x.trim() && !/^persona hablando/i.test(x.trim())).join("\n");
+    card.vio = { voz: !!vz, imgs: !!vi, video: !!l.video, frames: !!vf };
     if (vz) texto += "\n[VOZ DEL VÍDEO, transcrita]\n" + vz.slice(0, 1300);
     if (vi) texto += "\n[TEXTO EN LAS IMÁGENES DEL POST]\n" + vi;
+    if (vf) texto += "\n[LO QUE SE VE EN EL VÍDEO (fotogramas)]\n" + vf.slice(0, 1400);
   }
-  card.texto = texto.slice(0, 2500); card.tags = hashtags(texto);
+  card.texto = texto.slice(0, 3500); card.tags = hashtags(texto);
   // repos: links de GitHub + candidatos «owner/name» del texto, confirmados con la API
   const cands = new Set();
   for (const m of (card.tipo === "GitHub" ? card.url + " " + texto : texto).matchAll(/github\.com\/([\w.-]+)\/([\w.-]+)/gi)) cands.add(m[1] + "/" + m[2].replace(/\.git$/, ""));
   if (card.tipo === "Foto" || /github|repo|open.?source/i.test(texto)) for (const m of texto.matchAll(/(?<![\w/.@#-])([A-Za-z][\w-]{1,38}\/[A-Za-z][\w.-]{1,60})(?![\w/])/g)) if (!/^(https?|www)/i.test(m[1]) && !/\.(com|org|io|net|app)\b/i.test(m[1])) cands.add(m[1]);
   const repos = [];
   for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g) repos.push(repoInfo(g)); }
-  let ctx = texto.slice(0, 1800);
+  let ctx = texto.slice(0, 2600);
   for (const r of repos.slice(0, 2)) { const rd = await ghReadme(r.full); r.readme = rd; ctx += `\n[REPO VERIFICADO ${r.full} — ${r.desc} — README: ${rd.slice(0, 900)}]`; }
   let ai = null;
   if (hayIA() && ctx.trim()) {
@@ -562,7 +594,7 @@ ${ctx}`);
   }
   if (ai && ai.resumen && !fundado(ai.resumen + " " + (ai.titulo || ""), ctx + " " + card.url)) { ai.resumen = ""; ai.titulo = ""; card.motivo = "La IA dijo algo que no sale del post; lo descarté"; } // anti-invención
   const r0 = repos[0];
-  card.repos = repos.map(r => ({ full: r.full, url: r.url, stars: r.stars, desc: r.desc, topics: r.topics }));
+  card.repos = repos.map(r => ({ full: r.full, url: r.url, stars: r.stars, desc: r.desc, topics: r.topics, pushed: r.pushed, archived: r.archived }));
   card.titulo = (ai && ai.titulo) || titulo || (r0 && r0.full.split("/")[1]) || (card.tipo === "Instagram" && !texto.trim() ? "Post de Instagram (sin texto legible)" : "") || (texto.split("\n").find(l => l.trim() && !/^(Cuenta:|Imagen:?)/i.test(l.trim())) || "").slice(0, 70) || card.url;
   card.relIA = ai && Number(ai.relevancia) ? Math.max(1, Math.min(5, Number(ai.relevancia))) : 0;
   card.resumen = (ai && ai.resumen) || (r0 && r0.desc) || texto.slice(0, 220) || (card.tipo === "Instagram" ? "El texto de este post solo traía un gancho (comenta...); no se pudo leer su contenido. Abre el enlace." : "");
@@ -638,10 +670,10 @@ async function investigar(card, repos, ai, texto) {
   const hb = new Set((card.links || []).map(l => l.u.replace(/\/$/, "").toLowerCase()));
   if (hb.size < 2 || (hb.size === 1 && r0)) await buscarLinksOficiales(card);
   if (!hayIA()) return;
-  const material = `${texto.slice(0, 2600)}\n${r0 ? md : ""}\n${web ? web.titulo + " " + web.desc + " " + web.texto : ""}`;
+  const material = `${texto.slice(0, 3200)}\n${r0 ? md : ""}\n${web ? web.titulo + " " + web.desc + " " + web.texto : ""}`;
   const ex = await chatJson(`Eres un divulgador técnico. Un post de Instagram habla de un proyecto, herramienta, skill o idea. Explícalo para que alguien lo entienda SIN ver el vídeo. Usa SOLO el material de abajo; si algo no está, no lo menciones. Si parte del material no tiene relación con el post (otro tema), IGNÓRALA. Responde SOLO JSON:
 {"explicacion":"4 a 6 frases en español claro: qué es, qué problema resuelve y para quién","puntos":["TODOS los puntos, pasos, ideas o herramientas que el post enumera (hasta 8); cada uno: nombre + una frase"],"skills":["si el post crea o propone skills/plugins/comandos para Claude: nombre — qué hace (hasta 5); si no hay, []"],"como":["pasos para instalarlo o usarlo (hasta 6), con el comando EXACTO solo si aparece en el material; si no aparecen, []"],"limites":"coste, requisitos o límites si se mencionan; si no, \"\""}
-POST (texto, voz del vídeo y texto de las imágenes): ${texto.slice(0, 2600)}
+POST (texto, voz del vídeo, texto de las imágenes y lo que se ve en el vídeo): ${texto.slice(0, 3200)}
 ${r0 ? "README de " + r0.full + ": " + md.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 3500) : ""}
 ${web ? "WEB OFICIAL (" + web.url + "): " + web.titulo + " — " + web.desc + " " + web.texto.slice(0, 1200) : ""}`);
   const lista = (v, n) => Array.isArray(v) ? v.map(x => String(x || "").trim()).filter(x => x.length > 3).slice(0, n) : [];
@@ -832,12 +864,12 @@ const claveUrl = u => { // misma publicación aunque cambie la forma del link (u
 const clavesDe = c => { const k = new Set([claveUrl(c.url), ...(c.extra || []).map(claveUrl)]); const r = c.repos && c.repos[0]; if (r) k.add("gh:" + r.full.toLowerCase()); return k; };
 const yaGuardada = u => { const k = claveUrl(u); return db.cards.find(c => clavesDe(c).has(k)); };
 function grupoActual() { const g = (($("#grupo") || {}).value || "").trim() || "AI"; if (db.grupo !== g) { db.grupo = g; guardar(); } return g; }
-function encolar(links) {
+function encolar(links, bloque) {
   let nuevos = 0, repes = 0;
   for (const u of links) {
     const ya = yaGuardada(u);
     if (ya) { repes++; continue; }
-    db.cards.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+    db.cards.push({ bloque, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
     nuevos++;
   }
   guardar(); return { nuevos, repes };
@@ -866,22 +898,29 @@ function gruposDup(conTitulo) {
   const g = {}; cards.forEach((c, i) => (g[f(i)] ||= []).push(c)); return Object.values(g).filter(a => a.length > 1);
 }
 const unirRepetidos = () => gruposDup().forEach(fusionar);
+let pausado = false, actual = null, sesionDesde = (db.bn || 0) + 1;
+function etqOrdenar() { $("#bOrdenar").textContent = corriendo ? `➕ Añadir bloque ${(db.bn || 0) + 1} (en cola)` : "Ordenar mis links"; }
+function pintaBloques() {
+  const bs = {}; db.cards.forEach(c => { if (c.bloque && c.bloque >= sesionDesde) { const b = bs[c.bloque] ||= { n: c.bloque, t: 0, h: 0 }; b.t++; if (c.estado !== "pendiente") b.h++; } });
+  $("#bloques").innerHTML = Object.values(bs).sort((x, y) => x.n - y.n).map(b => { const fin = b.h >= b.t, act = !fin && actual && actual.bloque === b.n; return `<div class="blq"><b>Bloque ${b.n}</b> · ${b.h}/${b.t} ${fin ? "✅ terminado" : act ? "⏳ trabajando" : "🕒 en cola"}<div class="barra"><i style="width:${Math.round(b.h / b.t * 100)}%"></i></div>${fin ? "" : `<button class="btn sm" data-bq="${b.n}">Cancelar lo que falta</button>`}</div>`; }).join("");
+}
 async function correr() {
-  if (corriendo) return; corriendo = true; parar = false; $("#prog").style.display = "block"; $("#bParar").disabled = false; muertos = {};
-  const todo = db.cards.filter(c => c.estado === "pendiente").length; let hechos = 0;
-  for (const c of db.cards.filter(c => c.estado === "pendiente")) {
-    if (parar) break;
-    $("#progT").textContent = `Procesando ${hechos + 1} de ${todo}`;
+  if (corriendo) return; corriendo = true; pausado = false; $("#prog").style.display = "block"; $("#bParar").textContent = "⏸ Pausar"; muertos = {}; etqOrdenar();
+  let hechos = 0;
+  while (true) {
+    const c = db.cards.find(x => x.estado === "pendiente"); if (!c) break;
+    while (pausado) await dormir(400);
+    actual = c; const falta = db.cards.filter(x => x.estado === "pendiente").length;
+    $("#progT").textContent = `Trabajando en el bloque ${c.bloque || "—"} · faltan ${falta}`;
     $("#progS").textContent = c.url.replace(/^https?:\/\/(www\.)?/, "").slice(0, 60);
-    $("#progB").style.width = (hechos / todo * 100) + "%";
+    pintaBloques();
     try { await analizar(c); } catch (e) { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = "Fallo inesperado: " + String(e).slice(0, 80); }
-    unirRepetidos(); guardar(); pintar(); hechos++;
+    actual = null; unirRepetidos(); guardar(); pintar(); pintaBloques(); hechos++;
     if (c.tipo === "Instagram") await dormir(700);
   }
-  corriendo = false; $("#prog").style.display = "none";
+  corriendo = false; $("#prog").style.display = "none"; etqOrdenar(); pintaBloques();
   const ok = db.cards.filter(c => c.estado === "ok").length, rev = db.cards.filter(c => c.estado === "revisar").length;
-  aviso(parar ? `Parado. ${hechos} hechos.` : `Listo: ${ok} ordenadas${rev ? `, ${rev} para revisar` : ""}.`);
-  if (!parar) cambiaTab("fichas");
+  aviso(`Todo listo: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}. Míralas en «Fichas».`);
 }
 
 // ============ pantalla ============
@@ -912,7 +951,7 @@ function pintar() {
 }
 const lista = (t, a, ord) => a && a.length ? `<div class="bl"><b>${t}</b><${ord ? "ol" : "ul"}>${a.map(x => `<li>${esc(x)}</li>`).join("")}</${ord ? "ol" : "ul"}></div>` : "";
 function enlacesDe(c) { // SIEMPRE se ve el link del post original y el del repo/web a donde lleva
-  const out = [], vistos = new Set(), add = (cls, t, u) => { if (!u || !/^https?:/i.test(u)) return; const k = claveUrl(u); if (vistos.has(k)) return; vistos.add(k); out.push(`<a class="lk ${cls}" data-a="ext" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`); };
+  const out = [], vistos = new Set(), add = (cls, t, u) => { if (!u || !/^https?:/i.test(u)) return; const k = claveUrl(u); if (vistos.has(k)) return; vistos.add(k); out.push(`<a class="lk ${cls}${(c.rotos || []).includes(u) ? " roto" : ""}" data-a="ext" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`); };
   if (c.tipo !== "Foto") add("ig", c.tipo === "Instagram" ? "📷 Instagram original" : "🔗 Link original (" + c.tipo + ")", c.url);
   for (const r of (c.repos || []).slice(0, 2)) add("gh", "GitHub " + r.full + (r.stars && r.stars !== "?" ? " ★" + miles(r.stars) : ""), r.url);
   for (const l of (c.links || [])) add("", l.t, l.u);
@@ -923,12 +962,12 @@ function fichaHtml(c) {
   const rl = relevancia(c), vio = c.vio || {};
   const est = c.estado === "ok" ? "" : c.estado === "pendiente" ? '<span class="chip">en cola</span>' : '<span class="chip warn">revisar</span>';
   const gal = c.imgs && c.imgs.length ? `<div class="gal">${c.imgs.slice(0, 8).map(u => `<a data-a="ext" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.closest('a').remove()"></a>`).join("")}</div>` : "";
-  const aprendido = [vio.voz ? "🎙 voz del vídeo" : c.voz === "no" ? "🔇 sin voz" : "", vio.imgs ? "🖼 texto de las imágenes" : "", c.repos && c.repos.length ? "📦 README" : ""].filter(Boolean).map(t => `<span class="chip">${t}</span>`).join("");
+  const aprendido = [vio.voz ? "🎙 voz del vídeo" : c.voz === "no" ? "🔇 sin voz" : "", vio.imgs ? "🖼 texto de las imágenes" : "", vio.frames ? "🎞 fotogramas del vídeo" : "", c.repos && c.repos.length ? "📦 README" : ""].filter(Boolean).map(t => `<span class="chip">${t}</span>`).join("");
   const hayMas = (c.puntos || []).length || (c.como || []).length || (c.skills || []).length || c.limites || c.notas;
   return `<div class="card" data-id="${c.id}"><div class="cab"><h3 data-a="toggle">${esc(c.titulo)}</h3>${rl.n ? `<span class="rel r${rl.n}">${c.fav ? "⭐ " : ""}${ETQ_REL[rl.n]}</span>` : ""}</div>${gal}${c.resumen ? `<p class="res">${esc(c.resumen)}</p>` : ""}
 <div class="mas">${lista("Puntos clave", c.puntos)}${lista("Skills que propone", c.skills)}${lista("Cómo usarlo / instalarlo", c.como, true)}${c.limites ? `<div class="bl"><b>Requisitos y límites</b>${esc(c.limites)}</div>` : ""}${c.notas ? `<div class="notas">${esc(c.notas)}</div>` : ""}</div>
 <div class="enl">${enlacesDe(c)}${c.estado === "ok" ? '<button class="lk cc" data-a="claude">🧠 Para Claude Code</button>' : ""}</div>
-<div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${aprendido}${est}</div>
+<div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${(c.repos || []).slice(0, 2).map((r, _, A) => { const e = estadoRepo(r); return e ? `<span class="chip ${e.cls}">${A.length > 1 ? esc(r.full.split("/")[1]) + ": " : ""}${e.t}</span>` : ""; }).join("")}${(c.rotos || []).length ? `<span class="chip bad">❌ ${c.rotos.length} enlace(s) roto(s)</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${aprendido}${est}</div>
 ${c.motivo ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo)}</div>` : ""}
 ${c.buscado && c.links && c.links.length ? `<div class="nota">🔎 Buscado: ${esc(c.buscado)}</div>` : ""}
 <div class="fila" style="margin:8px 0 0"><button class="btn sm" data-a="toggle">${hayMas ? "Ver todo ▾" : "Más ▾"}</button><button class="btn sm" data-a="editar">✏️ Editar</button><button class="btn sm" data-a="mover">↔️ Mover</button></div>
@@ -944,7 +983,7 @@ function todoTxt() {
 }
 function pregunta(titulo, valor, largo) {
   return new Promise(res => {
-    $("#dT").textContent = titulo; $("#dC").innerHTML = largo ? '<textarea id="dIn" style="min-height:30vh"></textarea>' : '<input type="text" id="dIn">'; $("#dIn").value = valor || "";
+    $("#dSi").textContent = "Aceptar"; $("#dT").textContent = titulo; $("#dC").innerHTML = largo ? '<textarea id="dIn" style="min-height:30vh"></textarea>' : '<input type="text" id="dIn">'; $("#dIn").value = valor || "";
     const d = $("#dlg"); const fin = v => { d.close(); res(v); };
     $("#dSi").onclick = () => fin($("#dIn").value); $("#dNo").onclick = () => fin(null); d.oncancel = () => res(null); d.showModal();
   });
@@ -996,8 +1035,8 @@ $("#mvSi").onclick = () => {
   $("#dmv").close(); mover(mvCard, g, cat);
 };
 // ============ duplicados y reclasificar ============
-function confirmar(titulo, html) {
-  return new Promise(res => { $("#dT").textContent = titulo; $("#dC").innerHTML = html; const d = $("#dlg"); $("#dSi").onclick = () => { d.close(); res(true); }; $("#dNo").onclick = () => { d.close(); res(false); }; d.oncancel = () => res(false); d.showModal(); });
+function confirmar(titulo, html, si = "Aceptar") {
+  return new Promise(res => { $("#dT").textContent = titulo; $("#dC").innerHTML = html; $("#dSi").textContent = si; const d = $("#dlg"); $("#dSi").onclick = () => { d.close(); res(true); }; $("#dNo").onclick = () => { d.close(); res(false); }; d.oncancel = () => res(false); d.showModal(); });
 }
 async function quitarDuplicados() {
   const gs = gruposDup(true); if (!gs.length) return aviso("No hay fichas duplicadas 👍");
@@ -1005,6 +1044,66 @@ async function quitarDuplicados() {
   const ej = gs.slice(0, 5).map(a => `<li>${esc(a[0].titulo.slice(0, 60))} <span class="sema">×${a.length}</span></li>`).join("");
   if (!await confirmar("Quitar duplicados", `<p>Encontré <b>${n}</b> ficha${n > 1 ? "s" : ""} repetida${n > 1 ? "s" : ""} en ${gs.length} grupo${gs.length > 1 ? "s" : ""}. Dejo la más completa y le paso los links, imágenes y notas de las otras.</p><ul>${ej}</ul>`)) return;
   gs.forEach(fusionar); guardar(); pintar(); aviso(`Listo: ${n} duplicada${n > 1 ? "s" : ""} fusionada${n > 1 ? "s" : ""}`);
+}
+async function vivo(u) {
+  let r = await http(u, { method: "HEAD" });
+  if (r.status === 0 || r.status >= 400) r = await http(u);
+  return !(r.status === 404 || r.status === 410 || r.status === 0);
+}
+let comprobando = false;
+async function comprobarTodo() {
+  if (comprobando) return; comprobando = true;
+  const cards = db.cards.filter(c => c.estado === "ok" && ((c.repos || []).length || (c.links || []).length));
+  if (!cards.length) { comprobando = false; return aviso("No hay fichas con enlaces que comprobar"); }
+  let rotos = 0, obs = 0, i = 0;
+  for (const c of cards) {
+    aviso(`Comprobando ${++i} de ${cards.length}…`);
+    const malos = [];
+    for (const r of (c.repos || []).slice(0, 2)) {
+      const g = await ghRepo(r.full);
+      if (g) { r.pushed = g.pushed_at || r.pushed; r.archived = !!g.archived; if (g.stargazers_count != null) r.stars = g.stargazers_count; } else if (ghEstado === 404) malos.push(r.url);
+      const e = estadoRepo(r); if (e && e.cls === "bad") obs++;
+    }
+    for (const l of (c.links || []).slice(0, 6)) { if (/github\.com\/[\w.-]+\/[\w.-]+\/?$/i.test(l.u) && malos.length) continue; if (!await vivo(l.u)) malos.push(l.u); }
+    c.rotos = [...new Set(malos)]; rotos += c.rotos.length; c.chequeado = Date.now(); guardar();
+  }
+  comprobando = false; pintar();
+  aviso(`Revisadas ${cards.length} fichas: ${rotos} enlace(s) roto(s) y ${obs} repo(s) obsoleto(s) o archivado(s)`);
+}
+async function priorizarSemana() {
+  const cand = db.cards.filter(c => c.estado === "ok" && !(c.repos && c.repos[0] && (estadoRepo(c.repos[0]) || {}).cls === "bad") && !(c.rotos || []).length).sort(porRel).slice(0, 20);
+  if (!cand.length) return aviso("Aún no hay fichas buenas para priorizar");
+  aviso("Pensando tu semana…");
+  const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+  let plan = null;
+  if (hayIA()) {
+    const j = await chatJson(`Eres mi asistente de productividad. Tengo ideas guardadas de Instagram. Soy desarrollador con TDAH: pocas cosas, concretas. Elige las 5 que más me conviene mirar ESTA semana (útiles para Claude Code, agentes de IA, herramientas gratis/open source, automatización) y ordénalas de Lunes a Viernes (lo más fácil y útil primero). Usa SOLO estos datos, no inventes. Responde SOLO JSON: {"plan":[{"id":"...","motivo":"1 frase de por qué","paso":"primer paso físico concreto, 1 frase"}]}
+FICHAS: ${JSON.stringify(cand.map(c => ({ id: c.id, titulo: c.titulo, que: (c.resumen || "").slice(0, 200), categoria: c.categoria, relevancia: relevancia(c).n, repo: c.repos && c.repos[0] ? c.repos[0].full + " " + (estadoRepo(c.repos[0]) || {}).t : "" })))}`);
+    if (j && Array.isArray(j.plan)) plan = j.plan.map(x => ({ c: cand.find(c => c.id === x.id), motivo: x.motivo, paso: x.paso })).filter(x => x.c).slice(0, 5);
+  }
+  if (!plan || !plan.length) plan = cand.slice(0, 5).map(c => ({ c, motivo: (c.resumen || "").split(/(?<=[.!?])\s/)[0].slice(0, 140), paso: "Abre el enlace y decide en 5 minutos si lo instalas." }));
+  const html = `<ol class="sem">${plan.map((x, i) => `<li><b>${dias[i]}</b> · ${esc(x.c.titulo)}<small>${esc(x.motivo || "")}</small><small>👉 ${esc(x.paso || "")}</small></li>`).join("")}</ol><p class="nota">«Preparar» deja el texto listo para pegar en Claude Code.</p>`;
+  if (await confirmar("Tu semana: 5 cosas", html, "Preparar para Claude Code")) abrirCC(plan.map(x => x.c), "priorizar");
+}
+const slug = t => String(t || "sin título").replace(/[\\/:*?"<>|#^\[\]]/g, " ").replace(/\s+/g, " ").trim().slice(0, 70) || "sin título";
+function notaMd(c) {
+  const r = c.repos && c.repos[0], rl = relevancia(c), er = estadoRepo(r);
+  const fm = ["---", `titulo: "${String(c.titulo).replace(/"/g, "'")}"`, `tipo: ${c.tipo}`, `categoria: ${c.categoria}`, `grupo: ${c.grupo || "AI"}`, `relevancia: ${rl.n}`, c.tipo !== "Foto" ? `origen: ${c.url}` : "", r ? `repo: ${r.url}` : "", r && r.stars ? `estrellas: ${r.stars}` : "", er ? `estado_repo: "${er.t}"` : "", `tags: [${["ig-extractor", ...(c.tags || []).map(t => String(t).replace(/^#/, ""))].join(", ")}]`, `exportado: ${new Date().toISOString().slice(0, 10)}`, "---"].filter(Boolean).join("\n");
+  const sec = (t, a, num) => a && a.length ? `\n## ${t}\n${a.map((x, i) => num ? `${i + 1}. ${x}` : `- ${x}`).join("\n")}\n` : "";
+  const enl = [c.tipo !== "Foto" ? `- Post original: ${c.url}` : "", r ? `- GitHub: ${r.url}` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => `- ${l.t}: ${l.u}`)].filter(Boolean);
+  return `${fm}\n\n# ${c.titulo}\n\n${c.resumen || ""}\n${sec("Puntos clave", c.puntos)}${sec("Skills que propone", c.skills)}${sec("Cómo usarlo", c.como, true)}${c.limites ? `\n## Requisitos y límites\n${c.limites}\n` : ""}${sec("Enlaces", enl)}${c.notas ? `\n## Mis notas\n${c.notas}\n` : ""}`;
+}
+async function exportarObsidian() {
+  const cards = db.cards.filter(c => c.estado === "ok"); if (!cards.length) return aviso("No hay fichas listas para exportar");
+  const usados = new Set(), arch = [], idx = {};
+  for (const c of cards) {
+    let base = `${slug(c.grupo || "AI")}/${slug(c.categoria)}/${slug(c.titulo)}`, k = base, i = 2; while (usados.has(k.toLowerCase())) k = base + " " + i++; usados.add(k.toLowerCase());
+    arch.push({ ruta: k + ".md", texto: notaMd(c) }); (idx[c.categoria] ||= []).push(`- [[${k}|${c.titulo.replace(/[\[\]|]/g, " ")}]] · ${ETQ_REL[relevancia(c).n] || ""}`);
+  }
+  arch.push({ ruta: "IG Extractor.md", texto: `# IG Extractor — índice\n\n${Object.keys(idx).sort().map(k => `## ${k}\n${idx[k].join("\n")}`).join("\n\n")}\n` });
+  await srvListo;
+  if (SRV) { const r = await postSrv("/api/obsidian", { archivos: arch }); return aviso(r && r.ok ? `Exportadas ${r.n} notas a: ${r.dir}` : "No pude exportar a Obsidian"); }
+  const t = arch.map(a => `<!-- ${a.ruta} -->\n${a.texto}`).join("\n\n"); N ? N.compartir(t, "IG Extractor (Obsidian)") : copiar(t); aviso("Copié todas las notas en un solo texto (en el programa de PC se guardan como archivos)");
 }
 function reclasificar() { // algoritmo nuevo sobre lo ya guardado (sin red); respeta lo que moviste a mano
   let n = 0;
@@ -1026,16 +1125,19 @@ $("#txt").addEventListener("input", detectar);
 $("#bPegar").onclick = () => { const t = N ? N.pegado() : ""; if (t) { $("#txt").value += ($("#txt").value ? "\n" : "") + t; detectar(); } else aviso("El portapapeles está vacío"); };
 $("#bOrdenar").onclick = () => {
   const { links } = sacarLinks($("#txt").value);
-  if (!links.length && !db.cards.some(c => c.estado === "pendiente")) return aviso("No veo ningún link. Pega algunos primero.");
-  const r = encolar(links); $("#txt").value = ""; detectar();
-  if (!r.nuevos && !db.cards.some(c => c.estado === "pendiente")) { aviso("Esos links ya estaban todos guardados."); return cambiaTab("fichas"); }
+  if (!links.length) { if (db.cards.some(c => c.estado === "pendiente") && !corriendo) { correr(); return; } return aviso("No veo ningún link. Pega algunos primero."); }
+  const n = (db.bn || 0) + 1, r = encolar(links, n);
+  if (!r.nuevos) { $("#txt").value = ""; detectar(); return aviso("Esos links ya estaban todos guardados."); }
+  db.bn = n; guardar(); $("#txt").value = ""; detectar(); pintaBloques();
+  aviso(`Bloque ${n} en marcha: ${r.nuevos} links${r.repes ? `, ${r.repes} repetidos quitados` : ""}. Puedes pegar otro bloque ya.`);
   correr();
 };
-$("#bParar").onclick = () => { parar = true; $("#bParar").disabled = true; };
+$("#bParar").onclick = () => { pausado = !pausado; $("#bParar").textContent = pausado ? "▶ Reanudar" : "⏸ Pausar"; };
+$("#bloques").addEventListener("click", e => { const n = Number(e.target.dataset.bq); if (!n) return; db.cards = db.cards.filter(c => !(c.bloque === n && c.estado === "pendiente" && c !== actual)); guardar(); pintaBloques(); pintar(); aviso(`Bloque ${n}: cancelé lo que faltaba`); });
 $("#buscar").addEventListener("input", pintar);
 $("#bCopiar").onclick = () => db.cards.length ? copiar(todoTxt()) : aviso("No hay fichas");
 $("#bComp").onclick = () => db.cards.length ? (N ? N.compartir(todoTxt(), "IG Extractor") : copiar(todoTxt())) : aviso("No hay fichas");
-$("#bReint").onclick = () => { const f = db.cards.filter(c => c.estado === "revisar"); if (!f.length) return aviso("No hay fallidas"); f.forEach(c => c.estado = "pendiente"); guardar(); cambiaTab("pegar"); correr(); };
+$("#bReint").onclick = () => { const f = db.cards.filter(c => c.estado === "revisar"); if (!f.length) return aviso("No hay fallidas"); const n = (db.bn || 0) + 1; db.bn = n; f.forEach(c => { c.estado = "pendiente"; c.bloque = n; }); guardar(); cambiaTab("pegar"); pintaBloques(); correr(); };
 $("#bLinksMasivos").onclick = async () => {
   const f = db.cards.filter(c => c.estado === "ok" && (!c.links || !c.links.length || c.links.length < 2));
   if (!f.length) return aviso("Todas las fichas ya tienen links investigationados");
@@ -1061,6 +1163,9 @@ $("#lista").addEventListener("click", async e => {
 });
 $("#filtros").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { filtro = b.dataset.f; pintar(); } });
 $("#bDup").onclick = quitarDuplicados;
+$("#bSemana").onclick = priorizarSemana;
+$("#bComprobar").onclick = comprobarTodo;
+$("#bObs").onclick = exportarObsidian;
 $("#bGuardar").onclick = async () => {
   db.cfg = { nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim(), groq: $("#kGq").value.trim(), intereses: $("#kInt").value.trim() }; guardar(); muertos = {}; pintar();
   $("#kEstado").textContent = "Probando…";
@@ -1098,9 +1203,10 @@ window.__atras = () => {
 window.__chat = (t, fs) => {
   cambiaTab("pegar");
   $("#txt").value = (fs.length ? `📎 ${fs.length} fotos recibidas\n\n` : "") + t.slice(0, 30000); try { detectar(); } catch (e) { } // se ve lo recibido: da calma
-  const r = encolar(sacarLinks(t).links), st = Date.now().toString(36);
-  for (const n of fs) db.cards.push({ id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
-  guardar();
+  const bn = (db.bn || 0) + 1, r = encolar(sacarLinks(t).links, bn), st = Date.now().toString(36);
+  for (const n of fs) db.cards.push({ bloque: bn, id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+  if (r.nuevos || fs.length) db.bn = bn;
+  guardar(); pintaBloques();
   if (!r.nuevos && !fs.length) return aviso(r.repes ? "Esos links ya estaban guardados." : "No encontré links ni fotos.");
   aviso(`Recibido: ${r.nuevos} links nuevos${r.repes ? `, ${r.repes} repetidos` : ""}, ${fs.length} fotos. Ordenando…`);
   correr();
@@ -1132,7 +1238,7 @@ async function cargarSemilla() {
 }
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
 migrarCats(); unirRepetidos(); pintar(); detectar(); cargarSemilla();
-if (db.cards.some(c => c.estado === "pendiente")) { aviso("Quedaban links a medias: continúo."); correr(); }
+if (db.cards.some(c => c.estado === "pendiente")) { const n = (db.bn || 0) + 1; db.bn = n; sesionDesde = n; db.cards.forEach(c => { if (c.estado === "pendiente") c.bloque = n; }); guardar(); pintaBloques(); aviso("Quedaban links a medias: continúo."); correr(); }
 </script>
 </body>
 </html>

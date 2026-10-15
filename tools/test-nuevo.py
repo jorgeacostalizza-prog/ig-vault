@@ -117,7 +117,7 @@ def main(movil):
           {id:'d',url:'https://example.com/herramienta-uno',tipo:'Web',estado:'ok',grupo:'AI',categoria:'Webs',titulo:'Una herramienta distinta de verdad',resumen:'r',links:[],repos:[],tags:[]},
           {id:'e',url:'https://example.org/otra-url-distinta',tipo:'Web',estado:'ok',grupo:'AI',categoria:'Webs',titulo:'Una herramienta distinta de verdad',resumen:'r2',links:[],repos:[],tags:[]}
         ]; guardar(); pintar();}""")
-        pg.click("#bDup"); pg.wait_for_timeout(250)
+        pg.evaluate("cambiaTab('fichas')"); pg.click("#bDup"); pg.wait_for_timeout(250)
         ok("el aviso de duplicados aparece", pg.is_visible("#dlg"))
         pg.click("#dSi"); pg.wait_for_timeout(250)
         pg.evaluate("cambiaTab('fichas')"); n = pg.evaluate("db.cards.length"); ex = pg.evaluate("db.cards[0].links.length")
