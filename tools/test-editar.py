@@ -86,27 +86,7 @@ def main(movil):
         pg.evaluate("mover(db.cards[1], 'AI', 'Para revisar')")
         res.append(ok("mover() cambia grupo y categoria", pg.evaluate("() => db.cards[1].categoria") == "Para revisar"))
 
-        # 5) arrastre con el dedo: tarjeta 'b' -> seccion Musica
-        pg.evaluate("""() => { document.querySelectorAll('#lista details').forEach(d => d.open = true); }""")
-        pg.wait_for_timeout(200)
-        okarr = pg.evaluate("""() => {
-          const card = document.querySelector('.card[data-id="b"]');
-          const dest = document.querySelector('details[data-k="G:Musica"]');
-          if (!card || !dest) return 'no encontrado';
-          const r = card.querySelector('.agarre').getBoundingClientRect();
-          const d = dest.getBoundingClientRect();
-          const ev = (t, el, x, y) => el.dispatchEvent(new PointerEvent(t, {bubbles:true, cancelable:true, clientX:x, clientY:y, pointerId:1}));
-          const h = card.querySelector('.agarre');
-          ev('pointerdown', h, r.x+5, r.y+5);
-          ev('pointermove', window, r.x+40, r.y+20);
-          ev('pointermove', window, d.x+d.width/2, d.y+8);
-          const marca = !!document.querySelector('details.destino');
-          ev('pointerup', window, d.x+d.width/2, d.y+8);
-          return {marca, grupo: db.cards[1].grupo, cat: db.cards[1].categoria, arrastre: !!window.arrastre};
-        }""")
-        res.append(ok("arrastre: se marca el destino mientras se arrastra", okarr.get("marca")))
-        res.append(ok("arrastre: la ficha cae en el grupo destino (" + okarr.get("grupo") + ")", okarr.get("grupo") == "Musica"))
-        res.append(ok("arrastre: se limpia el estado", not okarr.get("arrastre")))
+        # 5) (arrastre eliminado a propósito: ahora es el botón Mover, probado en el paso 3/4)
 
         # 6) buscador de links reales (con verificacion) sobre una ficha sin links
         pg.evaluate("db.cards[0].estado='ok'")
