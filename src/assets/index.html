@@ -541,7 +541,24 @@ function fundado(salida, fuente) {
   const w = [...raices(salida)]; if (w.length < 5) return true;
   const f = raices(fuente); return w.filter(x => f.has(x)).length / w.length >= 0.22;
 }
-const hashtags = t => [...new Set((t.match(/#[\p{L}\d_]+/gu) || []).map(x => x.toLowerCase()))].slice(0, 12);
+const hashtags = t => (t.match(/#[\p{L}\d_]+/gu) || []);
+// tags consistentes: minúsculas, sin acentos/plural simple, sinónimos unificados, sin genéricas, máx 5
+const TAG_SIN = { ai: "ia", "inteligencia-artificial": "ia", "artificial-intelligence": "ia", claudecode: "claude-code", opensource: "open-source", "codigo-abierto": "open-source", gratis: "free", ghub: "github" };
+const TAG_GEN = new Set(["fyp", "viral", "reels", "reel", "parati", "foryou", "foryoupage", "instagram", "explore", "trending", "tiktok", "insta", "instagood"]);
+function normalizarTags(tags, max = 5) {
+  const out = [];
+  for (const t of tags || []) {
+    let s = sinAcentos(String(t).toLowerCase()).replace(/^#/, "").trim().replace(/[\s_]+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/^-+|-+$/g, "");
+    s = TAG_SIN[s] || s; s = TAG_SIN[s.replace(/-/g, "")] || s;
+    if (s.length > 5 && /[lrn]es$/.test(s)) s = s.slice(0, -2); else if (s.length > 4 && /[^s]s$/.test(s) && !/(is|us|os)$/.test(s)) s = s.slice(0, -1);
+    s = TAG_SIN[s] || s;
+    if (s.length < 2 || TAG_GEN.has(s) || /^\d+$/.test(s)) continue;
+    if (!out.includes("#" + s)) out.push("#" + s);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+const tagsVocab = () => { const n = {}; for (const c of db.cards) for (const t of c.tags || []) n[t] = (n[t] || 0) + 1; return Object.entries(n).sort((a, b) => b[1] - a[1]).slice(0, 40).map(x => x[0]).join(" "); };
 
 // quita frases-gancho (comenta X y te mando, sigueme, link en bio) para no resumirlas como contenido
 const GANCHO = /(comenta|comment\b|sígueme|síguenos|follow|link en (la )?bio|enlace en (la )?bio|te (lo )?mando|te env[ií]o|te paso|escr[ií]beme|dm\b|mensaje directo|suscr[ií]be|like y|guarda este)/i;
@@ -568,7 +585,7 @@ async function analizar(card, textoManual) {
     if (vi) texto += "\n[TEXTO EN LAS IMÁGENES DEL POST]\n" + vi;
     if (vf) texto += "\n[LO QUE SE VE EN EL VÍDEO (fotogramas)]\n" + vf.slice(0, 1400);
   }
-  card.texto = texto.slice(0, 3500); card.tags = hashtags(texto);
+  card.texto = texto.slice(0, 3500); card.tags = normalizarTags(hashtags(texto));
   // repos: links de GitHub + candidatos «owner/name» del texto, confirmados con la API
   const cands = new Set();
   for (const m of (card.tipo === "GitHub" ? card.url + " " + texto : texto).matchAll(/github\.com\/([\w.-]+)\/([\w.-]+)/gi)) cands.add(m[1] + "/" + m[2].replace(/\.git$/, ""));
@@ -580,7 +597,7 @@ async function analizar(card, textoManual) {
   let ai = null;
   if (hayIA() && ctx.trim()) {
     ai = await chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
-{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español claro: QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","relevancia":3,"proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 palabras clave en minúscula, sin #"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null"}
+{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español claro: QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","relevancia":3,"proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null"}
 Reglas: (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) relevancia 1-5 = lo útil que es para un desarrollador que usa Claude Code, agentes de IA, herramientas gratis/open source y automatización. (6) Si no hay información útil: "resumen":"" y "categoria":"Otros".
 CONTENIDO:
 ${ctx}`);
@@ -599,7 +616,7 @@ ${ctx}`);
   card.relIA = ai && Number(ai.relevancia) ? Math.max(1, Math.min(5, Number(ai.relevancia))) : 0;
   card.resumen = (ai && ai.resumen) || (r0 && r0.desc) || texto.slice(0, 220) || (card.tipo === "Instagram" ? "El texto de este post solo traía un gancho (comenta...); no se pudo leer su contenido. Abre el enlace." : "");
   card.categoria = clasificar(card, ai && ai.categoria);
-  if (!card.tags.length && ai && Array.isArray(ai.tags)) card.tags = ai.tags.slice(0, 5).map(t => "#" + String(t).toLowerCase().replace(/^#/, "").replace(/\s+/g, ""));
+  if (ai && Array.isArray(ai.tags)) card.tags = normalizarTags([...ai.tags, ...card.tags]);
   card.fuente = ai ? (r0 ? "verificado" : "resumen IA") : (r0 ? "verificado" : "deducido");
   try { await investigar(card, repos, ai, texto); } catch (e) { card.motivo = "No pude investigar a fondo: " + String(e).slice(0, 60); }
   card.estado = "ok"; if (!/descart/.test(card.motivo || "")) card.motivo = "";
@@ -831,7 +848,7 @@ function guardarEditor() {
   c.categoria = ($("#hCat").value.trim() || "Sin clasificar");
   c.resumen = $("#hRes").value.trim();
   c.notas = $("#hNota").value.trim();
-  c.tags = [...new Set(($("#hTags").value.split(/[,\s]+/).map(t => t.trim().replace(/^#/, "")).filter(Boolean)))].slice(0, 10).map(t => "#" + t);
+  c.tags = normalizarTags($("#hTags").value.split(/[,\s]+/).filter(Boolean));
   c.links = leerLinksHoja().filter(l => /^https?:\/\//i.test(l.u) || l.u === "");
   c.links = c.links.filter(l => l.u);
   c.manual = true; guardar(); cerrarEditor(); pintar(); aviso("Guardado");
@@ -880,7 +897,7 @@ function fusionar(arr) { // deja la ficha más completa y le pasa los links, im�
   for (const o of arr.slice(1)) {
     w.extra = [...new Set([...(w.extra || []), o.url, ...(o.extra || [])])].filter(u => claveUrl(u) !== claveUrl(w.url) && !String(u).startsWith("foto:"));
     const vistos = new Set((w.links || []).map(l => l.u)); (o.links || []).forEach(l => { if (!vistos.has(l.u)) { (w.links ||= []).push(l); vistos.add(l.u); } });
-    w.tags = [...new Set([...(w.tags || []), ...(o.tags || [])])].slice(0, 12); w.imgs = [...new Set([...(w.imgs || []), ...(o.imgs || [])])].slice(0, 8);
+    w.tags = normalizarTags([...(w.tags || []), ...(o.tags || [])]); w.imgs = [...new Set([...(w.imgs || []), ...(o.imgs || [])])].slice(0, 8);
     if (o.notas && o.notas !== w.notas) w.notas = [w.notas, o.notas].filter(Boolean).join("\n");
     if (o.fav) w.fav = true;
     db.cards = db.cards.filter(x => x !== o);
