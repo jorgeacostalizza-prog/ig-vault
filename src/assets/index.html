@@ -733,11 +733,20 @@ function esGenerico(u) {
   try { const h = new URL(u).hostname.replace(/^www\./, ""); return !sinTLD.test(h) || /^(google|bing|duckduckgo|yahoo|yandex|baidu|ecosia|brave|amazon|ebay|aliexpress|facebook|twitter|x|tiktok|pinterest|instagram|reddit|linkedin|medium|substack|etsy|wikipedia|youtube|spotify|netflix|twitch|discord|telegram|whatsapp|tiktokv|paypal|stripe)\./i.test(h); }
   catch (e) { return true; }
 }
+const httpT = (u, o) => Promise.race([http(u, o), dormir(6000).then(() => ({ status: 0, body: "", error: "timeout 6s" }))]); // tope duro 6 s por petición
+const cacheLinks = new Map(); // nombre -> link verificado ("" si no hay), solo en la sesión
+async function primeroOk(urls, nombre) { // verifica de 4 en 4 en paralelo y devuelve el primero que vale
+  for (let i = 0; i < urls.length; i += 4) {
+    const rs = await Promise.all(urls.slice(i, i + 4).map(u => verificar(u, nombre)));
+    const ok = rs.find(Boolean); if (ok) return ok;
+  }
+  return "";
+}
 async function verificar(u, nombre) {
   const base = /^https?:/i.test(u) ? u : "https://" + u;
   if (esGenerico(base)) return "";
   try {
-    const r = await http(base, { headers: { "User-Agent": UA_BOT, "Accept": "text/html,application/xhtml+xml" } });
+    const r = await httpT(base, { headers: { "User-Agent": UA_BOT, "Accept": "text/html,application/xhtml+xml" } });
     if (r.status !== 200 && !(r.status >= 300 && r.status < 400)) return "";
     const fin = r.url || base;
     if (esGenerico(fin)) return "";
@@ -755,7 +764,7 @@ async function buscarEnDuck(nombre) {
   const q = encodeURIComponent(tokeniza(nombre).slice(0, 5).join(" ") + " oficial");
   for (const base of ["https://html.duckduckgo.com/html/?q=", "https://lite.duckduckgo.com/lite/?q="]) {
     try {
-      const r = await http(base + q, { headers: { "User-Agent": UA_BOT, "Accept-Language": "es,en;q=0.8" } });
+      const r = await httpT(base + q, { headers: { "User-Agent": UA_BOT, "Accept-Language": "es,en;q=0.8" } });
       if (r.status !== 200) continue;
       const vs = [...new Set([...r.body.matchAll(/uddg=([^&"']+)/g)].map(m => decodeURIComponent(m[1])))].filter(u => /^https?:\/\//i.test(u) && !/duckduckgo\.com|\/y\.js|ad_domain|\/y\.js\?/i.test(u));
       if (vs.length) return vs.slice(0, 6);
@@ -784,18 +793,20 @@ async function buscarLinksOficiales(card, { forzar = false } = {}) {
   const meter = (t, u) => { if (!u || ya.has(u.replace(/\/$/, "").toLowerCase())) return false; ya.add(u.replace(/\/$/, "").toLowerCase()); card.links.push({ t, u }); return true; };
   let n0 = card.links.length, usados = [];
   if (!forzar) meter("GitHub", (card.repos && card.repos[0] && card.repos[0].url) || "");
-  const nombres = candidatos(card).slice(0, forzar ? 6 : 4);
+  const nombres = candidatos(card).slice(0, 4);
+  let red = 0; // links nuevos verificados por red: con 2 se corta
   for (const n of nombres) {
-    if (card.links.length >= 6) break;
+    if (card.links.length >= 6 || red >= 2) break;
     const k = sinAcentos(n).replace(/[^a-z0-9]/g, "");
     if (CONOCIDOS[k] && meter(etiquetaDe(CONOCIDOS[k]), CONOCIDOS[k])) { usados.push(n); continue; }
     if (CONOCIDOS[sinAcentos(n).split(" ")[0]]) continue; // genérico (openai, claude…): ya está
-    let ok = "";
-    for (const u of [`https://github.com/${n}`, `https://${k}.com`, `https://${k}.ai`, `https://${k}.app`, `https://${k}.io`, `https://${k}.org`, `https://www.npmjs.com/package/${k}`]) {
-      ok = await verificar(u, n); if (ok) break;
+    let ok = cacheLinks.get(k);
+    if (ok === undefined) {
+      ok = await primeroOk([`https://github.com/${n}`, `https://${k}.com`, `https://${k}.ai`, `https://${k}.app`, `https://${k}.io`, `https://${k}.org`, `https://www.npmjs.com/package/${k}`], n);
+      if (!ok) ok = await primeroOk(await buscarEnDuck(n), n);
+      cacheLinks.set(k, ok);
     }
-    if (!ok) for (const u of await buscarEnDuck(n)) { ok = await verificar(u, n); if (ok) break; }
-    if (ok) { meter(etiquetaDe(ok), ok); usados.push(n); }
+    if (ok && meter(etiquetaDe(ok), ok)) { usados.push(n); red++; }
   }
   if (!forzar && card.links.length) card.links = card.links.slice(0, 8);
   card.buscado = usados.join(" · "); // se ve debajo de los links: qué se buscó y qué se encontró
@@ -1159,8 +1170,12 @@ $("#bLinksMasivos").onclick = async () => {
   const f = db.cards.filter(c => c.estado === "ok" && (!c.links || !c.links.length || c.links.length < 2));
   if (!f.length) return aviso("Todas las fichas ya tienen links investigationados");
   aviso(`Buscando links en ${f.length} fichas…`);
-  let n = 0;
-  for (const c of f) { $("#bLinksMasivos").disabled = true; n += (await buscarLinksOficiales(c, { forzar: true })).length; guardar(); pintar(); await dormir(200); }
+  let n = 0, hechas = 0;
+  $("#bLinksMasivos").disabled = true;
+  for (let i = 0; i < f.length; i += 2) { // de 2 en 2
+    for (const r of await Promise.all(f.slice(i, i + 2).map(c => buscarLinksOficiales(c, { forzar: true })))) n += r.length;
+    hechas = Math.min(i + 2, f.length); guardar(); pintar(); aviso(`Buscando links… ${hechas}/${f.length} fichas`);
+  }
   $("#bLinksMasivos").disabled = false;
   aviso(`Investigadas ${f.length} fichas: ${n} links nuevos encontrados`);
 };

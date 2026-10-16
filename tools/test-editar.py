@@ -13,7 +13,7 @@ def http(m, url, hd, body):
     h.update(json.loads(hd or "{}"))
     rq = urllib.request.Request(url, data=body.encode() if body else None, headers=h, method=m)
     try:
-        r = urllib.request.urlopen(rq, timeout=30)
+        r = urllib.request.urlopen(rq, timeout=2.5)
         return {"status": r.status, "url": r.geturl(), "body": r.read(1500000).decode("utf8", "replace")}
     except urllib.error.HTTPError as e:
         return {"status": e.code, "url": url, "body": e.read(300000).decode("utf8", "replace")}
