@@ -70,6 +70,7 @@ def main(movil):
         # ---- pipeline completo: pegar un link de Instagram y ordenar ----
         pg.fill("#txt", "mira esto https://www.instagram.com/p/AAA111/?igsh=zzz y otra vez instagram.com/reel/AAA111 \nhttps://github.com/obra/superpowers")
         pg.click("#bOrdenar"); pg.wait_for_function("db.cards.length>0 && !db.cards.some(c=>c.estado==='pendiente')", timeout=60000)
+        pg.evaluate("gruposDup(true).forEach(fusionar); guardar(); pintar()")  # «Quitar duplicados» ya no es automático
         c = pg.evaluate("db.cards.map(c=>({t:c.titulo,e:c.estado,cat:c.categoria,tipo:c.tipo,imgs:(c.imgs||[]).length,links:(c.links||[]).map(l=>l.u),repos:(c.repos||[]).map(r=>r.full),n:(c.puntos||[]).length,sk:(c.skills||[]).length,como:(c.como||[]).length,extra:c.extra||[],res:c.resumen,url:c.url}))")
         print("   fichas:", json.dumps(c, ensure_ascii=False)[:700])
         ok("3 links pegados (post IG + reel repetido + repo) → fusionados en 1 ficha", len(c) == 1, len(c))
@@ -81,24 +82,27 @@ def main(movil):
         ok("guarda el link original de Instagram", "instagram.com/p/AAA111" in f.get("url", ""))
 
         pg.evaluate("cambiaTab('fichas')"); pg.wait_for_timeout(300)
-        hrefs = pg.eval_on_selector_all(".card a.lk", "els=>els.map(e=>e.href)")
+        pg.click(".rw .rb"); pg.wait_for_timeout(300)
+        hrefs = pg.eval_on_selector_all("#det a.lk", "els=>els.map(e=>e.href)")
         ok("se ven a la vez el link de Instagram y el de GitHub (como <a> reales)", any("instagram.com/p/AAA111" in x for x in hrefs) and any("github.com/obra/superpowers" in x for x in hrefs), hrefs)
-        ok("las imágenes se pintan todas", pg.locator(".card .gal img").count() >= 5, pg.locator(".card .gal img").count())
-        ok("etiqueta de relevancia visible", pg.locator(".card .rel").count() == 1, pg.inner_text(".card .rel") if pg.locator(".card .rel").count() else "")
+        ok("el detalle muestra UNA miniatura", pg.locator("#det img.mini").count() == 1 and pg.locator("#lista img").count() == 0)
+        ok("etiqueta de relevancia visible", pg.locator("#det .rel").count() == 1)
 
         # clic en enlace: la página NO se queda en negro / sigue usable
-        pg.click(".card a.lk.ig"); pg.wait_for_timeout(200)
+        pg.click("#det a.lk.ig"); pg.wait_for_timeout(200)
         ok("el clic en Instagram abre el link correcto (puente nativo)", "instagram.com/p/AAA111" in (pg.evaluate("window.__abierto||''")))
         vis = pg.evaluate("(()=>{const e=document.elementFromPoint(innerWidth/2,innerHeight/2);return !!e && e.tagName!=='HTML'})()")
-        ok("tras pulsar un enlace la app sigue visible y usable", vis and pg.is_visible(".card") and pg.evaluate("getComputedStyle(document.body).backgroundColor")!="rgb(0, 0, 0)")
+        ok("tras pulsar un enlace la app sigue visible y usable", vis and pg.is_visible("#det") and pg.evaluate("getComputedStyle(document.body).backgroundColor")!="rgb(0, 0, 0)")
 
-        # Claude Code
-        pg.click(".card [data-a=claude]"); pg.wait_for_timeout(250)
+        # Exportar .txt para Claude Code (selección de la ficha)
+        pg.evaluate("cerrarDet()"); pg.click(".rw .sel"); pg.wait_for_timeout(150)
+        ok("la casilla marca la ficha y sale la barra de selección", pg.is_visible("#barSel") and "1 seleccionada" in pg.inner_text("#selN"))
+        pg.click("#barSel #selExp"); pg.wait_for_timeout(250)
         t = pg.input_value("#ccTxt")
-        ok("texto para Claude Code incluye post original + GitHub + pasos", "instagram.com/p/AAA111" in t and "github.com/obra/superpowers" in t and "plugin install" in t and "Qué quiero que hagas" in t)
-        pg.click("#ccT button[data-k=instalar]"); ok("cambiar la tarea cambia el texto", "Instálalo" in pg.input_value("#ccTxt"))
+        ok("texto .txt incluye post original + GitHub + pasos + instrucciones", "instagram.com/p/AAA111" in t and "github.com/obra/superpowers" in t and "plugin install" in t and "Pide confirmación" in t, t[:300])
         pg.click("#ccCopia"); pg.wait_for_timeout(200)
-        ok("botón Copiar entrega el texto (puente nativo)", "Tarea para Claude Code" in (pg.evaluate("window.__copiado||''")))
+        ok("botón Copiar entrega el texto (puente nativo)", "para Claude Code" in (pg.evaluate("window.__copiado||''")))
+        pg.click("#ccNo")
 
         # ---- anti-invención: la IA habla de un videojuego sin relación ----
         ALUCINA["on"] = True
@@ -117,13 +121,13 @@ def main(movil):
           {id:'d',url:'https://example.com/herramienta-uno',tipo:'Web',estado:'ok',grupo:'AI',categoria:'Webs',titulo:'Una herramienta distinta de verdad',resumen:'r',links:[],repos:[],tags:[]},
           {id:'e',url:'https://example.org/otra-url-distinta',tipo:'Web',estado:'ok',grupo:'AI',categoria:'Webs',titulo:'Una herramienta distinta de verdad',resumen:'r2',links:[],repos:[],tags:[]}
         ]; guardar(); pintar();}""")
-        pg.evaluate("cambiaTab('fichas')"); pg.click("#bDup"); pg.wait_for_timeout(250)
+        pg.evaluate("cambiaTab('fichas')"); pg.click("#bMas"); pg.click("#bDup"); pg.wait_for_timeout(250)
         ok("el aviso de duplicados aparece", pg.is_visible("#dlg"))
         pg.click("#dSi"); pg.wait_for_timeout(250)
         pg.evaluate("cambiaTab('fichas')"); n = pg.evaluate("db.cards.length"); ex = pg.evaluate("db.cards[0].links.length")
         ok("5 fichas → 2 (IG+IG+repo juntas; mismo título juntas)", n == 2, n)
         ok("la fusión conserva los links de las repetidas", ex >= 2, ex)
-        pg.click("#bDup"); pg.wait_for_timeout(200)
+        pg.click("#bMas"); pg.click("#bDup"); pg.wait_for_timeout(200)
         ok("sin duplicados avisa y no abre nada", not pg.is_visible("#dlg"))
 
         # ---- clasificación + relevancia ----
@@ -142,7 +146,7 @@ def main(movil):
 
         # ---- mover sin arrastrar ----
         pg.evaluate("cambiaTab('fichas')"); pg.wait_for_timeout(300)
-        pg.click(".card [data-a=mover]"); pg.wait_for_timeout(200)
+        pg.click(".rw .rb"); pg.click("#det [data-a=mover]"); pg.wait_for_timeout(200)
         ok("el diálogo Mover abre", pg.is_visible("#dmv"))
         pg.fill("#mvN", "Música › Canciones"); pg.click("#mvSi"); pg.wait_for_timeout(250)
         g = pg.evaluate("db.cards.map(c=>c.grupo+'>'+c.categoria)")
@@ -150,7 +154,7 @@ def main(movil):
         ok("ya no existe el agarre de arrastrar", pg.locator(".agarre").count() == 0)
 
         # ---- filtros y diseño ----
-        pg.click("#filtros button[data-f=rel]"); pg.wait_for_timeout(200)
+        pg.evaluate("cerrarDet()"); pg.click("#filtros button[data-f=rel]"); pg.wait_for_timeout(200)
         ok("filtro «Más relevantes» funciona sin error", pg.locator("#filtros button.on").inner_text().startswith("★"))
         if not movil:
             ok("PC: barra lateral a la izquierda", pg.evaluate("document.querySelector('nav').getBoundingClientRect().left")<5 and pg.evaluate("document.querySelector('nav').getBoundingClientRect().width")>150)

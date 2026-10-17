@@ -12,8 +12,8 @@
 html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,Roboto,"Segoe UI",sans-serif}
 body{display:flex;flex-direction:column}
 .cuerpo{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0}
-header{padding:calc(env(safe-area-inset-top) + 14px) 16px 8px;display:flex;align-items:baseline;justify-content:space-between}
-header h1{margin:0;font-size:22px;letter-spacing:-.3px}
+header{padding:calc(env(safe-area-inset-top) + 8px) 16px 2px;display:flex;align-items:baseline;justify-content:space-between}
+header h1{margin:0;font-size:20px;letter-spacing:-.3px}
 header span{color:var(--mut);font-size:13px}
 main{flex:1;overflow-y:auto;padding:4px 16px 96px}
 nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--s1);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom)}
@@ -89,7 +89,7 @@ dialog h2{margin:0 0 10px;font-size:18px}
 .gal a{display:block;flex:none}.gal img{height:112px;max-width:190px;object-fit:cover;border-radius:10px;border:1px solid var(--ln);display:block}
 .enl{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px}
 .lk{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 14px system-ui;text-decoration:none}
-.lk.ig{border-color:#c13584;color:var(--tx)}.lk.gh{border-color:var(--ok)}.lk.cc{background:var(--ac);color:var(--acx);border-color:var(--ac);cursor:pointer}
+.lk.ig{border-color:#c13584;color:var(--tx)}.lk.gh{border-color:var(--ok)}
 .lk:hover{filter:brightness(1.12)}
 .bl{margin:8px 0 2px}.bl b{display:block;font-size:12.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
 .bl ul,.bl ol{margin:0 0 0 20px;padding:0}.bl li{margin:2px 0;font-size:14.5px}
@@ -109,8 +109,6 @@ dialog h2{margin:0 0 10px;font-size:18px}
   .pan{max-width:1180px}
   #p-pegar,#p-ajustes{max-width:760px}
   textarea{min-height:30vh}
-  .secc{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:12px;align-items:start}
-  .secc .card{margin:0}
   #aviso{bottom:24px}
   #hojaC{max-width:760px;margin:0 auto;width:100%}
 }
@@ -118,7 +116,79 @@ dialog h2{margin:0 0 10px;font-size:18px}
 .blq .barra{margin:6px 0}
 .chip.bad{color:var(--bad);border-color:var(--bad)}
 .lk.roto{text-decoration:line-through;opacity:.6;border-color:var(--bad)}
-.sem li{margin:10px 0}.sem small{display:block;color:var(--mut)}
+.cab h3{flex:1;min-width:0}
+.sel{flex:none;width:44px;height:44px;margin:0 0 0 -8px;display:grid;place-items:center;background:none;border:0;padding:0}
+.sel i{width:24px;height:24px;border-radius:7px;border:2px solid var(--mut);display:grid;place-items:center;font:700 16px/1 system-ui;color:transparent}
+.card.marca{border-color:var(--ac)}
+.card.marca .sel i{background:var(--ac);border-color:var(--ac);color:var(--acx)}
+#barSel{display:none;position:sticky;top:0;z-index:4;align-items:center;gap:6px;flex-wrap:wrap;background:var(--s2);border:1px solid var(--ac);border-radius:14px;padding:4px 8px;margin:8px 0}
+#barSel.on{display:flex}
+#barSel b{flex:1 1 auto;font-size:13px}
+#barSel button{min-height:48px;padding:0 8px;border-radius:12px;border:1px solid var(--ln);background:var(--s1);color:var(--tx);font:600 13px system-ui}
+#barSel button.pri{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.mnu{position:relative;flex:1}.mnu .btn{width:100%}
+#menuMas{display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:6;min-width:250px;background:var(--s1);border:1px solid var(--ln);border-radius:14px;padding:6px}
+#menuMas.on{display:block}
+#menuMas button{display:block;width:100%;min-height:48px;text-align:left;padding:0 14px;background:none;border:0;border-radius:10px;color:var(--tx);font:600 15px system-ui}
+#menuMas button:active{background:var(--s2)}
+button{cursor:pointer}
+button:focus-visible,summary:focus-visible,a:focus-visible,input[type=checkbox]:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(prefers-reduced-motion:reduce){.prog i,.barra i,[class*=bar] i{transition:none}}
+
+/* ---- lista compacta + detalle ---- */
+.top{flex-wrap:nowrap;align-items:center;margin:4px 0 6px}
+.top #buscar{flex:1;min-width:0;width:auto;height:44px;padding:0 14px;border-radius:12px}
+.top .btn{min-height:44px;font-size:14px;padding:0 12px;flex:none}
+.top .mnu{flex:none}
+.filtros{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:2px 0 4px}
+.filtros::-webkit-scrollbar{display:none}
+.filtros button,.filtros select{flex:none;min-height:44px;white-space:nowrap}
+.filtros select{border-radius:22px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 13px system-ui;padding:0 10px}
+details{margin:0}
+summary{position:sticky;top:var(--bs,0px);z-index:3;background:var(--bg);min-height:44px;justify-content:flex-start;gap:8px;font-size:15px}
+summary .cn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+summary svg{width:18px;height:18px;flex:none;stroke:var(--mut);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+details[open]>summary svg.cv{transform:rotate(90deg)}
+.grupo details summary{top:calc(var(--bs,0px) + 44px)}
+.rw{display:flex;align-items:center;gap:2px;min-height:56px;border-bottom:1px solid var(--ln)}
+.rw.act{background:var(--s1)}
+.rw.marca .sel i{background:var(--ac);border-color:var(--ac);color:var(--acx)}
+.rb{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left;background:none;border:0;color:var(--tx);padding:6px 4px;min-height:56px;justify-content:center;font:inherit}
+.rt{font-weight:700;font-size:15px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs{font-size:13px;line-height:1.3;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs.av{color:var(--warn)}
+.pt{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:6px;vertical-align:1px}
+.rw svg,#det svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rst{flex:none;color:var(--ac);display:grid;place-items:center;width:20px}
+.rst svg{width:16px;height:16px;fill:currentColor}
+a.li{flex:none;width:44px;height:44px;display:grid;place-items:center;color:var(--mut);border-radius:12px;text-decoration:none}
+a.li:hover,a.li:active{color:var(--ac);background:var(--s2)}
+a.li.roto{opacity:.45}
+#det{display:none}
+#det.on{display:flex;position:fixed;inset:0;z-index:15;background:var(--bg);flex-direction:column;animation:subir .26s cubic-bezier(.2,0,0,1)}
+@keyframes subir{from{transform:translateY(28px);opacity:0}}
+.dh{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 8px) 12px 6px;font-weight:700}
+.dh .btn{min-width:44px;padding:0 10px}
+#detC{flex:1;overflow-y:auto;padding:4px 16px calc(env(safe-area-inset-bottom) + 24px);max-width:760px;width:100%;margin:0 auto}
+#detC h2{margin:6px 0 8px;font-size:20px;line-height:1.3}
+#detC .meta{margin:6px 0}
+#detC .res{white-space:pre-wrap;margin:10px 0}
+.mini{display:block;max-height:180px;max-width:100%;object-fit:cover;border-radius:12px;margin:6px 0}
+.enl.gr .lk{width:100%;min-height:48px;justify-content:flex-start;font-size:15px}
+.enl.gr .lk svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.acs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:18px 0 8px}
+.acs .btn{min-height:48px;font-size:14px;padding:0 8px}
+.cmd{display:block;font:13px/1.4 ui-monospace,Consolas,monospace;background:var(--s1);border-radius:10px;padding:8px 10px;margin:4px 0;white-space:pre-wrap;word-break:break-all}
+@media(min-width:900px){
+  #p-fichas.on{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:24px;align-items:start;max-width:1360px}
+  #det,#det.on{display:flex;flex-direction:column;position:sticky;top:0;inset:auto;z-index:1;max-height:calc(100dvh - 24px);background:var(--s1);border-radius:16px;animation:none}
+  #det .dh{display:none}
+  #detC{padding:16px 18px 24px;max-width:none;margin:0}
+  .rw:hover{background:var(--s1)}
+}
+.vacioDet{color:var(--mut);text-align:center;padding:48px 12px}
+@media(prefers-reduced-motion:reduce){#det.on{animation:none}details[open]>summary svg.cv{transition:none}}
 </style>
 </head>
 <body>
@@ -130,34 +200,35 @@ dialog h2{margin:0 0 10px;font-size:18px}
     <textarea id="txt" placeholder="Pega aquí todos tus links de golpe (Instagram, YouTube, GitHub…), uno por línea o mezclados con texto. Yo saco los links solo." spellcheck="false"></textarea>
     <div class="nota" id="detect">Aún no hay links.</div>
     <div class="fila">
-      <button class="btn" id="bPegar">📋 Pegar del portapapeles</button>
+      <button class="btn" id="bPegar">Pegar del portapapeles</button>
       <button class="btn pri" id="bOrdenar">Ordenar mis links</button>
     </div>
     <div class="prog" id="prog" style="display:none">
       <div id="progT">…</div>
       <div class="nota" id="progS"></div>
-      <button class="btn sm" id="bParar">⏸ Pausar</button>
+      <button class="btn sm" id="bParar">Pausar</button>
     </div>
     <div id="bloques"></div>
-    <div class="nota">Puedes pegar otro lote mientras trabaja: se añade como bloque nuevo y espera su turno.</div>
-    <div class="nota">Sin clave de IA también ordeno por GitHub y hashtags. Con clave (Ajustes) escribo resumen y categoría de cada uno.</div>
+    <div class="nota">Puedes pegar otro lote mientras trabaja: se añade como bloque nuevo.</div>
   </section>
 
   <section class="pan" id="p-fichas">
-    <input type="search" id="buscar" placeholder="Buscar en tus fichas…">
-    <div class="fila">
-      <button class="btn sm pri" id="bClaude">🧠 Copiar para Claude Code</button>
-      <button class="btn sm pri" id="bSemana">📅 Priorizar mi semana</button>
-      <button class="btn sm" id="bDup">🧹 Quitar duplicados</button>
-      <button class="btn sm" id="bComprobar">🩺 Comprobar enlaces y repos</button>
-      <button class="btn sm" id="bObs">📓 Exportar a Obsidian</button>
-      <button class="btn sm" id="bCopiar">Copiar todo</button>
-      <button class="btn sm" id="bComp">Compartir</button>
-      <button class="btn sm" id="bLinksMasivos">🔎 Buscar links</button>
-      <button class="btn sm" id="bReint">Reintentar fallidas</button>
+    <div class="izq">
+    <div class="fila top"><input type="search" id="buscar" placeholder="Buscar…" aria-label="Buscar en tus fichas">
+      <button class="btn pri" id="bExport">Exportar .txt</button>
+      <div class="mnu"><button class="btn" id="bMas" aria-haspopup="true">⋯ Más</button>
+        <div id="menuMas">
+          <button id="bDup">Quitar duplicados</button>
+          <button id="bReint">Reintentar fallidas</button>
+          <button id="bComprobar">Comprobar enlaces</button>
+          <button id="bLinksMasivos">Buscar links que faltan</button>
+        </div></div>
     </div>
     <div class="filtros" id="filtros"></div>
+    <div id="barSel"><b id="selN"></b><button id="selTodas">Todas</button><button id="selNinguna">Ninguna</button><button id="selExp" class="pri">Exportar .txt</button></div>
     <div id="lista"></div>
+    </div>
+    <aside id="det" aria-label="Detalle de la ficha"></aside>
   </section>
 
   <section class="pan" id="p-ajustes">
@@ -171,13 +242,11 @@ dialog h2{margin:0 0 10px;font-size:18px}
     <input type="password" id="kGq" autocomplete="off" placeholder="gsk_… (solo PC/web; en el móvil ya va incluida)">
     <label for="kInt">Mis intereses (para marcar lo más relevante)</label>
     <textarea id="kInt" rows="3" placeholder="claude, agentes, mcp, gratis, open source…"></textarea>
-    <div class="nota">Las fichas que hablen de esto suben arriba con ★. Separa con comas.</div>
-    <div class="nota">Las claves se guardan solo en este dispositivo. No se envían a ningún sitio salvo a su propio proveedor.</div>
+    <div class="nota">Las claves se quedan solo en este dispositivo. Los intereses (separados por comas) suben fichas con ★.</div>
     <div class="fila">
       <button class="btn pri" id="bGuardar">Guardar y probar</button>
     </div>
     <div class="nota" id="kEstado"></div>
-    <div class="fila"><button class="btn" id="bReclas">♻ Reclasificar todo con el algoritmo nuevo</button></div>
     <div class="fila"><button class="btn" id="bBorrar" style="color:var(--bad)">Borrar todas las fichas</button></div>
     <div class="sello">IG Extractor · #Finnky Pirat!</div>
   </section>
@@ -206,14 +275,13 @@ dialog h2{margin:0 0 10px;font-size:18px}
   <div id="hojaP"><button class="btn" id="hNo">Cancelar</button><button class="btn pri" id="hSi">Guardar</button></div>
 </div>
 <nav>
-  <button data-t="pegar" class="on"><span class="i">＋</span>Pegar</button>
-  <button data-t="fichas"><span class="i">☰</span>Fichas</button>
-  <button data-t="ajustes"><span class="i">⚙</span>Ajustes</button>
+  <button data-t="pegar" class="on"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Pegar</button>
+  <button data-t="fichas"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>Fichas</button>
+  <button data-t="ajustes"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>Ajustes</button>
 </nav>
-<dialog id="dcc"><h2>Para pegar en Claude Code</h2>
-  <div class="chips" id="ccT"></div>
+<dialog id="dcc"><h2 id="ccH">Exportar .txt para Claude Code</h2>
   <textarea id="ccTxt" class="cc-t" spellcheck="false"></textarea>
-  <div class="fila"><button class="btn" id="ccNo">Cerrar</button><button class="btn pri" id="ccCopia">📋 Copiar</button></div></dialog>
+  <div class="fila"><button class="btn" id="ccNo">Cerrar</button><button class="btn" id="ccCopia">Copiar</button><button class="btn pri" id="ccGuarda">Guardar .txt</button></div></dialog>
 <dialog id="dmv"><h2>Mover a otra sección</h2><div class="dest" id="mvD"></div>
   <input type="text" id="mvN" placeholder="O escribe una nueva: Grupo › Categoría" style="margin-top:8px">
   <div class="fila"><button class="btn" id="mvNo">Cancelar</button><button class="btn pri" id="mvSi">Mover</button></div></dialog>
@@ -251,7 +319,8 @@ const pagina = url => N ? nat("pagina", url) : (window.__pagina ? window.__pagin
 const BASE_WEB = "https://jorgeacostalizza-prog.github.io/ig-vault/";
 let db = { cards: [], cfg: { nvidia: "", openrouter: "", github: "", groq: "", intereses: "" } };
 try { const d = JSON.parse(localStorage.getItem("igv") || "null"); if (d) db = { ...db, ...d, cfg: { ...db.cfg, ...d.cfg } }; } catch (e) { }
-const guardar = () => { try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } };
+let _rsp; // PC: copia de las fichas fuera del navegador (si el perfil se vacía, se restauran solas)
+const guardar = () => { try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } if (SRV) { clearTimeout(_rsp); _rsp = setTimeout(() => postSrv("/api/respaldo", { cards: db.cards, sel: db.sel || [] }), 1500); } };
 
 // ============ detección de links ============
 const RE_URL = /(?<![\w.\/-])(?:https?:\/\/|(?:www\.)?(?:instagram\.com|youtube\.com|youtu\.be|github\.com)\/)[^\s<>()\[\]"'«»]+/gi;
@@ -486,15 +555,15 @@ async function leerWeb(url) {
 // ============ procesar un link ============
 // ---- categorías fijas: webs, recursos, tutoriales, cursos, IA, repositorios, programas y apps ----
 const CATS = ["Repositorios", "Inteligencia artificial", "Programas y apps", "Webs", "Recursos", "Tutoriales", "Cursos", "Otros"];
-const CAT_VIEJAS = { "repos de github": "Repositorios", "repos y herramientas ia": "Inteligencia artificial", "herramientas de ia": "Inteligencia artificial", "webs y recursos": "Webs", "tutoriales y cursos": "Tutoriales", "trucos y tutoriales": "Tutoriales", "ideas y negocio": "Recursos", "sin clasificar": "Otros", "pendiente": "Pendiente", "para revisar": "Para revisar" };
-const normCat = c => { const k = String(c || "").trim().toLowerCase(); return CAT_VIEJAS[k] || CATS.find(x => x.toLowerCase() === k) || null; };
+const CAT_VIEJAS = { "repos de github": "Repositorios", "repos y herramientas ia": "Inteligencia artificial", "herramientas de ia": "Inteligencia artificial", "webs y recursos": "Webs", "tutoriales y cursos": "Tutoriales", "trucos y tutoriales": "Tutoriales", "ideas y negocio": "Recursos", "sin clasificar": "Otros", "ia": "Inteligencia artificial", "ai": "Inteligencia artificial", "herramientas ia": "Inteligencia artificial", "herramientas de inteligencia artificial": "Inteligencia artificial", "repos": "Repositorios", "repositorio": "Repositorios", "github": "Repositorios", "programas": "Programas y apps", "apps": "Programas y apps", "aplicaciones": "Programas y apps", "web": "Webs", "recurso": "Recursos", "tutorial": "Tutoriales", "curso": "Cursos", "otro": "Otros", "pendiente": "Pendiente", "para revisar": "Para revisar" };
+const normCat = c => { const k = sinAcentos(String(c || "").trim()); return CAT_VIEJAS[k] || CATS.find(x => sinAcentos(x) === k) || null; };
 const REGLAS = {
   "Repositorios": [/github\.com\/[\w.-]+\/[\w.-]+/i, /\brepo(sitorios?)?\b/i, /open.?source|c[oó]digo abierto/i],
   "Inteligencia artificial": [/\b(ia|ai|llms?|gpt|claude|gemini|agentes?|agents?|mcp|rag|prompts?|openai|anthropic|chatgpt|copilot|codex|whisper|nvidia|inteligencia artificial|machine learning|modelos?)\b/i, /\b(skills?|embeddings?|fine.?tun\w*|vibe ?cod\w*)\b/i],
-  "Programas y apps": [/\b(apps?|aplicaci[oó]n|programa|software|extensi[oó]n|plugin|apk|ejecutable|instalar|instalador|descargar|escritorio|windows)\b/i, /\b(cli|terminal|desktop|android|ios)\b/i],
-  "Webs": [/\b(web|p[aá]gina|sitio|website|online|plataforma|navegador)\b/i],
+  "Programas y apps": [/\b(apps?|aplicaci[oó]n|programa|software|extensi[oó]n|plugin|apk|ejecutable|instalador)\b/i, /\b(cli|terminal|desktop|android|ios)\b/i],
+  "Webs": [/\b(web|p[aá]gina web|sitio web|website)\b/i],
   "Recursos": [/\b(recursos?|plantillas?|templates?|packs?|listas?|colecci[oó]n|cheat ?sheet|dataset|libro|ebook|pdf|recopilaci[oó]n|awesome)\b/i],
-  "Tutoriales": [/\b(tutorial|c[oó]mo|how to|paso a paso|trucos?|tips?|aprende|learn|gu[ií]a|configura\w*|ense[ñn]a)\b/i],
+  "Tutoriales": [/\b(tutorial|c[oó]mo (?:se |puedes |hacer|usar|crear|instalar|configurar)|how to|paso a paso|trucos?|tips?|aprende|learn|gu[ií]a|configura\w*|ense[ñn]a)\b/i],
   "Cursos": [/\b(cursos?|courses?|clases?|masterclass|bootcamp|certificaci[oó]n|formaci[oó]n|roadmap|temario)\b/i, /udemy|coursera|platzi|domestika|edx\.org|skillshare|khanacademy/i]
 };
 function clasificar(c, aiCat) { // puntúa cada categoría con señales claras; gana la que más suma
@@ -517,7 +586,7 @@ function relevancia(c) {
   if (c.fav) return { n: 5, pts: 99 };
   if (c.estado !== "ok") return { n: 0, pts: 0 };
   const blob = sinAcentos([c.titulo, c.resumen, (c.puntos || []).join(" "), (c.tags || []).join(" "), c.categoria].join(" "));
-  let pts = Math.min(5, new Set(interesesLista().filter(w => blob.includes(w))).size);
+  let pts = Math.min(5, new Set(interesesLista().filter(w => new RegExp("(^|[^a-z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(blob))).size);
   const r = c.repos && c.repos[0];
   if (r) { pts += 1; const st = Number(r.stars) || 0; pts += st >= 10000 ? 3 : st >= 1000 ? 2 : st >= 100 ? 1 : 0; }
   if (r && estadoRepo(r) && estadoRepo(r).cls === "bad") pts -= 3; // repo abandonado: baja
@@ -563,6 +632,7 @@ const tagsVocab = () => { const n = {}; for (const c of db.cards) for (const t o
 // quita frases-gancho (comenta X y te mando, sigueme, link en bio) para no resumirlas como contenido
 const GANCHO = /(comenta|comment\b|sígueme|síguenos|follow|link en (la )?bio|enlace en (la )?bio|te (lo )?mando|te env[ií]o|te paso|escr[ií]beme|dm\b|mensaje directo|suscr[ií]be|like y|guarda este)/i;
 const quitaGancho = t => t.split(/(?<=[.!?\n])\s+/).filter(f => !GANCHO.test(f)).join(" ").trim();
+const PAR_COMUN = /^(and|or|y|o|input|output|client|server|front|back|frontend|backend|read|write|on|off|yes|no|true|false|ci|cd|ui|ux|ai|ia|pc|mac|win|windows|linux|ios|android|before|after|start|stop|open|close|dev|prod|test|build|run)\//i; // pares de palabras corrientes, no repos
 async function analizar(card, textoManual) {
   ghAviso = ""; iaError = "";
   if (card.tipo === "Foto" && !textoManual) {
@@ -587,11 +657,11 @@ async function analizar(card, textoManual) {
   }
   card.texto = texto.slice(0, 3500); card.tags = normalizarTags(hashtags(texto));
   // repos: links de GitHub + candidatos «owner/name» del texto, confirmados con la API
-  const cands = new Set();
+  const cands = new Set(), suelto = new Set(); // suelto = «owner/name» sacado del texto (no de un link): exige tracción
   for (const m of (card.tipo === "GitHub" ? card.url + " " + texto : texto).matchAll(/github\.com\/([\w.-]+)\/([\w.-]+)/gi)) cands.add(m[1] + "/" + m[2].replace(/\.git$/, ""));
-  if (card.tipo === "Foto" || /github|repo|open.?source/i.test(texto)) for (const m of texto.matchAll(/(?<![\w/.@#-])([A-Za-z][\w-]{1,38}\/[A-Za-z][\w.-]{1,60})(?![\w/])/g)) if (!/^(https?|www)/i.test(m[1]) && !/\.(com|org|io|net|app)\b/i.test(m[1])) cands.add(m[1]);
+  if (card.tipo === "Foto" || /github|repo|open.?source/i.test(texto)) for (const m of texto.matchAll(/(?<![\w/.@#-])([A-Za-z][\w-]{1,38}\/[A-Za-z][\w.-]{1,60})(?![\w/])/g)) if (!/^(https?|www)/i.test(m[1]) && !/\.(com|org|io|net|app)\b/i.test(m[1]) && !PAR_COMUN.test(m[1])) { cands.add(m[1]); suelto.add(m[1]); }
   const repos = [];
-  for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g) repos.push(repoInfo(g)); }
+  for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g && !(suelto.has(c) && Number(g.stargazers_count) < 10)) repos.push(repoInfo(g)); }
   let ctx = texto.slice(0, 2600);
   for (const r of repos.slice(0, 2)) { const rd = await ghReadme(r.full); r.readme = rd; ctx += `\n[REPO VERIFICADO ${r.full} — ${r.desc} — README: ${rd.slice(0, 900)}]`; }
   let ai = null;
@@ -925,7 +995,6 @@ function gruposDup(conTitulo) {
   });
   const g = {}; cards.forEach((c, i) => (g[f(i)] ||= []).push(c)); return Object.values(g).filter(a => a.length > 1);
 }
-const unirRepetidos = () => gruposDup().forEach(fusionar);
 let pausado = false, actual = null, sesionDesde = (db.bn || 0) + 1;
 function etqOrdenar() { $("#bOrdenar").textContent = corriendo ? `➕ Añadir bloque ${(db.bn || 0) + 1} (en cola)` : "Ordenar mis links"; }
 function pintaBloques() {
@@ -943,7 +1012,7 @@ async function correr() {
     $("#progS").textContent = c.url.replace(/^https?:\/\/(www\.)?/, "").slice(0, 60);
     pintaBloques();
     try { await analizar(c); } catch (e) { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = "Fallo inesperado: " + String(e).slice(0, 80); }
-    actual = null; unirRepetidos(); guardar(); pintar(); pintaBloques(); hechos++;
+    actual = null; guardar(); pintar(); pintaBloques(); hechos++;
     if (c.tipo === "Instagram") await dormir(700);
   }
   corriendo = false; $("#prog").style.display = "none"; etqOrdenar(); pintaBloques();
@@ -953,7 +1022,7 @@ async function correr() {
 
 // ============ pantalla ============
 function aviso(t) { const a = $("#aviso"); a.textContent = t; a.style.display = "block"; clearTimeout(aviso.t); aviso.t = setTimeout(() => a.style.display = "none", 4500); }
-function cambiaTab(t) { $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + t)); if (t === "fichas") pintar(); $("main").scrollTop = 0; }
+function cambiaTab(t) { $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + t)); if (t !== "fichas" && detId) cerrarDet(); if (t === "fichas") pintar(); $("main").scrollTop = 0; }
 const miles = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : String(n);
 const ordenCat = (a, b) => ((a === "Para revisar") - (b === "Para revisar")) || (a === "Sin clasificar") - (b === "Sin clasificar") || a.localeCompare(b, "es");
 let filtro = "todo";
@@ -970,44 +1039,129 @@ function pintar() {
   const q = $("#buscar").value.trim().toLowerCase();
   const cards = visibles();
   $("#cuenta").textContent = db.cards.length ? db.cards.length + " fichas" : "";
-  $("#filtros").innerHTML = FILTROS.map(([k, t]) => `<button data-f="${k}" class="${filtro === k ? "on" : ""}">${t}${k === "todo" ? "" : ` (${db.cards.filter(c => pasaFiltro(c, k)).length})`}</button>`).join("");
-  if (!db.cards.length) { $("#lista").innerHTML = '<div class="vacio"><b>Todavía no hay fichas</b>Ve a «Pegar», mete tus links y pulsa «Ordenar».</div>'; return; }
+  $("#filtros").innerHTML = FILTROS.map(([k, t]) => `<button data-f="${k}" class="${filtro === k ? "on" : ""}">${t}${k === "todo" ? "" : ` (${db.cards.filter(c => pasaFiltro(c, k)).length})`}</button>`).join("") + '<select id="catSel" aria-label="Ir a categoría"></select><button data-p="1" id="bPlegar">Plegar todo</button>';
+  if (!db.cards.length) { $("#lista").innerHTML = '<div class="vacio"><b>Todavía no hay fichas</b>Ve a «Pegar», mete tus links y pulsa «Ordenar».</div>'; return marca(); }
   const gg = {}; cards.forEach(c => ((gg[c.grupo || "AI"] ||= {})[c.categoria || "Otros"] ||= []).push(c)); // grupo principal > categoría
   const cerradas = new Set($$("#lista details:not([open])").map(d => d.dataset.k)); // lo nuevo nace abierto; solo recuerdo lo que cerraste
-  const pintaCats = (grupos, pre) => Object.keys(grupos).sort(ordenCat).map(k => `<details data-k="${esc(pre + k)}" ${(!cerradas.has(pre + k) || q) ? "open" : ""}><summary>${esc(k)} <b>${grupos[k].length}</b></summary><div class="secc">${grupos[k].sort(porRel).map(fichaHtml).join("")}</div></details>`).join("");
-  $("#lista").innerHTML = Object.keys(gg).sort((a, b) => a.localeCompare(b, "es")).map(g => `<details class="grupo" data-k="G:${esc(g)}" ${(!cerradas.has("G:" + g) || q) ? "open" : ""}><summary style="font-size:1.1em">📁 ${esc(g)} <b>${Object.values(gg[g]).reduce((n, a) => n + a.length, 0)}</b></summary>${pintaCats(gg[g], g + "/")}</details>`).join("") || '<div class="vacio">Nada que mostrar con este filtro.</div>';
+  const mejor = a => Math.max(...a.map(c => relevancia(c).n));
+  const ordC = g => (x, y) => ((x === "Para revisar") - (y === "Para revisar")) || ((x === "Otros" || x === "Sin clasificar") - (y === "Otros" || y === "Sin clasificar")) || (mejor(g[y]) - mejor(g[x])) || (g[y].length - g[x].length) || x.localeCompare(y, "es");
+  const pintaCats = (grupos, pre) => Object.keys(grupos).sort(ordC(grupos)).map(k => `<details data-k="${esc(pre + k)}" ${(!cerradas.has(pre + k) || q) ? "open" : ""}><summary>${IC.chev}<span class="cn">${esc(k)}</span><b>${grupos[k].length}</b></summary><div class="secc">${grupos[k].sort(porRel).map(filaHtml).join("")}</div></details>`).join("");
+  const gs = Object.keys(gg).sort((x, y) => x.localeCompare(y, "es"));
+  // con un solo grupo no hay carpeta que abrir y cerrar: se ven directamente las categorías
+  $("#lista").innerHTML = gs.length === 1 ? pintaCats(gg[gs[0]], gs[0] + "/")
+    : gs.map(g => `<details class="grupo" data-k="G:${esc(g)}" ${(!cerradas.has("G:" + g) || q) ? "open" : ""}><summary style="font-size:1.1em">${IC.chev}<span class="cn">${esc(g)}</span><b>${Object.values(gg[g]).reduce((n, a) => n + a.length, 0)}</b></summary>${pintaCats(gg[g], g + "/")}</details>`).join("")
+    || '<div class="vacio">Nada que mostrar con este filtro.</div>';
+  const opts = $$("#lista details:not(.grupo)").map(d => `<option value="${esc(d.dataset.k)}">${esc(d.querySelector(".cn").textContent)} (${d.querySelector("b").textContent})</option>`).join("");
+  $("#catSel").innerHTML = '<option value="">Ir a categoría…</option>' + opts; etqPlegar();
+  pintaDet();
+  marca();
 }
 const lista = (t, a, ord) => a && a.length ? `<div class="bl"><b>${t}</b><${ord ? "ol" : "ul"}>${a.map(x => `<li>${esc(x)}</li>`).join("")}</${ord ? "ol" : "ul"}></div>` : "";
-function enlacesDe(c) { // SIEMPRE se ve el link del post original y el del repo/web a donde lleva
-  const out = [], vistos = new Set(), add = (cls, t, u) => { if (!u || !/^https?:/i.test(u)) return; const k = claveUrl(u); if (vistos.has(k)) return; vistos.add(k); out.push(`<a class="lk ${cls}${(c.rotos || []).includes(u) ? " roto" : ""}" data-a="ext" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)} ↗</a>`); };
-  if (c.tipo !== "Foto") add("ig", c.tipo === "Instagram" ? "📷 Instagram original" : "🔗 Link original (" + c.tipo + ")", c.url);
+const SV = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const IC = {
+  chev: SV('<path d="M9 6l6 6-6 6"/>').replace("<svg", '<svg class="cv"'),
+  ig: SV('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>'),
+  repo: SV('<path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/>'),
+  web: SV('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>'),
+  star: SV('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'),
+  back: SV('<path d="M15 6l-6 6 6 6"/>')
+};
+function listaLinks(c) { // SIEMPRE se ve el link del post original y el del repo/web a donde lleva
+  const out = [], vistos = new Set(), add = (cls, t, u) => { if (!u || !/^https?:/i.test(u)) return; const k = claveUrl(u); if (vistos.has(k)) return; vistos.add(k); out.push({ cls, t, u, roto: (c.rotos || []).includes(u), ic: cls === "ig" ? (c.tipo === "Instagram" ? IC.ig : IC.web) : cls === "gh" ? IC.repo : IC.web }); };
+  if (c.tipo !== "Foto") add("ig", c.tipo === "Instagram" ? "Post de Instagram" : "Link original (" + c.tipo + ")", c.url);
   for (const r of (c.repos || []).slice(0, 2)) add("gh", "GitHub " + r.full + (r.stars && r.stars !== "?" ? " ★" + miles(r.stars) : ""), r.url);
   for (const l of (c.links || [])) add("", l.t, l.u);
   for (const u of (c.extra || []).slice(0, 3)) add("", "Otro link", u);
-  return out.join("");
+  return out;
 }
-function fichaHtml(c) {
-  const rl = relevancia(c), vio = c.vio || {};
-  const est = c.estado === "ok" ? "" : c.estado === "pendiente" ? '<span class="chip">en cola</span>' : '<span class="chip warn">revisar</span>';
-  const gal = c.imgs && c.imgs.length ? `<div class="gal">${c.imgs.slice(0, 8).map(u => `<a data-a="ext" href="${esc(u)}" target="_blank" rel="noopener noreferrer"><img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="this.closest('a').remove()"></a>`).join("")}</div>` : "";
-  const aprendido = [vio.voz ? "🎙 voz del vídeo" : c.voz === "no" ? "🔇 sin voz" : "", vio.imgs ? "🖼 texto de las imágenes" : "", vio.frames ? "🎞 fotogramas del vídeo" : "", c.repos && c.repos.length ? "📦 README" : ""].filter(Boolean).map(t => `<span class="chip">${t}</span>`).join("");
-  const hayMas = (c.puntos || []).length || (c.como || []).length || (c.skills || []).length || c.limites || c.notas;
-  return `<div class="card" data-id="${c.id}"><div class="cab"><h3 data-a="toggle">${esc(c.titulo)}</h3>${rl.n ? `<span class="rel r${rl.n}">${c.fav ? "⭐ " : ""}${ETQ_REL[rl.n]}</span>` : ""}</div>${gal}${c.resumen ? `<p class="res">${esc(c.resumen)}</p>` : ""}
-<div class="mas">${lista("Puntos clave", c.puntos)}${lista("Skills que propone", c.skills)}${lista("Cómo usarlo / instalarlo", c.como, true)}${c.limites ? `<div class="bl"><b>Requisitos y límites</b>${esc(c.limites)}</div>` : ""}${c.notas ? `<div class="notas">${esc(c.notas)}</div>` : ""}</div>
-<div class="enl">${enlacesDe(c)}${c.estado === "ok" ? '<button class="lk cc" data-a="claude">🧠 Para Claude Code</button>' : ""}</div>
-<div class="meta"><span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${(c.repos || []).slice(0, 2).map((r, _, A) => { const e = estadoRepo(r); return e ? `<span class="chip ${e.cls}">${A.length > 1 ? esc(r.full.split("/")[1]) + ": " : ""}${e.t}</span>` : ""; }).join("")}${(c.rotos || []).length ? `<span class="chip bad">❌ ${c.rotos.length} enlace(s) roto(s)</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${aprendido}${est}</div>
-${c.motivo ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo)}</div>` : ""}
-${c.buscado && c.links && c.links.length ? `<div class="nota">🔎 Buscado: ${esc(c.buscado)}</div>` : ""}
-<div class="fila" style="margin:8px 0 0"><button class="btn sm" data-a="toggle">${hayMas ? "Ver todo ▾" : "Más ▾"}</button><button class="btn sm" data-a="editar">✏️ Editar</button><button class="btn sm" data-a="mover">↔️ Mover</button></div>
-<div class="acc"><button class="btn sm" data-a="fav">${c.fav ? "★ Quitar favorita" : "☆ Favorita"}</button><button class="btn sm" data-a="links">🔎 Buscar links</button><button class="btn sm" data-a="copiar">Copiar</button><button class="btn sm" data-a="texto">Pegar texto</button><button class="btn sm" data-a="borrar" style="color:var(--bad)">Borrar</button></div></div>`;
+const aHtml = (l, cls, txt) => `<a class="${cls} ${l.cls}${l.roto ? " roto" : ""}" data-a="ext" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer" title="${esc(l.t)}"${txt ? "" : ` aria-label="${esc(l.t)}"`}>${l.ic}${txt ? esc(l.t) : ""}</a>`;
+const enlacesDe = c => listaLinks(c).map(l => aHtml(l, "lk", true)).join("");
+function filaHtml(c) {
+  const rl = relevancia(c), ls = listaLinks(c), ig = ls.find(l => l.cls === "ig"), mp = ls.find(l => l.cls !== "ig");
+  const rev = c.estado === "revisar", sub = rev ? (c.motivo || "Hay que revisarla") : c.estado === "pendiente" ? "En cola…" : String(c.resumen || "").replace(/\s+/g, " ");
+  return `<div class="rw${db.sel && db.sel[c.id] ? " marca" : ""}${detId === c.id ? " act" : ""}" data-id="${c.id}"><button class="sel" data-a="sel" aria-label="Seleccionar"><i>✓</i></button><button class="rb" data-a="det"><span class="rt">${rev ? '<span class="pt" aria-label="Revisar"></span>' : ""}${esc(c.titulo)}</span><span class="rs${rev ? " av" : ""}">${esc(sub) || "&nbsp;"}</span></button>${rl.n >= 4 || c.fav ? `<span class="rst" role="img" aria-label="Relevante">${IC.star}</span>` : ""}${ig ? aHtml(ig, "li") : ""}${mp ? aHtml(mp, "li") : ""}</div>`;
 }
-function ficha2txt(c) {
-  const r = c.repos && c.repos[0];
-  return [`### ${c.titulo}`, c.resumen, ...(c.puntos || []).map(x => "- " + x), ...(c.como || []).map((x, i) => `${i + 1}. ${x}`), ...(c.skills || []).map(x => "- Skill: " + x), r ? `Repo: ${r.url} (★${r.stars})` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => l.t + ": " + l.u), c.notas ? "**Mis notas:** " + c.notas : "", c.cuenta ? "Cuenta: " + c.cuenta : "", c.tipo === "Foto" ? "" : `Post original: ${c.url}`, ...(c.extra || []).map(u => "Otro link: " + u)].filter(Boolean).join("\n");
+// ---- detalle: hoja a pantalla completa en móvil, panel a la derecha en escritorio ----
+let detId = null, detHist = false;
+const esPC = () => matchMedia("(min-width:900px)").matches;
+window.sigImg = el => { let r = []; try { r = JSON.parse(el.dataset.r || "[]"); } catch (e) { } if (r.length) { el.dataset.r = JSON.stringify(r.slice(1)); el.src = r[0]; } else el.remove(); };
+function detalleHtml(c) {
+  const rl = relevancia(c), vio = c.vio || {}, cm = comandos(c), imgs = (c.imgs || []).filter(Boolean), rev = c.estado === "revisar";
+  const repoCh = (c.repos || []).slice(0, 2).map((r, _, A) => { const e = estadoRepo(r); return e ? `<span class="chip ${e.cls}">${A.length > 1 ? esc(r.full.split("/")[1]) + ": " : ""}${e.t}</span>` : ""; }).join("");
+  const leido = [vio.voz ? "voz del vídeo" : c.voz === "no" ? "sin voz" : "", vio.imgs ? "texto de las imágenes" : "", vio.frames ? "fotogramas del vídeo" : "", c.repos && c.repos.length ? "README" : ""].filter(Boolean).join(" · ");
+  const sel = db.sel && db.sel[c.id];
+  return `<div class="dh"><button class="btn sm" data-a="cerrar" aria-label="Volver a la lista">${IC.back}</button><span>Ficha</span></div><div id="detC"><h2>${esc(c.titulo)}</h2>
+<div class="meta"><span class="chip">${esc(c.categoria || "Otros")}</span>${rl.n ? `<span class="rel r${rl.n}">${c.fav ? "Favorita · " : ""}${ETQ_REL[rl.n]}</span>` : ""}<span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${repoCh}${(c.rotos || []).length ? `<span class="chip bad">${c.rotos.length} enlace(s) roto(s)</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${c.estado === "pendiente" ? '<span class="chip">en cola</span>' : rev ? '<span class="chip warn">revisar</span>' : ""}</div>
+${rev && c.motivo ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo)}</div>` : ""}
+${imgs.length ? `<img class="mini" src="${esc(imgs[0])}" data-r="${esc(JSON.stringify(imgs.slice(1, 6)))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="sigImg(this)">` : ""}
+${c.resumen ? `<p class="res">${esc(c.resumen)}</p>` : '<p class="nota">Sin resumen todavía.</p>'}
+${lista("Puntos clave", c.puntos)}${lista("Skills que propone", c.skills)}${cm.length ? `<div class="bl"><b>Instalación / uso</b>${cm.map(x => `<code class="cmd">${esc(x)}</code>`).join("")}</div>` : ""}${c.limites ? `<div class="bl"><b>Requisitos y límites</b>${esc(c.limites)}</div>` : ""}
+<span class="het" style="margin-top:16px">Links</span><div class="enl gr">${enlacesDe(c) || '<p class="hp">Sin links. Pulsa «Buscar links».</p>'}</div>
+${c.buscado && c.links && c.links.length ? `<div class="nota">Buscado: ${esc(c.buscado)}</div>` : ""}${c.notas ? `<div class="notas">${esc(c.notas)}</div>` : ""}
+<div class="acs"><button class="btn" data-a="editar">Editar</button><button class="btn" data-a="mover">Mover</button><button class="btn" data-a="fav">${c.fav ? "Quitar favorita" : "Favorita"}</button><button class="btn" data-a="links">Buscar links</button><button class="btn" data-a="sel">${sel ? "Quitar selección" : "Seleccionar"}</button><button class="btn" data-a="texto">Pegar texto</button><button class="btn" data-a="borrar" style="color:var(--bad)">Borrar</button></div>
+${leido ? `<div class="nota">Leído con: ${esc(leido)}</div>` : ""}</div>`;
 }
-function todoTxt() {
-  const g = {}; db.cards.filter(c => c.estado !== "pendiente").forEach(c => (g[c.categoria || "Sin clasificar"] ||= []).push(c));
-  return `# IG Extractor — ${db.cards.length} fichas\n\n` + Object.keys(g).sort((a, b) => a.localeCompare(b, "es")).map(k => `## ${k} (${g[k].length})\n\n` + g[k].map(ficha2txt).join("\n\n")).join("\n\n");
+function pintaDet(nuevo) {
+  const d = $("#det"), c = detId && db.cards.find(x => x.id === detId);
+  if (detId && !c) { detId = null; d.classList.remove("on"); document.body.style.overflow = ""; }
+  const y = !nuevo && $("#detC") ? $("#detC").scrollTop : 0;
+  d.innerHTML = c ? detalleHtml(c) : '<div class="vacioDet">Elige una ficha de la lista para ver el detalle.</div>';
+  if ($("#detC")) $("#detC").scrollTop = y;
+}
+function abrirDet(c) {
+  const nuevo = detId !== c.id; detId = c.id; pintaDet(nuevo);
+  $$("#lista .rw").forEach(r => r.classList.toggle("act", r.dataset.id === detId));
+  if (!esPC()) { $("#det").classList.add("on"); document.body.style.overflow = "hidden"; if (!N && !detHist) { try { history.pushState({ det: 1 }, ""); detHist = true; } catch (e) { } } }
+}
+function cierraDetUI() { detId = null; $("#det").classList.remove("on"); document.body.style.overflow = ""; pintaDet(); $$("#lista .rw.act").forEach(r => r.classList.remove("act")); }
+function cerrarDet() { if (detHist) { detHist = false; try { history.back(); } catch (e) { } } cierraDetUI(); }
+addEventListener("popstate", () => { detHist = false; if (detId) cierraDetUI(); });
+const etqPlegar = () => { const b = $("#bPlegar"); if (b) b.textContent = $$("#lista details[open]").length ? "Plegar todo" : "Desplegar todo"; };
+// ============ exportar .txt para Claude Code (una sola función para todo) ============
+const selIds = () => { db.sel = db.sel || {}; return db.sel; };
+const ordenExp = (a, b) => ordenCat(a.categoria || "", b.categoria || "") || porRel(a, b);
+const elegidas = () => db.cards.filter(c => selIds()[c.id] && c.estado !== "pendiente").sort(ordenExp);
+const RE_CMD = /^(npx?|pnpm|yarn|bunx?|pipx?|uvx?|git clone|brew|winget|choco|curl|docker|cargo|go install|claude|\/plugin|\/install|python3?|node|ollama|irm|iwr)\b/i;
+function comandos(c) { // comandos entre `comillas` que aparecen en la propia ficha (no se inventa nada)
+  const txt = [c.resumen, ...(c.puntos || [])].filter(Boolean).join("\n");
+  return [...new Set([...(c.como || []), ...[...txt.matchAll(/`([^`\n]{4,160})`/g)].map(m => m[1].trim()).filter(s => RE_CMD.test(s))])];
+}
+function exportTxt(cards) {
+  const lista = (t, a, ord) => a && a.length ? t + ":\n" + a.map((x, i) => ord ? `  ${i + 1}. ${x}` : `  - ${x}`).join("\n") : "";
+  const bloque = (c, i) => {
+    const r = c.repos && c.repos[0], rl = relevancia(c), vistos = new Set(), L = [];
+    const add = (t, u) => { if (!u || !/^https?:/i.test(u)) return; const k = claveUrl(u); if (vistos.has(k)) return; vistos.add(k); L.push(`  - ${t}: ${u}`); };
+    if (c.tipo !== "Foto") add(c.tipo === "Instagram" ? "Post original (Instagram)" : "Link original (" + c.tipo + ")", c.url);
+    (c.repos || []).slice(0, 2).forEach(x => add("Repo GitHub" + (x.stars && x.stars !== "?" ? " (★" + x.stars + ")" : ""), x.url));
+    (c.links || []).forEach(l => add(l.t || "Web", l.u)); (c.extra || []).forEach(u => add("Otro link", u));
+    return [`## ${i + 1}. ${c.titulo}`, `Categoría: ${c.categoria}${rl.n ? " · Relevancia: " + ETQ_REL[rl.n] + " (" + rl.n + "/5)" : ""}${c.fav ? " · Favorita" : ""}`,
+      c.resumen ? "Qué es y para qué sirve: " + c.resumen : "", lista("Puntos clave", c.puntos), lista("Skills que propone", c.skills),
+      comandos(c).length ? lista("Instalación / uso (comandos citados en la ficha)", comandos(c), true) : "Instalación / uso: sin comando verificado" + (r ? " (mira el README del repo)" : ""),
+      c.limites ? "Requisitos y límites: " + c.limites : "", L.length ? "Links:\n" + L.join("\n") : "Links: ninguno", c.notas ? "Notas de Jorge: " + c.notas : ""].filter(Boolean).join("\n");
+  };
+  return `# IG Extractor — ${cards.length} elemento${cards.length === 1 ? "" : "s"} para Claude Code (${new Date().toISOString().slice(0, 10)})\n\nInstrucciones para Claude Code:\n- Instala/prueba cada elemento por orden y pega la salida real de cada comando.\n- Pide confirmación antes de ejecutar nada destructivo (borrar, sobrescribir, desinstalar).\n- No escribas claves ni contraseñas en archivos.\n- Los datos se extrajeron solos de Instagram y pueden tener fallos: compruébalos en los links. No inventes comandos ni repos; donde ponga «sin comando verificado», sigue el README oficial.\n\n${cards.map(bloque).join("\n\n")}\n`;
+}
+const nomTxt = () => `IG-Extractor-${new Date().toISOString().slice(0, 10)}.txt`;
+function guardarTxt(t) {
+  if (N) { N.copiar(t); N.compartir(t, nomTxt()); return; } // APK: sin acceso a archivos → portapapeles + compartir como texto
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([t], { type: "text/plain;charset=utf-8" })); a.download = nomTxt(); document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function abrirCC(cards) { $("#ccTxt").value = exportTxt(cards); $("#ccH").textContent = `Exportar .txt · ${cards.length} elemento${cards.length === 1 ? "" : "s"}`; $("#ccGuarda").textContent = N ? "Compartir .txt" : "Guardar .txt"; $("#dcc").showModal(); }
+async function exportar() {
+  let cs = elegidas();
+  if (!cs.length) {
+    cs = visibles().filter(c => c.estado !== "pendiente").sort(ordenExp);
+    if (!cs.length) return aviso("No hay fichas que exportar");
+    if (!await confirmar("Exportar .txt", `<p>No marcaste ninguna ficha. ¿Exportar todo lo visible (${cs.length})?</p>`, "Exportar todo")) return;
+  }
+  abrirCC(cs);
+}
+function marca() {
+  const n = Object.keys(selIds()).filter(id => db.cards.some(c => c.id === id)).length;
+  $("#barSel").classList.toggle("on", n > 0); $("#selN").textContent = `${n} seleccionada${n === 1 ? "" : "s"}`; $("#bExport").textContent = n ? `Exportar .txt (${n})` : "Exportar .txt";
+  $$("#lista .rw").forEach(el => el.classList.toggle("marca", !!selIds()[el.dataset.id]));
+  const bs = $("#det [data-a=sel]"); if (bs) bs.textContent = selIds()[detId] ? "Quitar selección" : "Seleccionar";
+  $("main").style.setProperty("--bs", n ? $("#barSel").offsetHeight + 8 + "px" : "0px");
 }
 function pregunta(titulo, valor, largo) {
   return new Promise(res => {
@@ -1020,34 +1174,15 @@ const copiar = t => { if (N) return N.copiar(t); const ok = () => aviso("Copiado
 function abrir(u) { if (N) N.abrir(u); else if (SRV) postSrv("/api/abrir", { url: u }); else window.open(u, "_blank", "noopener"); }
 document.addEventListener("click", e => { const a = e.target.closest && e.target.closest("a[data-a=ext]"); if (a && (N || SRV)) { e.preventDefault(); abrir(a.href); } });
 
-// ============ para Claude Code ============
-const TAREAS = {
-  evaluar: ["Evaluar", "Investiga los enlaces de arriba y dime en 5 líneas qué hace de verdad, si encaja en mis proyectos y cómo lo integrarías. No instales nada todavía."],
-  instalar: ["Instalar y probar", "Instálalo siguiendo el README oficial, pruébalo con un comando real y pégame la salida. Si falla 3 veces, para y explícame el error exacto."],
-  skill: ["Crear skill", "Crea una skill de Claude Code (SKILL.md) a partir de esto: qué hace, cuándo debe activarse y los pasos. Guárdala en ~/.claude/skills/ y enséñame el resultado."],
-  priorizar: ["Priorizar", "Ordena estos elementos por utilidad para mis proyectos, dime cuáles instalar primero y por qué, en una tabla corta."]
-};
-function promptCC(cards, tarea) {
-  const bloque = (c, i) => {
-    const r = c.repos && c.repos[0], rl = relevancia(c);
-    return [`### ${cards.length > 1 ? (i + 1) + ". " : ""}${c.titulo}  (${c.categoria}${rl.n ? " · relevancia: " + ETQ_REL[rl.n] : ""})`, c.resumen ? "Qué es: " + c.resumen : "",
-      c.puntos && c.puntos.length ? "Puntos clave:\n" + c.puntos.map(x => "- " + x).join("\n") : "", c.skills && c.skills.length ? "Skills que propone:\n" + c.skills.map(x => "- " + x).join("\n") : "",
-      c.como && c.como.length ? "Cómo se usa / instala (según lo extraído):\n" + c.como.map((x, j) => `${j + 1}. ${x}`).join("\n") : "", c.limites ? "Requisitos/límites: " + c.limites : "",
-      "Enlaces:", c.tipo !== "Foto" ? `- Post original (${c.tipo}): ${c.url}` : "", r ? `- GitHub: ${r.url}${r.stars && r.stars !== "?" ? " (★" + r.stars + ")" : ""}` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => `- ${l.t}: ${l.u}`),
-      c.notas ? "Mis notas: " + c.notas : ""].filter(Boolean).join("\n");
-  };
-  return `# Tarea para Claude Code\nTe paso ${cards.length} elemento${cards.length > 1 ? "s" : ""} que guardé de Instagram con IG Extractor. Los datos se extrajeron automáticamente: pueden tener fallos, compruébalos en los enlaces antes de fiarte.\n\n${cards.map(bloque).join("\n\n")}\n\n## Qué quiero que hagas\n${TAREAS[tarea][1]}\n\nReglas: no inventes comandos ni datos; si no puedes verificar algo, dilo.`;
-}
-let ccCards = [], ccTarea = "evaluar";
-function pintaCC() {
-  $("#ccT").innerHTML = Object.entries(TAREAS).map(([k, v]) => `<button data-k="${k}" style="${k === ccTarea ? "background:var(--ac);color:var(--acx);border-color:var(--ac)" : ""}">${v[0]}</button>`).join("");
-  $("#ccTxt").value = promptCC(ccCards, ccTarea);
-}
-function abrirCC(cards, tarea) { ccCards = cards; ccTarea = tarea || (cards.length > 1 ? "priorizar" : "evaluar"); pintaCC(); $("#dcc").showModal(); }
-$("#ccT").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { ccTarea = b.dataset.k; pintaCC(); } });
-$("#ccCopia").onclick = () => { copiar($("#ccTxt").value); $("#dcc").close(); };
+// ============ eventos de exportar y selección ============
+$("#ccCopia").onclick = () => copiar($("#ccTxt").value);
+$("#ccGuarda").onclick = () => { guardarTxt($("#ccTxt").value); if (!N) aviso("Guardado " + nomTxt()); };
 $("#ccNo").onclick = () => $("#dcc").close();
-$("#bClaude").onclick = () => { const todas = visibles().filter(c => c.estado === "ok"); if (!todas.length) return aviso("No hay fichas listas para copiar"); abrirCC(todas.sort(porRel).slice(0, 30)); if (todas.length > 30) aviso("Van las 30 más relevantes (de " + todas.length + ")"); };
+$("#bExport").onclick = $("#selExp").onclick = exportar;
+$("#selTodas").onclick = () => { visibles().forEach(c => { if (c.estado !== "pendiente") selIds()[c.id] = 1; }); guardar(); marca(); };
+$("#selNinguna").onclick = () => { db.sel = {}; guardar(); marca(); };
+$("#bMas").onclick = () => $("#menuMas").classList.toggle("on");
+document.addEventListener("click", e => { if (!e.target.closest("#bMas")) $("#menuMas").classList.remove("on"); });
 // ============ mover (sin arrastrar: un botón y eliges) ============
 let mvCard = null, mvSel = null;
 function abrirMover(c) {
@@ -1062,7 +1197,7 @@ $("#mvSi").onclick = () => {
   if (t) { const p = t.split(/[›>\/]/).map(x => x.trim()).filter(Boolean); g = p.length > 1 ? p[0] : mvCard.grupo; cat = p.length > 1 ? p[1] : p[0]; } else if (mvSel) { g = mvSel.g; cat = mvSel.c; } else return aviso("Elige una sección o escribe una nueva");
   $("#dmv").close(); mover(mvCard, g, cat);
 };
-// ============ duplicados y reclasificar ============
+// ============ duplicados y comprobaciones ============
 function confirmar(titulo, html, si = "Aceptar") {
   return new Promise(res => { $("#dT").textContent = titulo; $("#dC").innerHTML = html; $("#dSi").textContent = si; const d = $("#dlg"); $("#dSi").onclick = () => { d.close(); res(true); }; $("#dNo").onclick = () => { d.close(); res(false); }; d.oncancel = () => res(false); d.showModal(); });
 }
@@ -1098,49 +1233,6 @@ async function comprobarTodo() {
   comprobando = false; pintar();
   aviso(`Revisadas ${cards.length} fichas: ${rotos} enlace(s) roto(s) y ${obs} repo(s) obsoleto(s) o archivado(s)`);
 }
-async function priorizarSemana() {
-  const cand = db.cards.filter(c => c.estado === "ok" && !(c.repos && c.repos[0] && (estadoRepo(c.repos[0]) || {}).cls === "bad") && !(c.rotos || []).length).sort(porRel).slice(0, 20);
-  if (!cand.length) return aviso("Aún no hay fichas buenas para priorizar");
-  aviso("Pensando tu semana…");
-  const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
-  let plan = null;
-  if (hayIA()) {
-    const j = await chatJson(`Eres mi asistente de productividad. Tengo ideas guardadas de Instagram. Soy desarrollador con TDAH: pocas cosas, concretas. Elige las 5 que más me conviene mirar ESTA semana (útiles para Claude Code, agentes de IA, herramientas gratis/open source, automatización) y ordénalas de Lunes a Viernes (lo más fácil y útil primero). Usa SOLO estos datos, no inventes. Responde SOLO JSON: {"plan":[{"id":"...","motivo":"1 frase de por qué","paso":"primer paso físico concreto, 1 frase"}]}
-FICHAS: ${JSON.stringify(cand.map(c => ({ id: c.id, titulo: c.titulo, que: (c.resumen || "").slice(0, 200), categoria: c.categoria, relevancia: relevancia(c).n, repo: c.repos && c.repos[0] ? c.repos[0].full + " " + (estadoRepo(c.repos[0]) || {}).t : "" })))}`);
-    if (j && Array.isArray(j.plan)) plan = j.plan.map(x => ({ c: cand.find(c => c.id === x.id), motivo: x.motivo, paso: x.paso })).filter(x => x.c).slice(0, 5);
-  }
-  if (!plan || !plan.length) plan = cand.slice(0, 5).map(c => ({ c, motivo: (c.resumen || "").split(/(?<=[.!?])\s/)[0].slice(0, 140), paso: "Abre el enlace y decide en 5 minutos si lo instalas." }));
-  const html = `<ol class="sem">${plan.map((x, i) => `<li><b>${dias[i]}</b> · ${esc(x.c.titulo)}<small>${esc(x.motivo || "")}</small><small>👉 ${esc(x.paso || "")}</small></li>`).join("")}</ol><p class="nota">«Preparar» deja el texto listo para pegar en Claude Code.</p>`;
-  if (await confirmar("Tu semana: 5 cosas", html, "Preparar para Claude Code")) abrirCC(plan.map(x => x.c), "priorizar");
-}
-const slug = t => String(t || "sin título").replace(/[\\/:*?"<>|#^\[\]]/g, " ").replace(/\s+/g, " ").trim().slice(0, 70) || "sin título";
-function notaMd(c) {
-  const r = c.repos && c.repos[0], rl = relevancia(c), er = estadoRepo(r);
-  const fm = ["---", `titulo: "${String(c.titulo).replace(/"/g, "'")}"`, `tipo: ${c.tipo}`, `categoria: ${c.categoria}`, `grupo: ${c.grupo || "AI"}`, `relevancia: ${rl.n}`, c.tipo !== "Foto" ? `origen: ${c.url}` : "", r ? `repo: ${r.url}` : "", r && r.stars ? `estrellas: ${r.stars}` : "", er ? `estado_repo: "${er.t}"` : "", `tags: [${["ig-extractor", ...(c.tags || []).map(t => String(t).replace(/^#/, ""))].join(", ")}]`, `exportado: ${new Date().toISOString().slice(0, 10)}`, "---"].filter(Boolean).join("\n");
-  const sec = (t, a, num) => a && a.length ? `\n## ${t}\n${a.map((x, i) => num ? `${i + 1}. ${x}` : `- ${x}`).join("\n")}\n` : "";
-  const enl = [c.tipo !== "Foto" ? `- Post original: ${c.url}` : "", r ? `- GitHub: ${r.url}` : "", ...(c.links || []).filter(l => !r || l.u !== r.url).map(l => `- ${l.t}: ${l.u}`)].filter(Boolean);
-  return `${fm}\n\n# ${c.titulo}\n\n${c.resumen || ""}\n${sec("Puntos clave", c.puntos)}${sec("Skills que propone", c.skills)}${sec("Cómo usarlo", c.como, true)}${c.limites ? `\n## Requisitos y límites\n${c.limites}\n` : ""}${sec("Enlaces", enl)}${c.notas ? `\n## Mis notas\n${c.notas}\n` : ""}`;
-}
-async function exportarObsidian() {
-  const cards = db.cards.filter(c => c.estado === "ok"); if (!cards.length) return aviso("No hay fichas listas para exportar");
-  const usados = new Set(), arch = [], idx = {};
-  for (const c of cards) {
-    let base = `${slug(c.grupo || "AI")}/${slug(c.categoria)}/${slug(c.titulo)}`, k = base, i = 2; while (usados.has(k.toLowerCase())) k = base + " " + i++; usados.add(k.toLowerCase());
-    arch.push({ ruta: k + ".md", texto: notaMd(c) }); (idx[c.categoria] ||= []).push(`- [[${k}|${c.titulo.replace(/[\[\]|]/g, " ")}]] · ${ETQ_REL[relevancia(c).n] || ""}`);
-  }
-  arch.push({ ruta: "IG Extractor.md", texto: `# IG Extractor — índice\n\n${Object.keys(idx).sort().map(k => `## ${k}\n${idx[k].join("\n")}`).join("\n\n")}\n` });
-  await srvListo;
-  if (SRV) { const r = await postSrv("/api/obsidian", { archivos: arch }); return aviso(r && r.ok ? `Exportadas ${r.n} notas a: ${r.dir}` : "No pude exportar a Obsidian"); }
-  const t = arch.map(a => `<!-- ${a.ruta} -->\n${a.texto}`).join("\n\n"); N ? N.compartir(t, "IG Extractor (Obsidian)") : copiar(t); aviso("Copié todas las notas en un solo texto (en el programa de PC se guardan como archivos)");
-}
-function reclasificar() { // algoritmo nuevo sobre lo ya guardado (sin red); respeta lo que moviste a mano
-  let n = 0;
-  for (const c of db.cards) {
-    if (c.estado !== "ok" || c.manual) continue;
-    const nueva = clasificar(c, c.categoria); if (nueva !== c.categoria) { c.categoria = nueva; n++; }
-  }
-  guardar(); pintar(); return n;
-}
 function migrarCats() { let n = 0; for (const c of db.cards) { const v = normCat(c.categoria); if (v && v !== c.categoria) { c.categoria = v; n++; } } if (n) guardar(); }
 
 // ============ eventos ============
@@ -1163,8 +1255,6 @@ $("#bOrdenar").onclick = () => {
 $("#bParar").onclick = () => { pausado = !pausado; $("#bParar").textContent = pausado ? "▶ Reanudar" : "⏸ Pausar"; };
 $("#bloques").addEventListener("click", e => { const n = Number(e.target.dataset.bq); if (!n) return; db.cards = db.cards.filter(c => !(c.bloque === n && c.estado === "pendiente" && c !== actual)); guardar(); pintaBloques(); pintar(); aviso(`Bloque ${n}: cancelé lo que faltaba`); });
 $("#buscar").addEventListener("input", pintar);
-$("#bCopiar").onclick = () => db.cards.length ? copiar(todoTxt()) : aviso("No hay fichas");
-$("#bComp").onclick = () => db.cards.length ? (N ? N.compartir(todoTxt(), "IG Extractor") : copiar(todoTxt())) : aviso("No hay fichas");
 $("#bReint").onclick = () => { const f = db.cards.filter(c => c.estado === "revisar"); if (!f.length) return aviso("No hay fallidas"); const n = (db.bn || 0) + 1; db.bn = n; f.forEach(c => { c.estado = "pendiente"; c.bloque = n; }); guardar(); cambiaTab("pegar"); pintaBloques(); correr(); };
 $("#bLinksMasivos").onclick = async () => {
   const f = db.cards.filter(c => c.estado === "ok" && (!c.links || !c.links.length || c.links.length < 2));
@@ -1179,25 +1269,31 @@ $("#bLinksMasivos").onclick = async () => {
   $("#bLinksMasivos").disabled = false;
   aviso(`Investigadas ${f.length} fichas: ${n} links nuevos encontrados`);
 };
-$("#lista").addEventListener("click", async e => {
-  const card = e.target.closest(".card"); if (!card) return; const c = db.cards.find(x => x.id === card.dataset.id); if (!c) return;
+$("#lista").addEventListener("click", e => {
+  const row = e.target.closest(".rw"); if (!row) return; const c = db.cards.find(x => x.id === row.dataset.id); if (!c) return;
   const el = e.target.closest("[data-a]"), a = el && el.dataset.a;
   if (a === "ext") return; // enlace de verdad: el navegador lo abre solo
-  if (!a || a === "toggle") { card.classList.toggle("open"); const t = card.querySelector("button[data-a=toggle]"); if (t) t.textContent = card.classList.contains("open") ? "Ver menos ▴" : "Ver todo ▾"; return; }
+  if (a === "sel") return alterna(c);
+  abrirDet(c);
+});
+function alterna(c) { const m = selIds(); if (m[c.id]) delete m[c.id]; else m[c.id] = 1; guardar(); marca(); }
+$("#det").addEventListener("click", async e => {
+  const el = e.target.closest("[data-a]"); if (!el) return; const a = el.dataset.a;
+  if (a === "ext") return;
+  if (a === "cerrar") return cerrarDet();
+  const c = db.cards.find(x => x.id === detId); if (!c) return;
   if (a === "editar") return abrirEditor(c);
   if (a === "mover") return abrirMover(c);
-  if (a === "claude") return abrirCC([c]);
+  if (a === "sel") return alterna(c);
   if (a === "links") return pedirLinks(c);
   if (a === "fav") { c.fav = !c.fav; guardar(); return pintar(); }
-  if (a === "copiar") copiar(ficha2txt(c));
-  if (a === "borrar") { if (await confirmar("Borrar ficha", `<p>¿Borrar «${esc(c.titulo.slice(0, 70))}»?</p>`)) { db.cards = db.cards.filter(x => x !== c); guardar(); pintar(); } }
+  if (a === "borrar") { if (await confirmar("Borrar ficha", `<p>¿Borrar «${esc(c.titulo.slice(0, 70))}»?</p>`)) { db.cards = db.cards.filter(x => x !== c); guardar(); cerrarDet(); pintar(); } }
   if (a === "texto") { const v = await pregunta("Pega aquí el texto del post (la descripción)", c.texto || "", true); if (v && v.trim()) { c.estado = "pendiente"; guardar(); cambiaTab("pegar"); $("#prog").style.display = "block"; await analizar(c, v.trim()); guardar(); $("#prog").style.display = "none"; cambiaTab("fichas"); } }
 });
-$("#filtros").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { filtro = b.dataset.f; pintar(); } });
+$("#filtros").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.dataset.p) { const ab = $$("#lista details[open]").length > 0; $$("#lista details").forEach(d => d.open = !ab); return etqPlegar(); } filtro = b.dataset.f; pintar(); });
+$("#filtros").addEventListener("change", e => { if (e.target.id !== "catSel" || !e.target.value) return; const d = $$("#lista details").find(x => x.dataset.k === e.target.value); e.target.value = ""; if (d) { d.open = true; etqPlegar(); d.scrollIntoView(); } });
 $("#bDup").onclick = quitarDuplicados;
-$("#bSemana").onclick = priorizarSemana;
 $("#bComprobar").onclick = comprobarTodo;
-$("#bObs").onclick = exportarObsidian;
 $("#bGuardar").onclick = async () => {
   db.cfg = { nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim(), groq: $("#kGq").value.trim(), intereses: $("#kInt").value.trim() }; guardar(); muertos = {}; pintar();
   $("#kEstado").textContent = "Probando…";
@@ -1206,8 +1302,7 @@ $("#bGuardar").onclick = async () => {
   if (db.cfg.github) { const r = await http("https://api.github.com/rate_limit", { headers: ghH() }); out.push(r.status === 200 ? "GitHub ✓" : "GitHub ✗ token rechazado"); }
   $("#kEstado").textContent = out.join(" · ");
 };
-$("#bReclas").onclick = () => aviso(`Reclasificadas ${reclasificar()} fichas (las que moviste a mano no se tocan)`);
-$("#bBorrar").onclick = async () => { const v = await pregunta("Escribe BORRAR para eliminar todas las fichas", ""); if (v && v.trim().toUpperCase() === "BORRAR") { db.cards = []; guardar(); pintar(); aviso("Fichas borradas"); } };
+$("#bBorrar").onclick = async () => { const v = await pregunta("Escribe BORRAR para eliminar todas las fichas", ""); if (v && v.trim().toUpperCase() === "BORRAR") { db.cards = []; db.sel = []; guardar(); if (SRV) postSrv("/api/respaldo", { vaciar: true }); pintar(); aviso("Fichas borradas"); } };
 $$("nav button").forEach(b => b.onclick = () => cambiaTab(b.dataset.t));
 // ---- hoja de edición ----
 $("#hX").onclick = $("#hNo").onclick = cerrarEditor;
@@ -1224,10 +1319,12 @@ $("#hDest").addEventListener("click", e => {
   $("#hGru").value = b.dataset.g; $("#hCat").value = b.dataset.c; pintarDestino();
 });
 window.__atras = () => {
+  if ($("#menuMas").classList.contains("on")) { $("#menuMas").classList.remove("on"); return true; }
   if ($("#dcc").open) { $("#dcc").close(); return true; }
   if ($("#dmv").open) { $("#dmv").close(); return true; }
   if (editando) { cerrarEditor(); return true; }
   const d = $("#dlg"); if (d.open) { d.close(); return true; }
+  if (detId && $("#det").classList.contains("on")) { cerrarDet(); return true; }
   if (!$("#p-pegar").classList.contains("on")) { cambiaTab("pegar"); return true; }
   return false;
 };
@@ -1245,7 +1342,7 @@ window.__chat = (t, fs) => {
 };
 try { const k = N && N.claves ? JSON.parse(N.claves()) : {}; if (!db.cfg.nvidia && k.nvidia) db.cfg.nvidia = k.nvidia; if (!db.cfg.openrouter && k.openrouter) db.cfg.openrouter = k.openrouter; } catch (e) { }
 $("#grupo").value = db.grupo || "AI"; $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github; $("#kGq").value = db.cfg.groq || ""; $("#kInt").value = db.cfg.intereses || "";
-srvListo.then(async () => { if (!SRV) return; try { const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } });
+srvListo.then(async () => { if (!SRV) return; try { if (!db.cards.length) { const r = await (await fetch("/api/respaldo")).json(); if (r.cards && r.cards.length) { db.cards = r.cards; db.sel = r.sel || []; guardar(); pintar(); aviso("Recuperé " + r.cards.length + " fichas de la copia"); } } const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } });
 // semilla: investigación precargada. Llega por autoactualización, cifrada (el repo es público); la clave sale de la que ya lleva la APK
 async function cargarSemilla() {
   try {
@@ -1260,16 +1357,17 @@ async function cargarSemilla() {
       }
     }
     if (!sm && N && N.semilla) sm = N.semilla(); // respaldo: la que va dentro de la APK
+    if (!sm && !N) { await srvListo; if (SRV) { try { sm = await (await fetch("/api/semilla")).text(); } catch (e) { } } } // PC: semilla local
     if (!sm) return;
-    const sd = JSON.parse(sm), ver = String(sd.ver || sd.cards.length);
+    const sd = JSON.parse(sm); if (!sd.cards || !sd.cards.length) return; const ver = String(sd.ver || sd.cards.length);
     if (db.semilla === ver) return;
     const tiene = new Set(db.cards.map(c => c.url));
     sd.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); });
-    db.semilla = ver; guardar(); pintar();
+    db.semilla = ver; migrarCats(); guardar(); pintar();
   } catch (e) { }
 }
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
-migrarCats(); unirRepetidos(); pintar(); detectar(); cargarSemilla();
+migrarCats(); pintar(); detectar(); cargarSemilla();
 if (db.cards.some(c => c.estado === "pendiente")) { const n = (db.bn || 0) + 1; db.bn = n; sesionDesde = n; db.cards.forEach(c => { if (c.estado === "pendiente") c.bloque = n; }); guardar(); pintaBloques(); aviso("Quedaban links a medias: continúo."); correr(); }
 </script>
 </body>

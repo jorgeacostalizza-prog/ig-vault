@@ -69,10 +69,10 @@ def main(movil):
         res.append(ok("notas guardadas y persistidas", st["n"].startswith("NOTA DE JORGE") and st["ls"]))
         res.append(ok("tags con # y sin espacios raros", st["tags"] == "#voz,#dictado,#prueba"))
 
-        # 2) la nota se ve en la ficha y en el texto exportado
-        vis = pg.evaluate("() => document.querySelector('#lista').innerHTML.includes('NOTA DE JORGE')")
-        res.append(ok("la nota se ve en la ficha", vis))
-        res.append(ok("la nota sale al copiar", pg.evaluate("() => ficha2txt(db.cards[0]).includes('Mis notas')")))
+        # 2) la nota se ve en el detalle y en el texto exportado
+        vis = pg.evaluate("() => { abrirDet(db.cards[0]); const r = document.querySelector('#det').innerHTML.includes('NOTA DE JORGE'); cerrarDet(); return r; }")
+        res.append(ok("la nota se ve en el detalle", vis))
+        res.append(ok("la nota sale en el .txt", pg.evaluate("() => exportTxt([db.cards[0]]).includes('Notas de Jorge')")))
 
         # 3) mover con el editor (seleccionando seccion existente)
         pg.evaluate("abrirEditor(db.cards[2])"); pg.wait_for_timeout(200)

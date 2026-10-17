@@ -1,4 +1,4 @@
-# Prueba 2 (2026-10-15): fotogramas del video, bloques en cola, repos obsoletos, enlaces rotos, semana, Obsidian.
+# Prueba 2 (2026-10-15): fotogramas del video, bloques en cola, repos obsoletos, enlaces rotos, selección y exportar .txt.
 import json, sys, threading, time
 from playwright.sync_api import sync_playwright
 
@@ -73,11 +73,11 @@ with sync_playwright() as p:
     c = pg.evaluate("(()=>{const c=db.cards[0];return {frames:c.vio&&c.vio.frames,t:c.texto,n:window.__fr,rep:(c.repos||[]).map(r=>r.full)}})()")
     ok("se pidieron fotogramas del vídeo", c["n"] >= 5, c["n"])
     ok("lo que se ve en el vídeo entra en la ficha", c["frames"] and "npx foo-cli install" in c["t"], c)
-    ok("la ficha enseña 🎞 fotogramas del vídeo", "fotogramas del vídeo" in (pg.evaluate("cambiaTab('fichas')") or "") + pg.inner_text("#lista"))
+    ok("la ficha enseña 🎞 fotogramas del vídeo", "fotogramas del vídeo" in (pg.evaluate("cambiaTab('fichas')") or "") + (pg.click(".rw .rb") or "") + pg.inner_text("#det"))
 
     # ---- repos obsoletos ----
     pg.evaluate("cambiaTab('fichas')"); pg.wait_for_timeout(200)
-    txt = pg.inner_text("#lista")
+    pg.evaluate("cerrarDet()"); txt = pg.inner_text("#lista")
     ok("repo con pushed 2022 sale como Obsoleto", "Obsoleto" in txt or pg.evaluate("estadoRepo({pushed:'2022-01-01T00:00:00Z'}).cls") == "bad")
     r = pg.evaluate("[estadoRepo({pushed:'2022-01-01T00:00:00Z'}).cls, estadoRepo({archived:true,pushed:'2026-10-01T00:00:00Z'}).cls, estadoRepo({pushed:new Date().toISOString()}).cls, estadoRepo({pushed:new Date(Date.now()-8*2.63e9).toISOString()}).cls]")
     ok("estado repo: obsoleto/archivado=bad, reciente=ok, 8 meses=warn", r == ["bad", "bad", "ok", "warn"], r)
@@ -86,30 +86,41 @@ with sync_playwright() as p:
     pg.evaluate("""()=>{db.cards=[{id:'x1',url:'https://www.instagram.com/p/ZZZ/',tipo:'Instagram',estado:'ok',grupo:'AI',categoria:'Repositorios',titulo:'Con enlaces',resumen:'r',
       repos:[{full:'acme/borrada',url:'https://github.com/acme/borrada',stars:1},{full:'acme/archivada',url:'https://github.com/acme/archivada',stars:5,pushed:'2025-01-01T00:00:00Z'}],
       links:[{t:'Viva',u:'https://ok.test/viva'},{t:'Muerta',u:'https://ok.test/muerta'}],tags:[]}];guardar();pintar();}""")
-    pg.click("#bComprobar"); pg.wait_for_function("!comprobando", timeout=40000); pg.wait_for_timeout(300)
+    pg.click("#bMas"); pg.click("#bComprobar"); pg.wait_for_function("!comprobando", timeout=40000); pg.wait_for_timeout(300)
     d = pg.evaluate("({rotos:db.cards[0].rotos, arch:db.cards[0].repos[1].archived})")
     ok("detecta el enlace roto y el repo borrado", "https://ok.test/muerta" in d["rotos"] and "https://github.com/acme/borrada" in d["rotos"] and "https://ok.test/viva" not in d["rotos"], d)
     ok("detecta repo archivado", d["arch"] is True)
-    pg.evaluate("cambiaTab('fichas')"); pg.wait_for_timeout(200)
-    ok("la ficha muestra ❌ enlaces rotos y 🗄 archivado", "roto(s)" in pg.inner_text("#lista") and "archivado" in pg.inner_text("#lista"), pg.inner_text("#lista")[:400])
+    pg.evaluate("cambiaTab('fichas')"); pg.wait_for_timeout(200); pg.click(".rw .rb"); pg.wait_for_timeout(200)
+    ok("el detalle muestra enlaces rotos y archivado", "roto(s)" in pg.inner_text("#det") and "archivado" in pg.inner_text("#det"), pg.inner_text("#det")[:400]); pg.evaluate("cerrarDet()")
 
-    # ---- semana ----
-    pg.evaluate("""()=>{db.cards=[1,2,3,4,5,6,7].map(i=>({id:'s'+i,url:'https://ex.test/'+i,tipo:'Web',estado:'ok',grupo:'AI',categoria:'Webs',titulo:'Herramienta claude '+i,resumen:'Sirve para agentes gratis '+i,repos:[],links:[],tags:[]}));guardar();pintar();}""")
-    pg.click("#bSemana"); pg.wait_for_selector("#dlg[open]", timeout=20000)
-    ok("«Priorizar mi semana» propone 5 cosas de Lunes a Viernes", pg.locator("#dC li").count() == 5 and "Lunes" in pg.inner_text("#dC") and "Viernes" in pg.inner_text("#dC"), pg.inner_text("#dC")[:200])
-    ok("incluye motivo y primer paso", "👉" in pg.inner_text("#dC") and "Encaja" in pg.inner_text("#dC"))
-    pg.click("#dSi"); pg.wait_for_selector("#dcc[open]", timeout=5000)
-    ok("«Preparar» abre el texto para Claude Code con 5 elementos", pg.input_value("#ccTxt").count("### ") == 5, pg.input_value("#ccTxt").count("### "))
+    # ---- selección + exportar .txt: solo sale lo marcado ----
+    pg.evaluate("""()=>{db.sel={};db.cards=['Alfa','Beta','Gamma'].map((n,i)=>({id:'e'+i,url:'https://ex.test/'+n,tipo:'Web',estado:'ok',grupo:'AI',categoria:'Webs',titulo:'Herramienta '+n,resumen:'Resumen de '+n,
+      como:i==0?['npx '+n.toLowerCase()+' install']:[],repos:[],links:[{t:'Docs',u:'https://docs.test/'+n}],notas:i==0?'MI NOTA':'',tags:[]}));guardar();pintar();cambiaTab('fichas')}""")
+    pg.wait_for_timeout(200)
+    ok("cada ficha tiene casilla de ≥44px", pg.evaluate("[...document.querySelectorAll('.rw .sel')].every(b=>{const r=b.getBoundingClientRect();return r.width>=44&&r.height>=44})") and pg.locator(".rw .sel").count() == 3)
+    pg.locator(".rw .sel").nth(0).click(); pg.locator(".rw .sel").nth(2).click(); pg.wait_for_timeout(100)
+    ok("barra: «2 seleccionadas»", pg.is_visible("#barSel") and "2 seleccionadas" in pg.inner_text("#selN"), pg.inner_text("#selN"))
+    pg.fill("#buscar", "Beta"); pg.wait_for_timeout(150)
+    ok("la selección sobrevive al filtrar", "2 seleccionadas" in pg.inner_text("#selN") and pg.evaluate("Object.keys(db.sel).length") == 2)
+    pg.fill("#buscar", ""); pg.wait_for_timeout(150)
+    pg.click("#bExport"); pg.wait_for_selector("#dcc[open]", timeout=3000)
+    t = pg.input_value("#ccTxt")
+    ok("el .txt solo contiene lo marcado (Alfa y Gamma, no Beta)", "Herramienta Alfa" in t and "Herramienta Gamma" in t and "Herramienta Beta" not in t, t[:400])
+    ok("trae instrucciones, comando real, 'sin comando verificado', links y notas", "Pide confirmación" in t and "npx alfa install" in t and "sin comando verificado" in t and "https://docs.test/Gamma" in t and "https://ex.test/Alfa" in t and "MI NOTA" in t)
     pg.click("#ccNo")
-
-    # ---- Obsidian ----
-    pg.evaluate("""()=>{db.cards=[{id:'o1',url:'https://www.instagram.com/p/OBS/',tipo:'Instagram',estado:'ok',grupo:'AI',categoria:'Repositorios',titulo:'Nota: con/barras y [corchetes]',resumen:'Explicación',puntos:['uno','dos'],como:['paso 1'],skills:['sk — hace algo'],
-      repos:[{full:'acme/nueva',url:'https://github.com/acme/nueva',stars:900,pushed:new Date().toISOString()}],links:[],tags:['#claude']}];guardar();pintar();}""")
-    md = pg.evaluate("notaMd(db.cards[0])")
-    ok("la nota de Obsidian tiene frontmatter, secciones y enlaces", md.startswith("---\n") and "repo: https://github.com/acme/nueva" in md and "## Puntos clave" in md and "## Cómo usarlo" in md and "tags: [ig-extractor, claude]" in md, md[:300])
-    ok("nombre de archivo seguro (sin / ni [ ])", pg.evaluate("slug(db.cards[0].titulo)") == "Nota con barras y corchetes", pg.evaluate("slug(db.cards[0].titulo)"))
-    pg.click("#bObs"); pg.wait_for_timeout(400)
-    ok("sin programa de PC exporta todo en un texto", "IG Extractor — índice" in (pg.evaluate("window.__compartido||''")))
+    pg.click("#selNinguna"); pg.wait_for_timeout(100)
+    ok("«Ninguna» limpia la selección y oculta la barra", not pg.is_visible("#barSel"))
+    pg.click("#bExport"); pg.wait_for_selector("#dlg[open]", timeout=3000)
+    ok("sin selección pregunta «¿Exportar todo lo visible?»", "Exportar todo lo visible (3)" in pg.inner_text("#dC"), pg.inner_text("#dC"))
+    pg.click("#dSi"); pg.wait_for_selector("#dcc[open]", timeout=3000)
+    ok("tras aceptar exporta las 3", pg.input_value("#ccTxt").count("\n## ") == 3)
+    pg.click("#ccNo")
+    pg.click("#selNinguna") if pg.is_visible("#barSel") else None
+    pg.click("#bMas"); pg.wait_for_timeout(100)
+    ok("menú «⋯ Más» con 4 acciones visibles", pg.locator("#menuMas button:visible").count() == 4)
+    pg.mouse.click(5, 5); pg.wait_for_timeout(100)
+    ok("el menú se cierra al tocar fuera", not pg.is_visible("#menuMas"))
+    ok("ya no existen los botones eliminados", all(pg.locator(i).count() == 0 for i in ["#bSemana", "#bObs", "#bCopiar", "#bComp", "#bReclas", "#bClaude"]))
     br.close()
 
 print("\nERRORES JS:", ERR if ERR else "ninguno"); print("RESULTADO: %d/%d OK" % (sum(res), len(res)))
