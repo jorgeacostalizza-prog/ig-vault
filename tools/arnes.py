@@ -16,7 +16,7 @@ def http(m, url, hd, body):
     if "instagram.com/p/" in url and "embed" not in url:
         code = url.split("/p/")[1].split("/")[0]
         if code not in CAPS: return {"status": 404, "url": url, "body": ""}
-        return {"status": 200, "url": url, "body": '<meta property="og:image" content="https://img.test/a.jpg">{"caption":{"text":' + json.dumps(CAPS[code]) + '}}'}
+        return {"status": 200, "url": url, "body": '<meta property="og:image" content="https://img.test/a.jpg">{"caption":{"text":' + json.dumps(CAPS[code]) + '},"code":"' + code + '"}'}
     if "youtube.com/oembed" in url or "youtu" in url and "oembed" in url:
         return {"status": 500, "body": ""}
     if "integrate.api.nvidia.com" in url:

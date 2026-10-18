@@ -411,27 +411,55 @@ const MAX_RESUMEN = 220; // el resumen de la ficha es corto; lo largo va en «Ve
 const corto = (t, n = MAX_RESUMEN) => { t = String(t || "").replace(/\s+/g, " ").trim(); if (t.length <= n) return t; const f = t.slice(0, n), p = Math.max(f.lastIndexOf(". "), f.lastIndexOf("! "), f.lastIndexOf("? ")); return p >= 80 ? f.slice(0, p + 1) : f.slice(0, f.lastIndexOf(" ")).replace(/[,;:\s]+$/, "") + "…"; };
 const iaTexto = () => muertos.NVIDIA || muertos.OpenRouter ? "la clave de la IA fue rechazada" : /429/.test(iaError) ? "la IA está saturada ahora mismo" : /HTTP 5/.test(iaError) ? "la IA no está disponible ahora mismo" : "la IA no respondió";
 const AVISO_SIN_IA = "Sin IA: añade una clave en Ajustes para tener resumen";
-function pintaAvisoIA() { $$(".avIA").forEach(e => { e.style.display = hayIA() ? "none" : "block"; e.textContent = AVISO_SIN_IA + "."; }); }
+let clavesListas = !!N; // R6: en PC las claves llegan de /api/claves; hasta saberlo no se avisa de «Sin IA»
+function pintaAvisoIA() { $$(".avIA").forEach(e => { e.style.display = hayIA() || !clavesListas ? "none" : "block"; e.textContent = AVISO_SIN_IA + "."; }); }
+// R5: la IA no puede colgar la ficha. Tope por llamada, NVIDIA y OpenRouter a la vez (gana la primera respuesta válida) y una clave que da 429 se enfría un rato.
+let TOPE_IA_MS = 14000;            // tope de espera por cada llamada a la IA
+let ENFRIA_429_MS = 60000;         // una clave con 429 no se vuelve a pedir durante este rato (si hay otra)
+let ENFRIA_CORTE_MS = 20000;       // igual si la llamada se corta sin respuesta
+let enfria = {};
+const estaFria = nom => (enfria[nom] || 0) > Date.now();
+function esperandoIA() { const e = $("#progS"); if (e && corriendo) e.textContent = "Esperando a la IA…"; }
+async function httpIA(nom, url, opt) {
+  let to; const corte = new Promise(r => { to = setTimeout(() => r({ status: 0, body: "", error: "tiempo agotado" }), TOPE_IA_MS); });
+  const r = await Promise.race([http(url, opt), corte]); clearTimeout(to);
+  if (r.status === 429) enfria[nom] = Date.now() + ENFRIA_429_MS; else if (r.status === 0) enfria[nom] = Date.now() + ENFRIA_CORTE_MS;
+  return r;
+}
+function primera(tareas) { // lanza todas a la vez; devuelve la primera que dé algo válido (null si ninguna). Las demás se ignoran.
+  return new Promise(res => {
+    let n = tareas.length, hecho = false; if (!n) return res(null);
+    const parar = () => hecho;
+    for (const t of tareas) t(parar).then(v => { if (!hecho && v) { hecho = true; res(v); } }).catch(() => { }).then(() => { if (--n === 0 && !hecho) { hecho = true; res(null); } });
+  });
+}
+const sinFrias = provs => { const v = provs.filter(p => !estaFria(p.nom)); return v.length ? v : provs; }; // si todas están frías, se prueban igual
 async function chat(prompt, max = 900) {
   const provs = [];
-  if (db.cfg.nvidia) provs.push(["NVIDIA", "https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, MOD_NV]);
-  if (db.cfg.openrouter) provs.push(["OpenRouter", "https://openrouter.ai/api/v1/chat/completions", db.cfg.openrouter, MOD_OR]);
+  if (db.cfg.nvidia) provs.push({ nom: "NVIDIA", url: "https://integrate.api.nvidia.com/v1/chat/completions", key: db.cfg.nvidia, mods: MOD_NV });
+  if (db.cfg.openrouter) provs.push({ nom: "OpenRouter", url: "https://openrouter.ai/api/v1/chat/completions", key: db.cfg.openrouter, mods: MOD_OR });
   const errs = [];
-  for (const [nom, url, key, mods] of provs) {
-    if (muertos[nom]) { errs.push(nom + ": " + muertos[nom]); continue; }
+  const tareas = sinFrias(provs).map(({ nom, url, key, mods }) => async parar => {
+    if (muertos[nom]) { errs.push(nom + ": " + muertos[nom]); return null; }
     for (const m of mods) {
       for (let i = 0; i < 2; i++) {
-        const r = await http(url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: prompt }], max_tokens: max, temperature: 0.2, ...(nom === "NVIDIA" ? { chat_template_kwargs: { enable_thinking: false } } : {}) }) });
-        if (r.status === 401 || r.status === 403) { muertos[nom] = "clave rechazada"; errs.push(nom + ": clave rechazada"); break; }
+        if (parar()) return null;
+        const r = await httpIA(nom, url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: prompt }], max_tokens: max, temperature: 0.2, ...(nom === "NVIDIA" ? { chat_template_kwargs: { enable_thinking: false } } : {}) }) });
+        if (parar()) return null;
+        if (r.status === 401 || r.status === 403) { muertos[nom] = "clave rechazada"; errs.push(nom + ": clave rechazada"); return null; }
         if (r.status === 404 || r.status === 410) break;
         if (r.status === 200) {
           try { const t = (JSON.parse(r.body).choices[0].message.content || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim(); if (t) return t; errs.push(m + ": vacío"); } catch (e) { errs.push(m + ": respuesta rara"); }
         } else errs.push(m + ": HTTP " + r.status);
-        await dormir(1500 + i * 2500);
+        if (r.status === 429) return null;      // clave saturada: ya está enfriada, no insisto con ella
+        if (r.status === 0) break;              // no contestó: paso al siguiente modelo sin repetir
+        esperandoIA(); await dormir(1500 + i * 2500);
       }
-      if (muertos[nom]) break;
     }
-  }
+    return null;
+  });
+  const t = await primera(tareas);
+  if (t) return t;
   iaError = errs.slice(-2).join(" | ") || "sin respuesta";
   return null;
 }
@@ -495,7 +523,9 @@ async function gbIG(base) {
     const r = await http(base, { headers: { "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" } });
     if (r.status !== 200) return o;
     const dec = x => { try { return JSON.parse('"' + x + '"'); } catch (e) { return ""; } };
-    const c = r.body.match(/"caption":\{"text":"((?:[^"\\]|\\.)*)"/); if (c) o.cap = dec(c[1]).trim();
+    // R7: la página trae también el pie de OTROS posts del perfil; solo vale el pie que va pegado al código de ESTE post
+    const cod = (base.match(/\/(?:p|reel|reels|tv)\/([\w-]+)/) || [])[1] || "";
+    if (cod) { const c = r.body.match(new RegExp('"caption":\\{"text":"((?:[^"\\\\]|\\\\.)*)"\\},"code":"' + cod + '"')); if (c) o.cap = dec(c[1]).trim(); }
     const v = r.body.match(/"video_versions":\[\{[^\]]*?"url":"((?:[^"\\]|\\.)*)"/); if (v) o.video = dec(v[1]);
     const i = r.body.match(/property="og:image" content="([^"]+)"/); if (i) o.img = i[1].replace(/&amp;/g, "&");
     const cm = r.body.match(/"edge_media_to_comment":\{"count":(\d+)\}/); if (cm) o.comments = parseInt(cm[1], 10);
@@ -557,17 +587,20 @@ async function modelosVisOR() {
   return orVis;
 }
 async function leerImgs(imgs, prompt = PROMPT_FOTO, max = 3) {
-  const provs = [];
-  if (db.cfg.nvidia) for (const m of MOD_VIS.slice(0, 2)) provs.push(["https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, m]);
-  if (db.cfg.openrouter) for (const m of MOD_VIS_OR) provs.push(["https://openrouter.ai/api/v1/chat/completions", db.cfg.openrouter, m]);
-  const partes = [];
-  for (const u of imgs.slice(0, max)) {
-    for (const [url, key, m] of provs) {
-      const x = await http(url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: u } }] }], max_tokens: 500, temperature: 0.1 }) });
-      if (x.status === 200) { try { const t = (JSON.parse(x.body).choices[0].message.content || "").trim(); if (t) { partes.push(t); break; } } catch (e) { } }
+  const grupos = [];
+  if (db.cfg.nvidia) grupos.push({ nom: "NVIDIA", url: "https://integrate.api.nvidia.com/v1/chat/completions", key: db.cfg.nvidia, mods: MOD_VIS.slice(0, 2) });
+  if (db.cfg.openrouter) grupos.push({ nom: "OpenRouter", url: "https://openrouter.ai/api/v1/chat/completions", key: db.cfg.openrouter, mods: MOD_VIS_OR });
+  const una = u => primera(sinFrias(grupos).map(({ nom, url, key, mods }) => async parar => { // NVIDIA y OpenRouter a la vez; dentro de cada una, modelo por modelo
+    for (const m of mods) {
+      if (parar()) return null;
+      const x = await httpIA(nom, url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: u } }] }], max_tokens: 500, temperature: 0.1 }) });
+      if (x.status === 200) { try { const t = (JSON.parse(x.body).choices[0].message.content || "").trim(); if (t) return t; } catch (e) { } }
+      if (x.status === 429) return null;
     }
-  }
-  return partes.join("\n");
+    return null;
+  }));
+  const partes = await Promise.all(imgs.slice(0, max).map(una)); // las imágenes de una ficha, a la vez
+  return partes.filter(Boolean).join(String.fromCharCode(10));
 }
 async function leerYT(url) {
   const r = await http("https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent(url));
@@ -683,6 +716,10 @@ async function analizar(card, textoManual) {
     if (l.video) card.voz = vz ? "sí" : "no";
     const vf = (fr || "").split("\n").filter(x => x.trim() && !/^persona hablando/i.test(x.trim())).join("\n");
     card.vio = { voz: !!vz, imgs: !!vi, video: !!l.video, frames: !!vf };
+    { // R7: si el pie del post y lo que se oye/ve en el vídeo no comparten NI UNA palabra, no afirmo nada: Para revisar
+      const pie = raices(texto.replace(/^Comentarios:.*$/mi, "")), med = raices([vz, vi, vf].filter(Boolean).join(" "));
+      if (pie.size >= 6 && med.size >= 15 && ![...pie].some(x => med.has(x))) { Object.assign(card, { estado: "revisar", categoria: "Para revisar", motivo: "El texto del post y el vídeo no coinciden", texto: texto.slice(0, 1500) }); return card; }
+    }
     if (soloGancho && (vz || vi || vf)) soloGancho = false;
     if (soloGancho) texto = ""; // solo traía «comenta X»: no hay contenido real
     if (vz) texto += "\n[VOZ DEL VÍDEO, transcrita]\n" + vz.slice(0, 1300);
@@ -1473,7 +1510,7 @@ window.__chat = (t, fs) => {
 };
 try { const k = N && N.claves ? JSON.parse(N.claves()) : {}; if (!db.cfg.nvidia && k.nvidia) db.cfg.nvidia = k.nvidia; if (!db.cfg.openrouter && k.openrouter) db.cfg.openrouter = k.openrouter; } catch (e) { }
 $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github; $("#kGq").value = db.cfg.groq || "";
-srvListo.then(async () => { if (!SRV) return; try { { const r = await (await fetch("/api/respaldo")).json(); if (r.cards && r.cards.length) { r.cards.forEach(c => { if (c.estado === "pendiente") Object.assign(c, { estado: "revisar", categoria: "Para revisar", motivo: c.motivo || "Se quedó a medias al cerrar la app. Pulsa «Reintentar»" }); }); const tiene = new Set(db.cards.map(c => c.url)); const antes = db.cards.length; r.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); if (db.cards.length > antes) { db.sel = db.sel && db.sel.length ? db.sel : (r.sel || []); guardar(); pintar(); aviso("Recuperé " + (db.cards.length - antes) + " fichas de la copia"); unirRepetidas(); } } } const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } });
+srvListo.then(async () => { if (!SRV) { clavesListas = true; pintaAvisoIA(); return; } try { { const r = await (await fetch("/api/respaldo")).json(); if (r.cards && r.cards.length) { r.cards.forEach(c => { if (c.estado === "pendiente") Object.assign(c, { estado: "revisar", categoria: "Para revisar", motivo: c.motivo || "Se quedó a medias al cerrar la app. Pulsa «Reintentar»" }); }); const tiene = new Set(db.cards.map(c => c.url)); const antes = db.cards.length; r.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); if (db.cards.length > antes) { db.sel = db.sel && db.sel.length ? db.sel : (r.sel || []); guardar(); pintar(); aviso("Recuperé " + (db.cards.length - antes) + " fichas de la copia"); unirRepetidas(); } } } const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } clavesListas = true; pintaAvisoIA(); });
 srvListo.then(async () => { if (!SRV) return; try { const v = await (await fetch("/api/version")).json(); if (v && v.version) $("#verInfo").textContent = "Versión " + v.version + (v.actualizado ? " · actualizada " + String(v.actualizado).slice(0, 10) : ""); } catch (e) { } });
 // semilla: investigación precargada. Llega por autoactualización, cifrada (el repo es público); la clave sale de la que ya lleva la APK
 async function cargarSemilla() {
