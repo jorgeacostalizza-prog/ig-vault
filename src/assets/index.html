@@ -747,7 +747,7 @@ async function analizar(card, textoManual) {
   if (hayIA() && ctx.trim() && !soloGancho) {
     paso(card, "Pidiendo el resumen a la IA…");
     ai = await chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
-{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"1 o 2 frases en español claro (MÁXIMO 220 caracteres): QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null","subtipo":"solo si categoria es Inteligencia artificial y el contenido lo deja claro: UNO de ${SUBTIPOS.join(" | ")}; si no está claro, cadena vacía","sirve":"UNA línea llana (MÁXIMO 110 caracteres) que empiece por un verbo: para qué le sirve a quien la guarda, SOLO según el contenido; si no se sabe, cadena vacía","accion":"Instalar (si el contenido da forma de instalarlo) | Probar (si se puede probar sin instalar) | Solo guardar (si no hay base clara)"}
+{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"1 o 2 frases en español claro (MÁXIMO 220 caracteres): QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null","subtipo":"solo si categoria es Inteligencia artificial y el contenido lo deja claro: UNO de ${SUBTIPOS.join(" | ")}; si no está claro, cadena vacía","sirve":"UNA línea llana (MÁXIMO 110 caracteres) que empiece por un verbo: para qué le sirve a quien la guarda, SOLO según el contenido; si no se sabe, cadena vacía","sirve_cita":"cita corta TEXTUAL (MÁXIMO 120 caracteres, en el IDIOMA ORIGINAL de la fuente, sin traducir) copiada letra por letra del contenido, que respalde «sirve»; si no hay, cadena vacía","sirve_fuente":"de dónde copiaste la cita: pie | voz | fotogramas | repo","accion":"Instalar (si el contenido da forma de instalarlo) | Probar (si se puede probar sin instalar) | Solo guardar (si no hay base clara)"}
 Reglas (0) «sirve» y «accion» salen SOLO del pie del post, de la VOZ del vídeo, del texto leído en imágenes/fotogramas o del README (cualquiera de esas fuentes vale; no hace falta que el pie lo diga); sin base en ninguna: "sirve":"" y "accion":"Solo guardar". (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) Si no hay información útil: "resumen":"" y "categoria":"Otros".
 CONTENIDO:
 ${ctx}`);
@@ -765,12 +765,20 @@ ${ctx}`);
     const base = ctx + " " + card.url + " " + (ai && ai.titulo || "") + " " + (ai && ai.resumen || ""); // el resumen ya pasó «fundado»: sirve cuenta con él (el post puede venir en inglés)
     const wr = [...raices(sv)], fb = raices(base);
     if (sv.length > 130) sv = corto(sv, 110);
-    if (!ai || !ai.resumen || sv.length < 8 || (wr.length && wr.filter(x => fb.has(x)).length / wr.length < 0.3) || !fundado(sv, base)) sv = "";
+    // R8: la línea puede venir en otro idioma que la fuente; vale si trae una cita TEXTUAL que aparece de verdad en la fuente que dice
+    const nrm = t => sinAcentos(String(t || "").toLowerCase()).replace(/[^a-z0-9]+/g, " ").trim();
+    const FUE = { pie: [src.pie, "post"], voz: [src.voz, "voz"], fotogramas: [src.vis, "imagenes"], repo: [repos.map(r => r.desc + " " + (r.readme || "")).join(" "), "repo"] };
+    const cita = nrm(ai && ai.sirve_cita), fk = String(ai && ai.sirve_fuente || "").trim().toLowerCase(), fu = FUE[fk];
+    let porCita = false;
+    if (sv && cita) { porCita = !!(fu && cita.length >= 12 && String(ai.sirve_cita).length <= 140 && nrm(fu[0]).includes(cita)); if (!porCita) sv = ""; }
+    else if (!ai || !ai.resumen || sv.length < 8 || (wr.length && wr.filter(x => fb.has(x)).length / wr.length < 0.3) || !fundado(sv, base)) sv = "";
+    if (porCita && !(ai && ai.resumen)) sv = "";
     const ac = ai && ACCIONES.find(a => sinAcentos(a) === sinAcentos(String(ai.accion || "").trim()));
     card.sirve = sv ? corto(sv, 110) : ""; card.accion = sv && ac ? ac : "Solo guardar";
-    card.sirveDe = ""; // M1: fuente que respalda la línea (la que más palabras comparte)
-    if (sv) { const rs = [...raices(sv)], pt = x => rs.length ? rs.filter(w => x.has(w)).length / rs.length : 0;
-      const cand = [["post", pt(raices(src.pie))], ["voz", pt(raices(src.voz))], ["imagenes", pt(raices(src.vis))], ["repo", pt(raices(repos.map(r => r.desc + " " + (r.readme || "")).join(" ")))]].sort((a, b) => b[1] - a[1]);
+    card.sirveDe = ""; // M1/R8: fuente que respalda la línea
+    if (sv && porCita) card.sirveDe = fu[1];
+    else if (sv) { const rs = [...raices(sv)], pt = x => rs.length ? rs.filter(w => x.has(w)).length / rs.length : 0;
+      const cand = [["post", pt(raices(src.pie))], ["voz", pt(raices(src.voz))], ["imagenes", pt(raices(src.vis))], ["repo", pt(raices(FUE.repo[0]))]].sort((a, b) => b[1] - a[1]);
       card.sirveDe = cand[0][1] > 0 ? cand[0][0] : "post"; }
   }
   const r0 = repos[0];
