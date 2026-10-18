@@ -5,7 +5,7 @@ CC = BASE + "capturas/tanda-C2/"
 CARDS = """db.cards=[
 {id:'f1',url:'https://www.instagram.com/p/FAKE123xyz/',tipo:'Instagram',titulo:'https://www.instagram.com/p/FAKE123xyz/',grupo:'AI',categoria:'Para revisar',estado:'revisar',motivo:'Instagram no deja leer este post sin iniciar sesión. Pega el texto del post a mano o prueba más tarde con otra conexión.',resumen:'',links:[]},
 {id:'r1',url:'https://x.test/1',tipo:'Web',titulo:'Codex Security de OpenAI',grupo:'AI',categoria:'Programas',estado:'ok',resumen:'uno',imgs:['https://img.test/1.jpg'],links:[{t:'A',u:'https://a.test/'}],notas:'nota uno',fav:false},
-{id:'r2',url:'https://x.test/2',tipo:'Web',titulo:'Codex Security de OpenAI',grupo:'AI',categoria:'Programas',estado:'ok',resumen:'uno largo',imgs:['https://img.test/2.jpg'],links:[{t:'B',u:'https://b.test/'}],notas:'nota dos',fav:true},
+{id:'r2',url:'https://x.test/1?utm_source=b',tipo:'Web',titulo:'Codex Security de OpenAI',grupo:'AI',categoria:'Programas',estado:'ok',resumen:'uno largo',imgs:['https://img.test/2.jpg'],links:[{t:'B',u:'https://b.test/'}],notas:'nota dos',fav:true},
 {id:'r3',url:'https://x.test/3',tipo:'Web',titulo:'Otra cosa',grupo:'AI',categoria:'Programas',estado:'ok',resumen:'z',links:[]}];db.sel={};guardar();cambiaTab('fichas');pintar()"""
 with sync_playwright() as p:
     for ancho, nom in ((390, "movil"), (1280, "pc")):
@@ -31,7 +31,7 @@ with sync_playwright() as p:
         ok("C6 fusiona 1 repetida", n == 1 and pg.evaluate("db.cards.length") == 3, n)
         k = pg.evaluate("db.cards.find(c=>c.titulo.startsWith('Codex'))")
         ok("C6 conserva imágenes, links, notas y favorita de ambas", len(k["imgs"]) == 2 and len(k["links"]) == 2 and "nota uno" in k["notas"] and "nota dos" in k["notas"] and k["fav"] is True, k)
-        ok("C6 conserva el link de la quitada (extra)", any("x.test" in u for u in k.get("extra", [])), k.get("extra"))
+        ok("C6 (M2) misma publicación: no duplica su link en extra", not k.get("extra"), k.get("extra"))
         ok("C6 aviso «Unidas 1 repetidas»", "Unidas 1 repetidas" in pg.inner_text("#aviso"), pg.inner_text("#aviso"))
         ok("C6 sin más repetidas (idempotente)", pg.evaluate("unirRepetidas()") == 0)
         # Reintentar
@@ -40,7 +40,7 @@ with sync_playwright() as p:
         ok("C5 Reintentar la pone en cola", pg.evaluate("db.cards.find(c=>c.id=='f1').estado") in ("pendiente", "revisar", "ok") and pg.evaluate("db.bn") >= 1)
         # importar semilla con repetidas
         pg.evaluate("""db.cards=[{id:'s1',url:'u1',titulo:'Dup',grupo:'AI',categoria:'Otros',estado:'ok',resumen:'a',links:[]}];guardar()""")
-        pg.evaluate("""db.cards.push({id:'s2',url:'u2',titulo:'dup ',grupo:'AI',categoria:'Otros',estado:'ok',resumen:'a',links:[]});unirRepetidas()""")
+        pg.evaluate("""db.cards.push({id:'s2',url:'u1?utm_source=b',titulo:'dup ',grupo:'AI',categoria:'Otros',estado:'ok',resumen:'a',links:[]});unirRepetidas()""")
         ok("C6 al importar también une (acentos/mayúsculas)", pg.evaluate("db.cards.length") == 1)
         ok("sin desbordamiento horizontal", pg.evaluate("document.documentElement.scrollWidth<=innerWidth+1"))
         br.close()

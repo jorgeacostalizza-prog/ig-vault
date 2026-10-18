@@ -707,6 +707,7 @@ async function analizar(card, textoManual) {
     textoManual = v.texto; const cu = v.texto.match(/Cuenta:\s*(@[\w.]+)/i); if (cu) card.cuenta = cu[1];
   }
   let texto = textoManual || "", titulo = "", soloGancho = false;
+  const src = { pie: "", voz: "", vis: "" }; // M1: de dónde sale cada cosa (pie del post / voz del vídeo / texto leído en imágenes y fotogramas)
   if (!texto) {
     paso(card, "Leyendo " + card.tipo + "…");
     const l = card.tipo === "Instagram" ? await leerIG(card.url) : card.tipo === "YouTube" ? await leerYT(card.url) : card.tipo === "TikTok" ? await leerTikTok(card.url) : card.tipo === "X" ? await leerX(card.url) : card.tipo === "GitHub" ? { texto: "" } : await leerWeb(card.url);
@@ -726,6 +727,7 @@ async function analizar(card, textoManual) {
     }
     if (soloGancho && (vz || vi || vf)) soloGancho = false;
     if (soloGancho) texto = ""; // solo traía «comenta X»: no hay contenido real
+    src.pie = texto; src.voz = vz || ""; src.vis = [vi, vf].filter(Boolean).join("\n");
     if (vz) texto += "\n[VOZ DEL VÍDEO, transcrita]\n" + vz.slice(0, 1300);
     if (vi) texto += "\n[TEXTO EN LAS IMÁGENES DEL POST]\n" + vi;
     if (vf) texto += "\n[LO QUE SE VE EN EL VÍDEO (fotogramas)]\n" + vf.slice(0, 1400);
@@ -737,14 +739,16 @@ async function analizar(card, textoManual) {
   if (card.tipo === "Foto" || /github|repo|open.?source/i.test(texto)) for (const m of texto.matchAll(/(?<![\w/.@#-])([A-Za-z][\w-]{1,38}\/[A-Za-z][\w.-]{1,60})(?![\w/])/g)) if (!/^(https?|www)/i.test(m[1]) && !/\.(com|org|io|net|app)\b/i.test(m[1]) && !PAR_COMUN.test(m[1])) { cands.add(m[1]); suelto.add(m[1]); }
   const repos = []; if (cands.size) paso(card, "Comprobando en GitHub…");
   for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g && !(suelto.has(c) && Number(g.stargazers_count) < 10)) repos.push(repoInfo(g)); }
+  if (!src.pie && !src.voz && !src.vis) src.pie = texto;
   let ctx = texto.slice(0, 2600);
+  if (src.voz || src.vis) ctx = (src.pie.slice(0, 900) + (src.voz ? "\n[VOZ DEL VÍDEO, transcrita]\n" + src.voz.slice(0, 1100) : "") + (src.vis ? "\n[TEXTO LEÍDO EN IMÁGENES/FOTOGRAMAS]\n" + src.vis.slice(0, 900) : "")).slice(0, 3000); // M1: la voz y los fotogramas siempre entran en lo que ve la IA, aunque el pie sea largo
   for (const r of repos.slice(0, 2)) { const rd = await ghReadme(r.full); r.readme = rd; ctx += `\n[REPO VERIFICADO ${r.full} — ${r.desc} — README: ${rd.slice(0, 900)}]`; }
   let ai = null;
   if (hayIA() && ctx.trim() && !soloGancho) {
     paso(card, "Pidiendo el resumen a la IA…");
     ai = await chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
 {"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"1 o 2 frases en español claro (MÁXIMO 220 caracteres): QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null","subtipo":"solo si categoria es Inteligencia artificial y el contenido lo deja claro: UNO de ${SUBTIPOS.join(" | ")}; si no está claro, cadena vacía","sirve":"UNA línea llana (MÁXIMO 110 caracteres) que empiece por un verbo: para qué le sirve a quien la guarda, SOLO según el contenido; si no se sabe, cadena vacía","accion":"Instalar (si el contenido da forma de instalarlo) | Probar (si se puede probar sin instalar) | Solo guardar (si no hay base clara)"}
-Reglas (0) «sirve» y «accion» salen SOLO del post o del README; sin base: "sirve":"" y "accion":"Solo guardar". (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) Si no hay información útil: "resumen":"" y "categoria":"Otros".
+Reglas (0) «sirve» y «accion» salen SOLO del pie del post, de la VOZ del vídeo, del texto leído en imágenes/fotogramas o del README (cualquiera de esas fuentes vale; no hace falta que el pie lo diga); sin base en ninguna: "sirve":"" y "accion":"Solo guardar". (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) Si no hay información útil: "resumen":"" y "categoria":"Otros".
 CONTENIDO:
 ${ctx}`);
     if (ai && !repos.length) { // propuestas de la IA: solo valen si GitHub confirma que existen
@@ -764,6 +768,10 @@ ${ctx}`);
     if (!ai || !ai.resumen || sv.length < 8 || (wr.length && wr.filter(x => fb.has(x)).length / wr.length < 0.3) || !fundado(sv, base)) sv = "";
     const ac = ai && ACCIONES.find(a => sinAcentos(a) === sinAcentos(String(ai.accion || "").trim()));
     card.sirve = sv ? corto(sv, 110) : ""; card.accion = sv && ac ? ac : "Solo guardar";
+    card.sirveDe = ""; // M1: fuente que respalda la línea (la que más palabras comparte)
+    if (sv) { const rs = [...raices(sv)], pt = x => rs.length ? rs.filter(w => x.has(w)).length / rs.length : 0;
+      const cand = [["post", pt(raices(src.pie))], ["voz", pt(raices(src.voz))], ["imagenes", pt(raices(src.vis))], ["repo", pt(raices(repos.map(r => r.desc + " " + (r.readme || "")).join(" ")))]].sort((a, b) => b[1] - a[1]);
+      card.sirveDe = cand[0][1] > 0 ? cand[0][0] : "post"; }
   }
   const r0 = repos[0];
   card.repos = repos.map(r => ({ full: r.full, url: r.url, stars: r.stars, desc: r.desc, topics: r.topics, pushed: r.pushed, archived: r.archived }));
@@ -1126,15 +1134,16 @@ async function correr() {
   aviso(`${sin ? "Parado" : "Todo listo"}: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}${sin ? `, ${sin} sin terminar` : ""}${uni ? `. Unidas ${uni} repetidas` : ""}. Míralas en «Fichas».`, true);
 }
 
-// ---- fichas repetidas: mismo título (sin acentos) en el mismo grupo y categoría; la unida conserva todo ----
+// ---- fichas repetidas: misma identidad real (post/repo/URL normalizada) en el mismo grupo; la unida conserva todo; con «Deshacer» ----
 function unirRepetidas() {
   const grupos = {};
-  db.cards.forEach(c => { if (c.estado !== "ok" || !c.titulo || /^https?:/i.test(c.titulo)) return; const k = [c.grupo || "AI", c.categoria || "", sinAcentos(c.titulo).replace(/\s+/g, " ").trim()].join("|"); (grupos[k] ||= []).push(c); });
+  db.cards.forEach(c => { if (c.estado !== "ok" || !c.titulo || /^https?:/i.test(c.titulo)) return; const k = [c.grupo || "AI", claveUrl(c.url)].join("|"); (grupos[k] ||= []).push(c); });
   const peso = c => ["resumen", "detalle", "notas", "imgs", "links", "puntos", "skills", "repos", "tags"].reduce((n, k) => n + (c[k] ? String(JSON.stringify(c[k])).length : 0), 0) + (c.fav ? 1 : 0);
   const uniq = (a, f) => { const v = new Set(); return a.filter(x => { const k = f(x); if (!k || v.has(k)) return false; v.add(k); return true; }); };
-  let n = 0, quitar = new Set();
+  let n = 0, quitar = new Set(); const snap = { t: Date.now(), gr: [], sel: {} };
   Object.values(grupos).filter(a => a.length > 1).forEach(a => {
     a.sort((x, y) => peso(y) - peso(x)); const k = a[0];
+    snap.gr.push({ ids: a.map(c => c.id), orig: JSON.parse(JSON.stringify(a)) }); a.slice(1).forEach(o => { if (db.sel && db.sel[o.id] !== undefined) snap.sel[o.id] = db.sel[o.id]; });
     a.slice(1).forEach(o => {
       k.imgs = uniq([...(k.imgs || []), ...(o.imgs || [])], x => x);
       k.links = uniq([...(k.links || []), ...(o.links || [])], l => l && l.u);
@@ -1152,11 +1161,29 @@ function unirRepetidas() {
       quitar.add(o); n++;
     });
   });
-  if (n) { db.cards = db.cards.filter(c => !quitar.has(c)); guardar(); pintar(); aviso("Unidas " + n + " repetidas"); }
+  if (n) { db.cards = db.cards.filter(c => !quitar.has(c)); guardar(); pintar(); guardaDeshacer(snap); aviso("Unidas " + n + " repetidas"); }
   return n;
 }
+// ---- Deshacer la unión: copia en memoria + localStorage (límite de tamaño, caduca a los 10 min) ----
+let _undo = null; const UNDO_MS = 600000, UNDO_MAX = 400000;
+function guardaDeshacer(s) { _undo = s; try { const j = JSON.stringify(s); if (j.length <= UNDO_MAX) localStorage.setItem("igv-deshacer-union", j); else localStorage.removeItem("igv-deshacer-union"); } catch (e) { } }
+function deshacerVivo() {
+  if (!_undo) { try { _undo = JSON.parse(localStorage.getItem("igv-deshacer-union") || "null"); } catch (e) { _undo = null; } }
+  if (_undo && Date.now() - _undo.t > UNDO_MS) { _undo = null; try { localStorage.removeItem("igv-deshacer-union"); } catch (e) { } }
+  return _undo;
+}
+function deshacerUnion() {
+  const s = deshacerVivo(); if (!s) { aviso("Ya no se puede deshacer"); return 0; }
+  let n = 0;
+  s.gr.forEach(g => { const i = db.cards.findIndex(c => g.ids.includes(c.id)); if (i < 0) return; db.cards = db.cards.filter(c => !g.ids.includes(c.id)); db.cards.splice(i, 0, ...g.orig); n += g.orig.length - 1; });
+  db.sel = db.sel || {}; Object.assign(db.sel, s.sel); _undo = null; try { localStorage.removeItem("igv-deshacer-union"); } catch (e) { }
+  guardar(); pintar(); aviso("Separé " + n + " fichas otra vez"); return n;
+}
 // ============ pantalla ============
-function aviso(t, fijo) { const a = $("#aviso"); a.textContent = t; a.style.display = "block"; clearTimeout(aviso.t); if (!fijo) aviso.t = setTimeout(() => a.style.display = "none", 4500); } // fijo = no se quita solo: se cierra tocándolo
+function aviso(t, fijo) { const a = $("#aviso"); a.textContent = t; a.style.display = "block"; clearTimeout(aviso.t);
+  const des = /Unidas \d+ repetidas|Se unieron \d+ repetidas/.test(t) && deshacerVivo();
+  if (des) { const b = document.createElement("button"); b.className = "btn"; b.id = "avDeshacer"; b.textContent = "Deshacer"; b.style.cssText = "margin-left:10px;min-height:36px;flex:none"; b.onclick = e => { e.stopPropagation(); deshacerUnion(); }; a.appendChild(b); }
+  if (des) aviso.t = setTimeout(() => a.style.display = "none", 30000); else if (!fijo) aviso.t = setTimeout(() => a.style.display = "none", 4500); } // fijo = no se quita solo: se cierra tocándolo
 $("#aviso").addEventListener("click", () => { $("#aviso").style.display = "none"; });
 function cambiaTab(t) { $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + t)); if (t !== "fichas" && detId) cerrarDet(); if (t === "fichas") pintar(); $("main").scrollTop = 0; }
 const miles = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : String(n);
@@ -1249,7 +1276,7 @@ function detalleHtml(c) {
 ${imgs.length ? `<img class="mini" src="${esc(imgs[0])}" data-r="${esc(JSON.stringify(imgs.slice(1, 6)))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="sigImg(this)">` : ""}
 ${c.sinIA ? `<div class="nota" style="color:var(--warn)">${esc(c.sinIA)}</div>` : ""}
 <div class="usos" role="group" aria-label="Estado de la ficha">${USOS.map(([k, t]) => `<button class="btn${uso(c) === k ? " on" : ""}" data-a="uso" data-u="${k}" aria-pressed="${uso(c) === k}">${k === "descartada" && uso(c) === "descartada" ? "Descartada" : t}</button>`).join("")}</div>
-${c.sirve ? `<div class="bl"><b>Sirve para…</b>${esc(c.sirve)}</div>` : ""}${c.resumen ? `<p class="res">${esc(c.resumen)}</p>` : '<p class="nota">Sin resumen todavía.</p>'}${c.detalle && c.detalle !== c.resumen ? (verMasId === c.id ? `<p class="res">${esc(c.detalle)}</p><button class="btn sm" data-a="vermas">Ver menos</button>` : '<button class="btn sm" data-a="vermas">Ver más</button>') : ""}
+${c.sirve ? `<div class="bl"><b>Sirve para…</b>${esc(c.sirve)}${c.sirveDe ? ` <span class="nota sirvede">· ${esc(({ voz: "según la voz del vídeo", imagenes: "según el texto leído en el vídeo o las imágenes", repo: "según el repo", post: "según el texto del post" })[c.sirveDe] || "")}${c.fuente ? " (" + esc(c.fuente) + ")" : ""}</span>` : ""}</div>` : ""}${c.resumen ? `<p class="res">${esc(c.resumen)}</p>` : '<p class="nota">Sin resumen todavía.</p>'}${c.detalle && c.detalle !== c.resumen ? (verMasId === c.id ? `<p class="res">${esc(c.detalle)}</p><button class="btn sm" data-a="vermas">Ver menos</button>` : '<button class="btn sm" data-a="vermas">Ver más</button>') : ""}
 ${lista("Puntos clave", c.puntos)}${lista("Skills que propone", c.skills)}${cm.length ? `<div class="bl"><b>Instalación / uso</b>${cm.map(x => `<code class="cmd">${esc(x)}</code>`).join("")}</div>` : ""}${c.limites ? `<div class="bl"><b>Requisitos y límites</b>${esc(c.limites)}</div>` : ""}
 <span class="het" style="margin-top:16px">Links</span><div class="enl gr">${enlacesDe(c) || '<p class="hp">Sin links. Pulsa «Buscar links».</p>'}</div>
 ${c.buscado && c.links && c.links.length ? `<div class="nota">Buscado: ${esc(c.buscado)}</div>` : ""}${c.notas ? `<div class="notas">${esc(c.notas)}</div>` : ""}
@@ -1540,7 +1567,7 @@ async function cargarSemilla() {
   } catch (e) { }
 }
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
-migrarCats(); pintar(); detectar(); if (db.usarSemilla) cargarSemilla(); // las fichas de ejemplo ya no se cargan solas
+migrarCats(); pintar(); detectar(); { try { const u = deshacerVivo(); if (u) aviso("Se unieron " + u.gr.reduce((n, g) => n + g.orig.length - 1, 0) + " repetidas hace poco"); } catch (e) { } } if (db.usarSemilla) cargarSemilla(); // las fichas de ejemplo ya no se cargan solas
 if (db.cards.some(c => c.estado === "pendiente")) { const n = (db.bn || 0) + 1; db.bn = n; sesionDesde = n; db.cards.forEach(c => { if (c.estado === "pendiente") c.bloque = n; }); guardar(); pintaBloques(); aviso("Quedaban links a medias: continúo."); correr(); }
 </script>
 </body>

@@ -45,11 +45,11 @@ with sync_playwright() as p:
         pg.fill("#buscar", ""); pg.evaluate("filtro='nuevo';pintar()")
         # fusion
         pg.evaluate("""db.cards=[{id:'m1',url:'https://a.test/1',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Igual',resumen:'x'.repeat(200),categoria:'Webs',estadoUso:'nuevo'},
-          {id:'m2',url:'https://a.test/2',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Igual',resumen:'y',categoria:'Webs',estadoUso:'hecho'},
+          {id:'m2',url:'https://a.test/1?utm_source=b',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Igual',resumen:'y',categoria:'Webs',estadoUso:'hecho'},
           {id:'m3',url:'https://a.test/3',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Otra',resumen:'x',categoria:'Webs',estadoUso:'descartada'},
-          {id:'m4',url:'https://a.test/4',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Otra',resumen:'y',categoria:'Webs',estadoUso:'descartada'},
+          {id:'m4',url:'https://a.test/3?utm_source=b',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Otra',resumen:'y',categoria:'Webs',estadoUso:'descartada'},
           {id:'m5',url:'https://a.test/5',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Tercera',resumen:'x',categoria:'Webs',estadoUso:'quiero'},
-          {id:'m6',url:'https://a.test/6',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Tercera',resumen:'y',categoria:'Webs',estadoUso:'nuevo'}];unirRepetidas()""")
+          {id:'m6',url:'https://a.test/5?utm_source=b',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Tercera',resumen:'y',categoria:'Webs',estadoUso:'nuevo'}];unirRepetidas()""")
         m = pg.evaluate("db.cards.map(c=>c.titulo+':'+c.estadoUso).sort().join('|')")
         ok("fusion: hecho>nuevo, descartada+descartada, quiero>nuevo", m=="Igual:hecho|Otra:descartada|Tercera:quiero", m)
         # exportar: Lo quiero por defecto

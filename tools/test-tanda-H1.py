@@ -31,7 +31,7 @@ with sync_playwright() as p:
         ok("ficha vieja abre sin fallar", "Vieja" in pg.evaluate("detalleHtml(db.cards.find(c=>c.id==='old'))"))
         # fusion conserva campos nuevos
         pg.evaluate("""db.cards=[{id:'m1',url:'https://a.test/1',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Igual',resumen:'x'.repeat(200),categoria:'Webs'},
-          {id:'m2',url:'https://a.test/2',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Igual',resumen:'y',categoria:'Webs',sirve:'Probar cosas',accion:'Probar'}];unirRepetidas()""")
+          {id:'m2',url:'https://a.test/1?utm_source=b',tipo:'Web',estado:'ok',grupo:'AI',titulo:'Igual',resumen:'y',categoria:'Webs',sirve:'Probar cosas',accion:'Probar'}];unirRepetidas()""")
         m = pg.evaluate("db.cards.length+'|'+db.cards[0].sirve+'|'+db.cards[0].accion")
         ok("fusion conserva sirve/accion", m == "1|Probar cosas|Probar", m)
         pg.evaluate("db.cards=[];IA.x=0") if False else None
