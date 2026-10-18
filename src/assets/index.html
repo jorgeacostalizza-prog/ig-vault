@@ -314,6 +314,10 @@ const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAl
 const N = window.Native;
 let SRV = false; // en PC: servidor local que hace de puente (evita el bloqueo CORS)
 const srvListo = N ? Promise.resolve() : fetch("/api/ping").then(r => r.json()).then(j => { SRV = !!(j && j.ok); }).catch(() => { });
+// PC: latido al servidor local (si no, se apaga solo por inactividad) y aviso si se pierde. APK/sin servidor: no hace nada.
+let _srvCaido = false;
+const latido = async () => { if (!SRV) return; try { const j = await (await fetch("/api/ping", { cache: "no-store" })).json(); if (j && j.ok) { _srvCaido = false; return; } throw 0; } catch (e) { if (!_srvCaido) { _srvCaido = true; aviso("Se perdió la conexión con el programa del PC: ábrelo de nuevo", true); } } };
+srvListo.then(() => { if (!SRV) return; setInterval(latido, window.IGX_LATIDO || 25000); document.addEventListener("visibilitychange", () => { if (!document.hidden) latido(); }); });
 const postSrv = async (ruta, o) => { try { return await (await fetch(ruta, { method: "POST", body: JSON.stringify(o) })).json(); } catch (e) { return { status: 0, body: "", error: String(e) }; } };
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const dormir = ms => new Promise(r => setTimeout(r, ms));
