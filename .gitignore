@@ -4,3 +4,8 @@ build/
 src/assets/claves.json
 *.idsig
 src/assets/semilla.json
+
+capturas/
+BACKUPS/
+__pycache__/
+*.pyc

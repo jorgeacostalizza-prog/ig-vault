@@ -7,7 +7,7 @@
 <title>IG Extractor</title>
 <style>
 :root{--bg:#0f1115;--s1:#171a21;--s2:#1f232c;--tx:#eceef2;--mut:#9aa1ae;--ac:#f5a524;--acx:#1a1200;--ok:#3ecf8e;--warn:#f5a524;--bad:#ff6b6b;--ln:#2a2f3a}
-@media(prefers-color-scheme:light){:root{--bg:#f4f5f7;--s1:#fff;--s2:#eceef2;--tx:#14171c;--mut:#5d6573;--ac:#c77d00;--acx:#fff;--ok:#12805a;--warn:#9a6200;--bad:#c93b3b;--ln:#dfe2e8}}
+@media(prefers-color-scheme:light){:root{--bg:#f4f5f7;--s1:#fff;--s2:#eceef2;--tx:#14171c;--mut:#5d6573;--ac:#c77d00;--acx:#14171c;--ok:#12805a;--warn:#8a5800;--bad:#b02a2a;--ln:#dfe2e8}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,Roboto,"Segoe UI",sans-serif}
 body{display:flex;flex-direction:column}
@@ -19,7 +19,7 @@ main{flex:1;overflow-y:auto;padding:4px 16px 96px}
 nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--s1);border-top:1px solid var(--ln);padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;min-height:60px;background:none;border:0;color:var(--mut);font:600 13px system-ui;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 nav button .i{font-size:20px}
-nav button.on{color:var(--ac)}
+nav button.on{color:var(--warn)}
 .pan{display:none}.pan.on{display:block}
 textarea,input[type=text],input[type=password],input[type=search]{width:100%;background:var(--s1);color:var(--tx);border:1px solid var(--ln);border-radius:14px;padding:14px;font:16px/1.4 system-ui}
 textarea{min-height:34vh;resize:vertical}
@@ -79,12 +79,14 @@ dialog{border:1px solid var(--ln);border-radius:18px;background:var(--s1);color:
 dialog::backdrop{background:#0008}
 dialog h2{margin:0 0 10px;font-size:18px}
 #aviso{position:fixed;left:16px;right:16px;bottom:80px;max-width:560px;margin:0 auto;box-shadow:0 8px 24px #0006;background:var(--s2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px;display:none;z-index:5}
+#p-pegar{padding-bottom:40px}
+#p-ajustes summary{position:static;min-height:44px;font-size:15px;color:var(--mut)}
 .sello{text-align:center;color:var(--mut);font-size:13px;margin-top:28px}
 
 .card h3{cursor:pointer}
 .cab{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
 .rel{flex:none;font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid var(--ln);color:var(--mut);white-space:nowrap}
-.rel.r5,.rel.r4{color:var(--acx);background:var(--ac);border-color:var(--ac)}.rel.r3{color:var(--ac);border-color:var(--ac)}
+.rel.r5,.rel.r4{color:var(--acx);background:var(--ac);border-color:var(--ac)}.rel.r3{color:var(--warn);border-color:var(--ac)}
 .gal{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
 .gal a{display:block;flex:none}.gal img{height:112px;max-width:190px;object-fit:cover;border-radius:10px;border:1px solid var(--ln);display:block}
 .enl{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px}
@@ -141,9 +143,9 @@ nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width
 .top #buscar{flex:1;min-width:0;width:auto;height:44px;padding:0 14px;border-radius:12px}
 .top .btn{min-height:44px;font-size:14px;padding:0 12px;flex:none}
 .top .mnu{flex:none}
-.filtros{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:2px 0 4px}
-.filtros::-webkit-scrollbar{display:none}
-.filtros button,.filtros select{flex:none;min-height:44px;white-space:nowrap}
+.filtros{flex-wrap:wrap;margin:2px 0 4px}
+.filtros button,.filtros select{flex:none;min-height:44px;white-space:nowrap;max-width:100%}
+details.sub summary{position:static;font-size:14px;padding-left:12px}
 .filtros select{border-radius:22px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 13px system-ui;padding:0 10px}
 details{margin:0}
 summary{position:sticky;top:var(--bs,0px);z-index:3;background:var(--bg);min-height:44px;justify-content:flex-start;gap:8px;font-size:15px}
@@ -157,13 +159,27 @@ details[open]>summary svg.cv{transform:rotate(90deg)}
 .rb{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:left;background:none;border:0;color:var(--tx);padding:6px 4px;min-height:56px;justify-content:center;font:inherit}
 .rt{font-weight:700;font-size:15px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rs{font-size:13px;line-height:1.3;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rs.av{color:var(--warn)}
+.rs.av{color:var(--warn);white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.uso{flex:none;min-width:48px;min-height:44px;padding:0 8px;border-radius:22px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 12px system-ui}
+.uso.u-quiero{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.uso.u-hecho{opacity:.7}
+.uso.x{min-width:44px;padding:0}
+.usos{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0 4px}
+.usos .btn{min-height:48px;font-size:14px;padding:0 8px}
+.usos .btn.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.racc{flex:1 0 100%;display:flex;gap:8px;flex-wrap:wrap;padding:0 4px 10px 44px}
+.racc .btn,.racc a.btn,.fall .btn,.fall .lk{min-height:44px}.racc .btn{display:inline-flex;align-items:center}
+.rw:has(.racc){flex-wrap:wrap}
+.rw .rb:has(.av) .rt{white-space:normal;overflow-wrap:anywhere}
+.avIA.disc{font-size:12px;color:var(--mut)!important}
+#det:has(.vacioDet){background:none}
+@media(max-width:419px){.rt{white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}}
 .pt{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:6px;vertical-align:1px}
 .rw svg,#det svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.rst{flex:none;color:var(--ac);display:grid;place-items:center;width:20px}
+.rst{flex:none;color:var(--warn);display:grid;place-items:center;width:20px}
 .rst svg{width:16px;height:16px;fill:currentColor}
 a.li{flex:none;width:44px;height:44px;display:grid;place-items:center;color:var(--mut);border-radius:12px;text-decoration:none}
-a.li:hover,a.li:active{color:var(--ac);background:var(--s2)}
+a.li:hover,a.li:active{color:var(--warn);background:var(--s2)}
 a.li.roto{opacity:.45}
 #det{display:none}
 #det.on{display:flex;position:fixed;inset:0;z-index:15;background:var(--bg);flex-direction:column;animation:subir .26s cubic-bezier(.2,0,0,1)}
@@ -196,8 +212,9 @@ a.li.roto{opacity:.45}
 <header><h1>IG Extractor</h1><span id="cuenta"></span></header>
 <main>
   <section class="pan on" id="p-pegar">
-    <input type="text" id="grupo" placeholder="Grupo principal (AI, Hacking Ethical…)" style="margin-bottom:8px">
+    <div class="vacio" id="pasos"><b>Así de fácil</b>1. Copia tus links (Instagram, YouTube, GitHub…)<br>2. Pégalos aquí abajo<br>3. Pulsa «Ordenar mis links»</div>
     <textarea id="txt" placeholder="Pega aquí todos tus links de golpe (Instagram, YouTube, GitHub…), uno por línea o mezclados con texto. Yo saco los links solo." spellcheck="false"></textarea>
+    <div class="nota avIA" style="display:none;color:var(--warn)"></div>
     <div class="nota" id="detect">Aún no hay links.</div>
     <div class="fila">
       <button class="btn" id="bPegar">Pegar del portapapeles</button>
@@ -209,7 +226,7 @@ a.li.roto{opacity:.45}
       <button class="btn sm" id="bParar">Pausar</button>
     </div>
     <div id="bloques"></div>
-    <div class="nota">Puedes pegar otro lote mientras trabaja: se añade como bloque nuevo.</div>
+    <div class="nota" id="notaLote" style="display:none">Puedes pegar otro lote mientras trabaja: se añade como bloque nuevo.</div>
   </section>
 
   <section class="pan" id="p-fichas">
@@ -218,12 +235,10 @@ a.li.roto{opacity:.45}
       <button class="btn pri" id="bExport">Exportar .txt</button>
       <div class="mnu"><button class="btn" id="bMas" aria-haspopup="true">⋯ Más</button>
         <div id="menuMas">
-          <button id="bDup">Quitar duplicados</button>
           <button id="bReint">Reintentar fallidas</button>
-          <button id="bComprobar">Comprobar enlaces</button>
-          <button id="bLinksMasivos">Buscar links que faltan</button>
         </div></div>
     </div>
+    <div class="nota avIA disc" style="display:none"></div>
     <div class="filtros" id="filtros"></div>
     <div id="barSel"><b id="selN"></b><button id="selTodas">Todas</button><button id="selNinguna">Ninguna</button><button id="selExp" class="pri">Exportar .txt</button></div>
     <div id="lista"></div>
@@ -232,35 +247,43 @@ a.li.roto{opacity:.45}
   </section>
 
   <section class="pan" id="p-ajustes">
-    <label for="kNv">Clave NVIDIA (gratis)</label>
+    <div class="nota avIA" style="display:none;color:var(--warn)"></div>
+    <label for="kNv">Clave de IA (NVIDIA, gratis)</label>
     <input type="password" id="kNv" autocomplete="off" placeholder="nvapi-…">
-    <label for="kOr">Clave OpenRouter (plan B, gratis)</label>
+    <details class="avz"><summary>Avanzado</summary>
+    <label for="kOr">Clave de respaldo (OpenRouter, gratis)</label>
     <input type="password" id="kOr" autocomplete="off" placeholder="sk-or-…">
     <label for="kGh">Token GitHub (opcional, evita límites)</label>
     <input type="password" id="kGh" autocomplete="off" placeholder="ghp_…">
     <label for="kGq">Clave Groq (voz de los vídeos, gratis)</label>
     <input type="password" id="kGq" autocomplete="off" placeholder="gsk_… (solo PC/web; en el móvil ya va incluida)">
-    <label for="kInt">Mis intereses (para marcar lo más relevante)</label>
-    <textarea id="kInt" rows="3" placeholder="claude, agentes, mcp, gratis, open source…"></textarea>
-    <div class="nota">Las claves se quedan solo en este dispositivo. Los intereses (separados por comas) suben fichas con ★.</div>
+    </details>
+    <div class="nota">Las claves se quedan solo en este dispositivo.</div>
     <div class="fila">
       <button class="btn pri" id="bGuardar">Guardar y probar</button>
     </div>
     <div class="nota" id="kEstado"></div>
+    <label>Mantenimiento</label>
+    <div class="nota">Arreglos que casi nunca hacen falta.</div>
+    <div class="fila">
+      <button class="btn" id="bDup">Quitar duplicados</button>
+      <button class="btn" id="bComprobar">Comprobar enlaces</button>
+      <button class="btn" id="bLinksMasivos">Buscar links que faltan</button>
+    </div>
     <div class="fila"><button class="btn" id="bBorrar" style="color:var(--bad)">Borrar todas las fichas</button></div>
+    <div class="nota" id="verInfo" style="text-align:center"></div>
     <div class="sello">IG Extractor · #Finnky Pirat!</div>
   </section>
 </main>
 </div>
 <div id="aviso"></div>
 <div id="hoja">
-  <header><button class="btn sm" id="hX" style="flex:0 0 auto">✕</button><div id="hT">Editar</div><button class="btn sm" id="hL" style="flex:0 0 auto">Buscar links</button></header>
+  <header><button class="btn sm" id="hX" style="flex:0 0 auto">✕</button><div id="hT">Editar</div></header>
   <div id="hojaC">
     <span class="het">Título</span>
     <input class="hcamp" id="hTit" placeholder="Nombre de la ficha">
     <span class="het">Sección</span>
-    <input class="hcamp" id="hGru" placeholder="Grupo (carpeta)">
-    <input class="hcamp" id="hCat" placeholder="Categoría" style="margin-top:8px">
+    <input type="hidden" id="hGru"><input type="hidden" id="hCat">
     <div class="dest" id="hDest"></div>
     <span class="het">Resumen</span>
     <textarea class="hcamp" id="hRes" rows="4" placeholder="Escribe aquí lo que explique la ficha…"></textarea>
@@ -268,7 +291,7 @@ a.li.roto{opacity:.45}
     <textarea class="hcamp" id="hNota" rows="4" placeholder="Lo que tú quieras apuntar: para qué sirve, cuándo usarlo, ideas tuyas…"></textarea>
     <span class="het">Links</span>
     <div id="hLnks"></div>
-    <div class="fila"><button class="btn sm" id="hAddL">+ Añadir link</button><button class="btn sm" id="hInv">Investigar lo que falta</button></div>
+    <div class="fila"><button class="btn sm" id="hAddL">+ Añadir link</button></div>
     <span class="het">Etiquetas</span>
     <input class="hcamp" id="hTags" placeholder="#una #etiqueta #otra">
   </div>
@@ -282,9 +305,6 @@ a.li.roto{opacity:.45}
 <dialog id="dcc"><h2 id="ccH">Exportar .txt para Claude Code</h2>
   <textarea id="ccTxt" class="cc-t" spellcheck="false"></textarea>
   <div class="fila"><button class="btn" id="ccNo">Cerrar</button><button class="btn" id="ccCopia">Copiar</button><button class="btn pri" id="ccGuarda">Guardar .txt</button></div></dialog>
-<dialog id="dmv"><h2>Mover a otra sección</h2><div class="dest" id="mvD"></div>
-  <input type="text" id="mvN" placeholder="O escribe una nueva: Grupo › Categoría" style="margin-top:8px">
-  <div class="fila"><button class="btn" id="mvNo">Cancelar</button><button class="btn pri" id="mvSi">Mover</button></div></dialog>
 <dialog id="dlg"><h2 id="dT"></h2><div id="dC"></div>
   <div class="fila"><button class="btn" id="dNo">Cancelar</button><button class="btn pri" id="dSi">Aceptar</button></div></dialog>
 
@@ -319,8 +339,16 @@ const pagina = url => N ? nat("pagina", url) : (window.__pagina ? window.__pagin
 const BASE_WEB = "https://jorgeacostalizza-prog.github.io/ig-vault/";
 let db = { cards: [], cfg: { nvidia: "", openrouter: "", github: "", groq: "", intereses: "" } };
 try { const d = JSON.parse(localStorage.getItem("igv") || "null"); if (d) db = { ...db, ...d, cfg: { ...db.cfg, ...d.cfg } }; } catch (e) { }
+// H4: estado de uso (nuevo / quiero / hecho / descartada). Migración idempotente: copia previa una sola vez, no se borra nada.
+const USOS = [["nuevo", "Nuevo"], ["quiero", "Lo quiero"], ["hecho", "Hecho"], ["descartada", "Descartar"]];
+const uso = c => c.estadoUso || "nuevo";
+function migraUso() {
+  const sin = db.cards.filter(c => !c.estadoUso); if (!sin.length) return 0;
+  try { if (!localStorage.getItem("igv-antes-H2")) localStorage.setItem("igv-antes-H2", JSON.stringify({ cards: db.cards, sel: db.sel || {} })); } catch (e) { }
+  sin.forEach(c => { c.estadoUso = "nuevo"; }); return sin.length;
+}
 let _rsp; // PC: copia de las fichas fuera del navegador (si el perfil se vacía, se restauran solas)
-const guardar = () => { try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } if (SRV) { clearTimeout(_rsp); _rsp = setTimeout(() => postSrv("/api/respaldo", { cards: db.cards, sel: db.sel || [] }), 1500); } };
+const guardar = () => { migraUso(); try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } if (SRV) { clearTimeout(_rsp); _rsp = setTimeout(() => postSrv("/api/respaldo", { cards: db.cards, sel: db.sel || [] }), 1500); } };
 
 // ============ detección de links ============
 const RE_URL = /(?<![\w.\/-])(?:https?:\/\/|(?:www\.)?(?:instagram\.com|youtube\.com|youtu\.be|github\.com)\/)[^\s<>()\[\]"'«»]+/gi;
@@ -376,6 +404,12 @@ const MOD_NV = ["nvidia/nemotron-3-super-120b-a12b", "z-ai/glm-5.3-flash", "nvid
 const MOD_OR = ["nvidia/nemotron-3-super-120b-a12b:free", "google/gemma-4-31b-it:free"];
 let muertos = {}, iaError = "";
 const hayIA = () => !!(db.cfg.nvidia || db.cfg.openrouter);
+const ACCIONES = ["Instalar", "Probar", "Solo guardar"];
+const MAX_RESUMEN = 220; // el resumen de la ficha es corto; lo largo va en «Ver más»
+const corto = (t, n = MAX_RESUMEN) => { t = String(t || "").replace(/\s+/g, " ").trim(); if (t.length <= n) return t; const f = t.slice(0, n), p = Math.max(f.lastIndexOf(". "), f.lastIndexOf("! "), f.lastIndexOf("? ")); return p >= 80 ? f.slice(0, p + 1) : f.slice(0, f.lastIndexOf(" ")).replace(/[,;:\s]+$/, "") + "…"; };
+const iaTexto = () => muertos.NVIDIA || muertos.OpenRouter ? "la clave de la IA fue rechazada" : /429/.test(iaError) ? "la IA está saturada ahora mismo" : /HTTP 5/.test(iaError) ? "la IA no está disponible ahora mismo" : "la IA no respondió";
+const AVISO_SIN_IA = "Sin IA: añade una clave en Ajustes para tener resumen";
+function pintaAvisoIA() { $$(".avIA").forEach(e => { e.style.display = hayIA() ? "none" : "block"; e.textContent = AVISO_SIN_IA + "."; }); }
 async function chat(prompt, max = 900) {
   const provs = [];
   if (db.cfg.nvidia) provs.push(["NVIDIA", "https://integrate.api.nvidia.com/v1/chat/completions", db.cfg.nvidia, MOD_NV]);
@@ -430,8 +464,14 @@ function capDeOg(og) { // «123 likes, 4 comments - user on fecha: "texto"»
   const m = (og || "").match(/:\s*[“"]([\s\S]*)[”"]\.?\s*$/); return m ? m[1].trim() : "";
 }
 const MURO = /(log in|sign up|inicia sesi|iniciar sesi|crear cuenta|create an account|page isn.t available|no est[aá] disponible)/i;
+// F1: el embed público se pide UNA vez por post (caché por URL, solo durante leerIG; no se guarda)
+const _embedC = new Map();
+const embedIG = base => { if (!_embedC.has(base)) _embedC.set(base, http(base + "embed/captioned/")); return _embedC.get(base); };
 async function leerIG(url) {
   const base = url.replace(/\/$/, "") + "/";
+  try { return await leerIG0(url, base); } finally { _embedC.delete(base); }
+}
+async function leerIG0(url, base) {
   const g = await gbIG(base);
   let r = await pagina(base + "embed/captioned/");
   let t = (r.cap || "").trim() || g.cap;
@@ -465,7 +505,7 @@ async function gbIG(base) {
 // URL directa del vídeo de un reel/post (viene en el JSON del embed público)
 async function videoIG(base) {
   try {
-    const e = await http(base + "embed/captioned/");
+    const e = await embedIG(base);
     const m = e.status === 200 && e.body.match(/\\*"video_url\\*":\s*\\*"(https:.*?)\\*"/);
     return m ? m[1].replace(/\\/g, "").replace(/u0026/g, "&").replace(/&amp;/g, "&") : "";
   } catch (e) { return ""; }
@@ -494,7 +534,7 @@ const PROMPT_VIDEO = "Es un fotograma de un vídeo (reel). Transcribe TODO el te
 async function imgsIG(base) {
   const out = [];
   try {
-    const e = await http(base + "embed/captioned/");
+    const e = await embedIG(base);
     if (e.status === 200) for (const m of e.body.matchAll(/<img[^>]+class="[^"]*EmbeddedMediaImage[^"]*"[^>]+src="([^"]+)"/gi)) out.push(decodeHtml(m[1]));
     if (!out.length) { const h = await http(base); if (h.status === 200) { const o = metaDe(h.body, "og:image"); if (o) out.push(o); } }
   } catch (e) { }
@@ -529,7 +569,7 @@ async function leerImgs(imgs, prompt = PROMPT_FOTO, max = 3) {
 }
 async function leerYT(url) {
   const r = await http("https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent(url));
-  if (r.status !== 200) return { error: "No pude leer este vídeo de YouTube (HTTP " + r.status + ")" };
+  if (r.status !== 200) return { error: "No pude leer este vídeo de YouTube" + (r.status === 404 ? ": ya no existe o es privado" : ". Prueba más tarde") };
   try { const j = JSON.parse(r.body); return { texto: j.title + " — canal " + j.author_name, titulo: j.title }; } catch (e) { return { error: "YouTube devolvió algo ilegible" }; }
 }
 async function leerTikTok(url) {
@@ -545,7 +585,7 @@ async function leerX(url) {
 }
 async function leerWeb(url) {
   const r = await http(url);
-  if (r.status !== 200) return { error: "No pude abrir esta web (" + (r.status || r.error || "sin conexión") + ")" };
+  if (r.status !== 200) return { error: r.status === 404 ? "Esta web ya no existe (no encuentro la página)" : r.status === 403 || r.status === 401 ? "Esta web no deja leerla sin iniciar sesión" : r.status === 0 ? "No pude abrir esta web: parece que no hay conexión" : "No pude abrir esta web ahora. Prueba más tarde" };
   const h = r.body; const tit = decodeHtml((h.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [, ""])[1]).trim();
   const d = metaDe(h, "og:description") || metaDe(h, "description");
   const t = [tit, d].filter(Boolean).join(" — ");
@@ -578,24 +618,11 @@ function clasificar(c, aiCat) { // puntúa cada categoría con señales claras; 
   let best = "Otros", n = 0; for (const k of CATS) if (k !== "Otros" && sc[k] > n) { n = sc[k]; best = k; }
   return best;
 }
-// ---- relevancia para Jorge ----
-const INTERESES_BASE = "claude, claude code, agente, mcp, skill, gratis, free, open source, código abierto, github, api, automatiz, android, apk, token, whisper, llm, rag, codex, gemini, nvidia, openrouter, seguridad, privacidad, bot, scraping, playwright, obsidian, memoria, n8n, cursor, prompt";
-const interesesLista = () => (db.cfg.intereses && db.cfg.intereses.trim() ? db.cfg.intereses : INTERESES_BASE).split(",").map(x => sinAcentos(x.trim())).filter(x => x.length > 1);
-const ETQ_REL = ["", "Poco", "Normal", "Interesante", "Muy relevante", "Imprescindible"];
-function relevancia(c) {
-  if (c.fav) return { n: 5, pts: 99 };
-  if (c.estado !== "ok") return { n: 0, pts: 0 };
-  const blob = sinAcentos([c.titulo, c.resumen, (c.puntos || []).join(" "), (c.tags || []).join(" "), c.categoria].join(" "));
-  let pts = Math.min(5, new Set(interesesLista().filter(w => new RegExp("(^|[^a-z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(blob))).size);
-  const r = c.repos && c.repos[0];
-  if (r) { pts += 1; const st = Number(r.stars) || 0; pts += st >= 10000 ? 3 : st >= 1000 ? 2 : st >= 100 ? 1 : 0; }
-  if (r && estadoRepo(r) && estadoRepo(r).cls === "bad") pts -= 3; // repo abandonado: baja
-  if ((c.links || []).length >= 2) pts += 1;
-  if (c.fuente === "investigado") pts += 1;
-  if (c.relIA) pts += (Number(c.relIA) || 3) - 3;
-  if (!c.resumen) pts -= 2;
-  return { n: pts <= 1 ? 1 : pts <= 3 ? 2 : pts <= 5 ? 3 : pts <= 7 ? 4 : 5, pts };
-}
+// subtipos dentro de una categoría gorda: lo propone la IA; sin IA salen de las etiquetas que la ficha ya tiene. Sin base = «General» (nunca se inventa)
+const SUBTIPOS = ["Agentes", "Skills", "Modelos", "Prompts", "Herramientas"];
+const SUB_TAGS = [["Agentes", /agent|mcp|orquest|autonom/], ["Skills", /skill/], ["Modelos", /model|llm|gpt|gemini|llama|qwen|deepseek|embedding|fine-?tun/], ["Prompts", /prompt/], ["Herramientas", /herramienta|tool|cli|app|extension|plugin|open-?source|framework|editor|ide\b/]];
+const subDe = c => { if (c.subtipo && SUBTIPOS.includes(c.subtipo)) return c.subtipo; const t = (c.tags || []).map(x => sinAcentos(String(x)).toLowerCase()).join(" "); const h = SUB_TAGS.find(([, r]) => r.test(t)); return h ? h[0] : "General"; };
+const MAX_ABIERTO = 12;
 const mesesDesde = iso => iso ? (Date.now() - Date.parse(iso)) / 2.63e9 : null;
 function estadoRepo(r) {
   if (!r) return null; if (r.archived) return { t: "🗄 Repo archivado (abandonado)", cls: "bad" };
@@ -640,17 +667,22 @@ async function analizar(card, textoManual) {
     if (v.error) { Object.assign(card, { estado: "revisar", motivo: v.error, categoria: "Para revisar" }); return card; }
     textoManual = v.texto; const cu = v.texto.match(/Cuenta:\s*(@[\w.]+)/i); if (cu) card.cuenta = cu[1];
   }
-  let texto = textoManual || "", titulo = "";
+  let texto = textoManual || "", titulo = "", soloGancho = false;
   if (!texto) {
+    paso(card, "Leyendo " + card.tipo + "…");
     const l = card.tipo === "Instagram" ? await leerIG(card.url) : card.tipo === "YouTube" ? await leerYT(card.url) : card.tipo === "TikTok" ? await leerTikTok(card.url) : card.tipo === "X" ? await leerX(card.url) : card.tipo === "GitHub" ? { texto: "" } : await leerWeb(card.url);
     if (l.error) { Object.assign(card, { estado: "revisar", motivo: l.error, categoria: "Para revisar" }); if (card.tipo !== "GitHub") return card; }
     texto = l.texto || ""; titulo = l.titulo || "";
     if (card.tipo === "Instagram") texto = quitaGancho(texto);
+    soloGancho = card.tipo === "Instagram" && !texto.replace(/^Comentarios:.*$/mi, "").trim();
     if (l.imgs && l.imgs.length) card.imgs = l.imgs;
+    if (l.video || (l.imgs && l.imgs.length)) paso(card, "Mirando el vídeo y las imágenes…");
     const [vz, vi, fr] = await Promise.all([l.video ? leerVoz(l.video) : null, l.imgs && l.imgs.length ? leerImgs(l.imgs) : null, l.video ? leerFrames(l.video).then(f => f.length ? leerImgs(f, PROMPT_VIDEO, 4) : "") : null]); // a la vez: ahorra segundos
     if (l.video) card.voz = vz ? "sí" : "no";
     const vf = (fr || "").split("\n").filter(x => x.trim() && !/^persona hablando/i.test(x.trim())).join("\n");
     card.vio = { voz: !!vz, imgs: !!vi, video: !!l.video, frames: !!vf };
+    if (soloGancho && (vz || vi || vf)) soloGancho = false;
+    if (soloGancho) texto = ""; // solo traía «comenta X»: no hay contenido real
     if (vz) texto += "\n[VOZ DEL VÍDEO, transcrita]\n" + vz.slice(0, 1300);
     if (vi) texto += "\n[TEXTO EN LAS IMÁGENES DEL POST]\n" + vi;
     if (vf) texto += "\n[LO QUE SE VE EN EL VÍDEO (fotogramas)]\n" + vf.slice(0, 1400);
@@ -660,15 +692,16 @@ async function analizar(card, textoManual) {
   const cands = new Set(), suelto = new Set(); // suelto = «owner/name» sacado del texto (no de un link): exige tracción
   for (const m of (card.tipo === "GitHub" ? card.url + " " + texto : texto).matchAll(/github\.com\/([\w.-]+)\/([\w.-]+)/gi)) cands.add(m[1] + "/" + m[2].replace(/\.git$/, ""));
   if (card.tipo === "Foto" || /github|repo|open.?source/i.test(texto)) for (const m of texto.matchAll(/(?<![\w/.@#-])([A-Za-z][\w-]{1,38}\/[A-Za-z][\w.-]{1,60})(?![\w/])/g)) if (!/^(https?|www)/i.test(m[1]) && !/\.(com|org|io|net|app)\b/i.test(m[1]) && !PAR_COMUN.test(m[1])) { cands.add(m[1]); suelto.add(m[1]); }
-  const repos = [];
+  const repos = []; if (cands.size) paso(card, "Comprobando en GitHub…");
   for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g && !(suelto.has(c) && Number(g.stargazers_count) < 10)) repos.push(repoInfo(g)); }
   let ctx = texto.slice(0, 2600);
   for (const r of repos.slice(0, 2)) { const rd = await ghReadme(r.full); r.readme = rd; ctx += `\n[REPO VERIFICADO ${r.full} — ${r.desc} — README: ${rd.slice(0, 900)}]`; }
   let ai = null;
-  if (hayIA() && ctx.trim()) {
+  if (hayIA() && ctx.trim() && !soloGancho) {
+    paso(card, "Pidiendo el resumen a la IA…");
     ai = await chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
-{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"2 o 3 frases en español claro: QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","relevancia":3,"proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null"}
-Reglas: (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) relevancia 1-5 = lo útil que es para un desarrollador que usa Claude Code, agentes de IA, herramientas gratis/open source y automatización. (6) Si no hay información útil: "resumen":"" y "categoria":"Otros".
+{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"1 o 2 frases en español claro (MÁXIMO 220 caracteres): QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null","subtipo":"solo si categoria es Inteligencia artificial y el contenido lo deja claro: UNO de ${SUBTIPOS.join(" | ")}; si no está claro, cadena vacía","sirve":"UNA línea llana (MÁXIMO 110 caracteres) que empiece por un verbo: para qué le sirve a quien la guarda, SOLO según el contenido; si no se sabe, cadena vacía","accion":"Instalar (si el contenido da forma de instalarlo) | Probar (si se puede probar sin instalar) | Solo guardar (si no hay base clara)"}
+Reglas (0) «sirve» y «accion» salen SOLO del post o del README; sin base: "sirve":"" y "accion":"Solo guardar". (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) Si no hay información útil: "resumen":"" y "categoria":"Otros".
 CONTENIDO:
 ${ctx}`);
     if (ai && !repos.length) { // propuestas de la IA: solo valen si GitHub confirma que existen
@@ -680,19 +713,30 @@ ${ctx}`);
     }
   }
   if (ai && ai.resumen && !fundado(ai.resumen + " " + (ai.titulo || ""), ctx + " " + card.url)) { ai.resumen = ""; ai.titulo = ""; card.motivo = "La IA dijo algo que no sale del post; lo descarté"; } // anti-invención
+  { // H1: «Sirve para…» y acción sugerida; sin base real queda vacío y «Solo guardar»
+    let sv = ai && typeof ai.sirve === "string" ? ai.sirve.replace(/\s+/g, " ").trim() : "";
+    const base = ctx + " " + card.url + " " + (ai && ai.titulo || "");
+    const wr = [...raices(sv)], fb = raices(base);
+    if (!ai || !ai.resumen || sv.length < 8 || sv.length > 130 || (wr.length && wr.filter(x => fb.has(x)).length / wr.length < 0.3) || !fundado(sv, base)) sv = "";
+    const ac = ai && ACCIONES.find(a => sinAcentos(a) === sinAcentos(String(ai.accion || "").trim()));
+    card.sirve = sv ? corto(sv, 110) : ""; card.accion = sv && ac ? ac : "Solo guardar";
+  }
   const r0 = repos[0];
   card.repos = repos.map(r => ({ full: r.full, url: r.url, stars: r.stars, desc: r.desc, topics: r.topics, pushed: r.pushed, archived: r.archived }));
   card.titulo = (ai && ai.titulo) || titulo || (r0 && r0.full.split("/")[1]) || (card.tipo === "Instagram" && !texto.trim() ? "Post de Instagram (sin texto legible)" : "") || (texto.split("\n").find(l => l.trim() && !/^(Cuenta:|Imagen:?)/i.test(l.trim())) || "").slice(0, 70) || card.url;
-  card.relIA = ai && Number(ai.relevancia) ? Math.max(1, Math.min(5, Number(ai.relevancia))) : 0;
-  card.resumen = (ai && ai.resumen) || (r0 && r0.desc) || texto.slice(0, 220) || (card.tipo === "Instagram" ? "El texto de este post solo traía un gancho (comenta...); no se pudo leer su contenido. Abre el enlace." : "");
+  card.detalle = ai && ai.resumen && String(ai.resumen).length > MAX_RESUMEN ? String(ai.resumen).trim() : "";
+  card.resumen = corto((ai && ai.resumen) || (r0 && r0.desc) || texto.slice(0, MAX_RESUMEN)) || (card.tipo === "Instagram" ? "El texto de este post solo traía un gancho (comenta...); no se pudo leer su contenido. Abre el enlace." : "");
   card.categoria = clasificar(card, ai && ai.categoria);
+  card.subtipo = (ai && SUBTIPOS.find(s => sinAcentos(s) === sinAcentos(String(ai.subtipo || "").trim()))) || "";
   if (ai && Array.isArray(ai.tags)) card.tags = normalizarTags([...ai.tags, ...card.tags]);
   card.fuente = ai ? (r0 ? "verificado" : "resumen IA") : (r0 ? "verificado" : "deducido");
-  try { await investigar(card, repos, ai, texto); } catch (e) { card.motivo = "No pude investigar a fondo: " + String(e).slice(0, 60); }
+  try { await investigar(card, repos, ai, texto); } catch (e) { card.detalleTecnico = "investigar: " + String(e).slice(0, 120); }
   card.estado = "ok"; if (!/descart/.test(card.motivo || "")) card.motivo = "";
-  if (hayIA() && !ai && ctx.trim()) card.motivo = "Sin IA ahora (" + iaError.slice(0, 90) + "): ordenado por GitHub/hashtags";
+  card.sinIA = "";
+  if (!hayIA()) card.sinIA = AVISO_SIN_IA;
+  else if (!ai && ctx.trim()) { card.sinIA = "No hubo resumen de la IA: " + iaTexto() + ". Ordenada con lo que había"; card.detalleTecnico = iaError.slice(0, 160); }
   if (ghAviso) card.motivo = (card.motivo ? card.motivo + " · " : "") + ghAviso;
-  if (!texto.trim() && !r0) { card.estado = "revisar"; card.categoria = "Para revisar"; card.motivo = card.motivo || "No encontré texto en este link"; }
+  if (!texto.trim() && !r0) { card.estado = "revisar"; card.categoria = "Para revisar"; card.motivo = card.motivo || (soloGancho ? "Instagram no dejó leer el contenido: abre el enlace" : "No encontré texto en este link"); }
   return card;
 }
 
@@ -755,17 +799,18 @@ async function investigar(card, repos, ai, texto) {
   card.links = links;
   // si no hay ningún link (o solo el repo), se buscan y comprueban las webs oficiales de lo que menciona
   const hb = new Set((card.links || []).map(l => l.u.replace(/\/$/, "").toLowerCase()));
-  if (hb.size < 2 || (hb.size === 1 && r0)) await buscarLinksOficiales(card);
+  if (hb.size < 2 || (hb.size === 1 && r0)) { paso(card, "Buscando links…"); await buscarLinksOficiales(card); }
   if (!hayIA()) return;
   const material = `${texto.slice(0, 3200)}\n${r0 ? md : ""}\n${web ? web.titulo + " " + web.desc + " " + web.texto : ""}`;
+  paso(card, "Ampliando la explicación…");
   const ex = await chatJson(`Eres un divulgador técnico. Un post de Instagram habla de un proyecto, herramienta, skill o idea. Explícalo para que alguien lo entienda SIN ver el vídeo. Usa SOLO el material de abajo; si algo no está, no lo menciones. Si parte del material no tiene relación con el post (otro tema), IGNÓRALA. Responde SOLO JSON:
-{"explicacion":"4 a 6 frases en español claro: qué es, qué problema resuelve y para quién","puntos":["TODOS los puntos, pasos, ideas o herramientas que el post enumera (hasta 8); cada uno: nombre + una frase"],"skills":["si el post crea o propone skills/plugins/comandos para Claude: nombre — qué hace (hasta 5); si no hay, []"],"como":["pasos para instalarlo o usarlo (hasta 6), con el comando EXACTO solo si aparece en el material; si no aparecen, []"],"limites":"coste, requisitos o límites si se mencionan; si no, \"\""}
+{"resumen":"1 o 2 frases (MÁXIMO 220 caracteres): qué es y para qué sirve","explicacion":"4 a 6 frases en español claro: qué es, qué problema resuelve y para quién","puntos":["TODOS los puntos, pasos, ideas o herramientas que el post enumera (hasta 8); cada uno: nombre + una frase"],"skills":["si el post crea o propone skills/plugins/comandos para Claude: nombre — qué hace (hasta 5); si no hay, []"],"como":["pasos para instalarlo o usarlo (hasta 6), con el comando EXACTO solo si aparece en el material; si no aparecen, []"],"limites":"coste, requisitos o límites si se mencionan; si no, \"\""}
 POST (texto, voz del vídeo, texto de las imágenes y lo que se ve en el vídeo): ${texto.slice(0, 3200)}
 ${r0 ? "README de " + r0.full + ": " + md.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 3500) : ""}
 ${web ? "WEB OFICIAL (" + web.url + "): " + web.titulo + " — " + web.desc + " " + web.texto.slice(0, 1200) : ""}`);
   const lista = (v, n) => Array.isArray(v) ? v.map(x => String(x || "").trim()).filter(x => x.length > 3).slice(0, n) : [];
   if (ex && ex.explicacion && ex.explicacion.length > 60 && fundado(ex.explicacion, material + " " + card.titulo)) {
-    card.resumen = ex.explicacion; card.fuente = "investigado";
+    card.detalle = ex.explicacion.trim(); card.resumen = corto(ex.resumen && ex.resumen.length > 30 && ex.resumen.length <= MAX_RESUMEN && fundado(ex.resumen, material + " " + card.titulo) ? ex.resumen : ex.explicacion); card.fuente = "investigado";
     card.puntos = lista(ex.puntos, 8); card.skills = lista(ex.skills, 5); card.como = lista(ex.como, 6); card.limites = String(ex.limites || "").slice(0, 300);
   }
 }
@@ -884,7 +929,7 @@ async function buscarLinksOficiales(card, { forzar = false } = {}) {
 }
 
 // ============ editor de ficha: escribir, mover y buscar links ============
-let editando = null;
+let editando = null, masId = null;
 const seccionDe = (g, c) => String(g || "AI").trim() + " \u0001 " + String(c || "Sin clasificar").trim();
 function secciones() {
   const m = new Map();
@@ -894,11 +939,12 @@ function secciones() {
 }
 function pintarDestino(sel) {
   const s = seccionDe($("#hGru").value, $("#hCat").value);
-  $("#hDest").innerHTML = secciones().map(d => `<button data-g="${esc(d.g)}" data-c="${esc(d.c)}" class="${seccionDe(d.g, d.c) === s ? "on" : ""}">${esc(d.g)} › ${esc(d.c)} <span class="sema">${d.n}</span></button>`).join("") + `<button data-g="" data-c="">+ Nueva…</button>`;
+  const ls = secciones(); if (!ls.some(d => seccionDe(d.g, d.c) === s) && $("#hCat").value.trim()) ls.push({ g: $("#hGru").value.trim() || "AI", c: $("#hCat").value.trim(), n: 0 });
+  $("#hDest").innerHTML = ls.map(d => `<button data-g="${esc(d.g)}" data-c="${esc(d.c)}" class="${seccionDe(d.g, d.c) === s ? "on" : ""}">${esc(d.g)} › ${esc(d.c)} <span class="sema">${d.n}</span></button>`).join("") + `<button data-g="" data-c="">+ Nueva…</button>`;
 }
 function pintarLinksHoja() {
   const l = (editando.links || []);
-  $("#hLnks").innerHTML = l.map((x, i) => `<div class="lnk"><input class="hcamp t" data-li="${i}" data-lk="t" value="${esc(x.t)}" placeholder="Nombre"><input class="hcamp u" data-li="${i}" data-lk="u" value="${esc(x.u)}" placeholder="https://…"><button class="x" data-lx="${i}" aria-label="Quitar">✕</button></div>`).join("") || '<p class="hp">Sin links. Pulsa «Buscar links» y la app investiga y comprueba las webs oficiales de lo que menciona.</p>';
+  $("#hLnks").innerHTML = l.map((x, i) => `<div class="lnk"><input class="hcamp t" data-li="${i}" data-lk="t" value="${esc(x.t)}" placeholder="Nombre"><input class="hcamp u" data-li="${i}" data-lk="u" value="${esc(x.u)}" placeholder="https://…"><button class="x" data-lx="${i}" aria-label="Quitar">✕</button></div>`).join("") || '<p class="hp">Sin links. Puedes añadir uno a mano, o buscarlos desde la ficha con «⋯ › Buscar links».</p>';
 }
 function abrirEditor(c) {
   editando = c;
@@ -961,7 +1007,7 @@ const claveUrl = u => { // misma publicación aunque cambie la forma del link (u
 };
 const clavesDe = c => { const k = new Set([claveUrl(c.url), ...(c.extra || []).map(claveUrl)]); const r = c.repos && c.repos[0]; if (r) k.add("gh:" + r.full.toLowerCase()); return k; };
 const yaGuardada = u => { const k = claveUrl(u); return db.cards.find(c => clavesDe(c).has(k)); };
-function grupoActual() { const g = (($("#grupo") || {}).value || "").trim() || "AI"; if (db.grupo !== g) { db.grupo = g; guardar(); } return g; }
+const grupoActual = () => db.grupo || "AI"; // el grupo ya no se pide al pegar: se cambia desde Editar o Mover
 function encolar(links, bloque) {
   let nuevos = 0, repes = 0;
   for (const u of links) {
@@ -995,63 +1041,119 @@ function gruposDup(conTitulo) {
   });
   const g = {}; cards.forEach((c, i) => (g[f(i)] ||= []).push(c)); return Object.values(g).filter(a => a.length > 1);
 }
+const TIEMPO_ATASCADO_MS = 180000; // un link que lleva 3 minutos sin cambiar de paso se da por atascado
+let soltar = null, ultimoPaso = 0, atascado = false;
+const urlCorta = u => String(u || "").replace(/^https?:\/\/(www\.)?/, "").slice(0, 50);
+function paso(card, t) { // dice en qué va el link que se está procesando
+  if (actual && card !== actual) return; // un intento abandonado no pisa al nuevo
+  ultimoPaso = Date.now(); if (atascado) { atascado = false; pintaBloques(); }
+  $("#progS").textContent = t + (card ? " · " + urlCorta(card.url) : "");
+}
+setInterval(() => { if (corriendo && actual && !pausado && !atascado && Date.now() - ultimoPaso > TIEMPO_ATASCADO_MS) { atascado = true; pintaBloques(); } }, 5000);
 let pausado = false, actual = null, sesionDesde = (db.bn || 0) + 1;
-function etqOrdenar() { $("#bOrdenar").textContent = corriendo ? `➕ Añadir bloque ${(db.bn || 0) + 1} (en cola)` : "Ordenar mis links"; }
+function etqOrdenar() { $("#bOrdenar").textContent = corriendo ? `Añadir bloque ${(db.bn || 0) + 1} (en cola)` : "Ordenar mis links"; }
 function pintaBloques() {
+  const hayCola = db.cards.some(c => c.bloque && c.bloque >= sesionDesde); $("#notaLote").style.display = hayCola ? "" : "none";
+  $("#detect").style.display = hayCola || !$("#txt").value.trim() ? "none" : "";
   const bs = {}; db.cards.forEach(c => { if (c.bloque && c.bloque >= sesionDesde) { const b = bs[c.bloque] ||= { n: c.bloque, t: 0, h: 0 }; b.t++; if (c.estado !== "pendiente") b.h++; } });
-  $("#bloques").innerHTML = Object.values(bs).sort((x, y) => x.n - y.n).map(b => { const fin = b.h >= b.t, act = !fin && actual && actual.bloque === b.n; return `<div class="blq"><b>Bloque ${b.n}</b> · ${b.h}/${b.t} ${fin ? "✅ terminado" : act ? "⏳ trabajando" : "🕒 en cola"}<div class="barra"><i style="width:${Math.round(b.h / b.t * 100)}%"></i></div>${fin ? "" : `<button class="btn sm" data-bq="${b.n}">Cancelar lo que falta</button>`}</div>`; }).join("");
+  $("#bloques").innerHTML = Object.values(bs).sort((x, y) => x.n - y.n).map(b => { const fin = b.h >= b.t, act = !fin && actual && actual.bloque === b.n; return `<div class="blq"><b>Bloque ${b.n}</b> · ${b.h}/${b.t} ${fin ? "✅ terminado" : act ? "· trabajando" : "· en cola"}<div class="barra"><i style="width:${fin || b.h ? Math.round(b.h / b.t * 100) : 4}%"></i></div>${act && atascado ? '<div class="nota" style="color:var(--warn)">Parece atascado: este link no avanza. Puedes reiniciarlo o quitar el bloque.</div>' : ""}${fin ? `<button class="btn pri" data-ver="1">Ver mis ${b.t} fichas</button>` : `<div class="fila">${act ? `<button class="btn sm" data-rb="${b.n}">Reiniciar</button>` : ""}<button class="btn sm" data-bq="${b.n}">Quitar</button></div>`}</div>`; }).join("");
 }
 async function correr() {
-  if (corriendo) return; corriendo = true; pausado = false; $("#prog").style.display = "block"; $("#bParar").textContent = "⏸ Pausar"; muertos = {}; etqOrdenar();
+  if (corriendo) return; corriendo = true; pausado = false; $("#prog").style.display = "block"; $("#bParar").textContent = "Pausar"; muertos = {}; etqOrdenar();
   let hechos = 0;
   while (true) {
     const c = db.cards.find(x => x.estado === "pendiente"); if (!c) break;
     while (pausado) await dormir(400);
-    actual = c; const falta = db.cards.filter(x => x.estado === "pendiente").length;
+    actual = c; atascado = false; const falta = db.cards.filter(x => x.estado === "pendiente").length, copia = JSON.parse(JSON.stringify(c));
     $("#progT").textContent = `Trabajando en el bloque ${c.bloque || "—"} · faltan ${falta}`;
-    $("#progS").textContent = c.url.replace(/^https?:\/\/(www\.)?/, "").slice(0, 60);
+    paso(c, "Empezando");
     pintaBloques();
-    try { await analizar(c); } catch (e) { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = "Fallo inesperado: " + String(e).slice(0, 80); }
+    const suelto = new Promise(r => { soltar = r; }); let cortado = false;
+    try { await Promise.race([analizar(c), suelto.then(() => { cortado = true; })]); } catch (e) { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = "No pude procesar este link. Prueba «Reintentar»"; c.detalleTecnico = String(e).slice(0, 160); }
+    if (cortado) { const i = db.cards.indexOf(c); if (i >= 0 && c.reiniciar) db.cards[i] = { ...copia, estado: "pendiente" }; actual = null; guardar(); pintar(); pintaBloques(); continue; } // reiniciado o quitado: lo que el intento viejo siga haciendo ya no cuenta
     actual = null; guardar(); pintar(); pintaBloques(); hechos++;
     if (c.tipo === "Instagram") await dormir(700);
   }
   corriendo = false; $("#prog").style.display = "none"; etqOrdenar(); pintaBloques();
+  const uni = unirRepetidas();
   const ok = db.cards.filter(c => c.estado === "ok").length, rev = db.cards.filter(c => c.estado === "revisar").length;
-  aviso(`Todo listo: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}. Míralas en «Fichas».`);
+  aviso(`Todo listo: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}${uni ? `. Unidas ${uni} repetidas` : ""}. Míralas en «Fichas».`, true);
 }
 
+// ---- fichas repetidas: mismo título (sin acentos) en el mismo grupo y categoría; la unida conserva todo ----
+function unirRepetidas() {
+  const grupos = {};
+  db.cards.forEach(c => { if (c.estado !== "ok" || !c.titulo || /^https?:/i.test(c.titulo)) return; const k = [c.grupo || "AI", c.categoria || "", sinAcentos(c.titulo).replace(/\s+/g, " ").trim()].join("|"); (grupos[k] ||= []).push(c); });
+  const peso = c => ["resumen", "detalle", "notas", "imgs", "links", "puntos", "skills", "repos", "tags"].reduce((n, k) => n + (c[k] ? String(JSON.stringify(c[k])).length : 0), 0) + (c.fav ? 1 : 0);
+  const uniq = (a, f) => { const v = new Set(); return a.filter(x => { const k = f(x); if (!k || v.has(k)) return false; v.add(k); return true; }); };
+  let n = 0, quitar = new Set();
+  Object.values(grupos).filter(a => a.length > 1).forEach(a => {
+    a.sort((x, y) => peso(y) - peso(x)); const k = a[0];
+    a.slice(1).forEach(o => {
+      k.imgs = uniq([...(k.imgs || []), ...(o.imgs || [])], x => x);
+      k.links = uniq([...(k.links || []), ...(o.links || [])], l => l && l.u);
+      k.repos = uniq([...(k.repos || []), ...(o.repos || [])], r => r && r.full);
+      k.tags = uniq([...(k.tags || []), ...(o.tags || [])], x => x);
+      k.puntos = uniq([...(k.puntos || []), ...(o.puntos || [])], x => x);
+      k.skills = uniq([...(k.skills || []), ...(o.skills || [])], x => x);
+      k.extra = uniq([...(k.extra || []), ...(o.extra || []), o.url], x => x).filter(u => claveUrl(u) !== claveUrl(k.url));
+      if (o.notas && o.notas !== k.notas) k.notas = k.notas ? k.notas + "\n" + o.notas : o.notas;
+      if (!k.resumen && o.resumen) k.resumen = o.resumen; if (!k.detalle && o.detalle) k.detalle = o.detalle;
+      if (!k.sirve && o.sirve) { k.sirve = o.sirve; k.accion = o.accion; } else if (!k.accion && o.accion) k.accion = o.accion;
+      if (o.fav) k.fav = true;
+      { const R = { hecho: 3, quiero: 2, nuevo: 1, descartada: 0 }, a = uso(k), b = uso(o); k.estadoUso = R[b] > R[a] ? b : a; }
+      if (db.sel && db.sel[o.id]) { try { delete db.sel[o.id]; } catch (e) { } }
+      quitar.add(o); n++;
+    });
+  });
+  if (n) { db.cards = db.cards.filter(c => !quitar.has(c)); guardar(); pintar(); aviso("Unidas " + n + " repetidas"); }
+  return n;
+}
 // ============ pantalla ============
-function aviso(t) { const a = $("#aviso"); a.textContent = t; a.style.display = "block"; clearTimeout(aviso.t); aviso.t = setTimeout(() => a.style.display = "none", 4500); }
+function aviso(t, fijo) { const a = $("#aviso"); a.textContent = t; a.style.display = "block"; clearTimeout(aviso.t); if (!fijo) aviso.t = setTimeout(() => a.style.display = "none", 4500); } // fijo = no se quita solo: se cierra tocándolo
+$("#aviso").addEventListener("click", () => { $("#aviso").style.display = "none"; });
 function cambiaTab(t) { $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + t)); if (t !== "fichas" && detId) cerrarDet(); if (t === "fichas") pintar(); $("main").scrollTop = 0; }
 const miles = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : String(n);
 const ordenCat = (a, b) => ((a === "Para revisar") - (b === "Para revisar")) || (a === "Sin clasificar") - (b === "Sin clasificar") || a.localeCompare(b, "es");
-let filtro = "todo";
-const FILTROS = [["todo", "Todo"], ["rel", "★ Más relevantes"], ["repo", "Con GitHub"], ["rev", "Para revisar"]];
+let filtro = "nuevo"; const vistas = new Set();
+const FILTROS = [["nuevo", "Nuevo"], ["quiero", "Lo quiero"], ["hecho", "Hecho"], ["todo", "Todo"], ["rev", "Para revisar"], ["repo", "Con GitHub"], ["descartada", "Descartadas"]];
 function pasaFiltro(c, f = filtro) {
-  if (f === "rel") return c.estado === "ok" && relevancia(c).n >= 4;
+  if (f === "descartada") return uso(c) === "descartada";
+  if (uso(c) === "descartada") return false;
+  if (f === "nuevo" || f === "quiero" || f === "hecho") return uso(c) === f;
   if (f === "repo") return !!(c.repos && c.repos.length);
   if (f === "rev") return c.estado === "revisar";
   return true;
 }
-const visibles = () => { const q = $("#buscar").value.trim().toLowerCase(); return db.cards.filter(c => pasaFiltro(c) && (!q || [c.titulo, c.resumen, c.categoria, c.url, ...(c.tags || []), ...(c.repos || []).map(r => r.full), ...(c.puntos || [])].join(" ").toLowerCase().includes(q))); };
-const porRel = (a, b) => (relevancia(b).n - relevancia(a).n) || String(a.titulo).localeCompare(String(b.titulo), "es");
+const visibles = () => { const q = $("#buscar").value.trim().toLowerCase(); const f = q && ["nuevo", "quiero", "hecho"].includes(filtro) ? "todo" : filtro; return db.cards.filter(c => pasaFiltro(c, f) && (!q || [c.titulo, c.resumen, c.categoria, c.url, ...(c.tags || []), ...(c.repos || []).map(r => r.full), ...(c.puntos || [])].join(" ").toLowerCase().includes(q))); };
+const porRel = (a, b) => (!!b.fav - !!a.fav) || String(a.titulo).localeCompare(String(b.titulo), "es");
 function pintar() {
+  migraUso();
   const q = $("#buscar").value.trim().toLowerCase();
   const cards = visibles();
+  pintaAvisoIA(); $("#pasos").style.display = db.cards.length ? "none" : "block";
   $("#cuenta").textContent = db.cards.length ? db.cards.length + " fichas" : "";
   $("#filtros").innerHTML = FILTROS.map(([k, t]) => `<button data-f="${k}" class="${filtro === k ? "on" : ""}">${t}${k === "todo" ? "" : ` (${db.cards.filter(c => pasaFiltro(c, k)).length})`}</button>`).join("") + '<select id="catSel" aria-label="Ir a categoría"></select><button data-p="1" id="bPlegar">Plegar todo</button>';
   if (!db.cards.length) { $("#lista").innerHTML = '<div class="vacio"><b>Todavía no hay fichas</b>Ve a «Pegar», mete tus links y pulsa «Ordenar».</div>'; return marca(); }
   const gg = {}; cards.forEach(c => ((gg[c.grupo || "AI"] ||= {})[c.categoria || "Otros"] ||= []).push(c)); // grupo principal > categoría
   const cerradas = new Set($$("#lista details:not([open])").map(d => d.dataset.k)); // lo nuevo nace abierto; solo recuerdo lo que cerraste
-  const mejor = a => Math.max(...a.map(c => relevancia(c).n));
-  const ordC = g => (x, y) => ((x === "Para revisar") - (y === "Para revisar")) || ((x === "Otros" || x === "Sin clasificar") - (y === "Otros" || y === "Sin clasificar")) || (mejor(g[y]) - mejor(g[x])) || (g[y].length - g[x].length) || x.localeCompare(y, "es");
-  const pintaCats = (grupos, pre) => Object.keys(grupos).sort(ordC(grupos)).map(k => `<details data-k="${esc(pre + k)}" ${(!cerradas.has(pre + k) || q) ? "open" : ""}><summary>${IC.chev}<span class="cn">${esc(k)}</span><b>${grupos[k].length}</b></summary><div class="secc">${grupos[k].sort(porRel).map(filaHtml).join("")}</div></details>`).join("");
+  const ordC = g => (x, y) => ((x === "Para revisar") - (y === "Para revisar")) || ((x === "Otros" || x === "Sin clasificar") - (y === "Otros" || y === "Sin clasificar")) || (g[y].length - g[x].length) || x.localeCompare(y, "es");
+  const filtrando = !!q || !["todo", "nuevo"].includes(filtro); // con búsqueda o filtro se abre todo lo que tenga resultados
+  const abierta = (key, n) => filtrando || (vistas.has(key) ? !cerradas.has(key) : n <= MAX_ABIERTO); // lo grande nace plegado
+  const pintaCats = (grupos, pre) => Object.keys(grupos).sort(ordC(grupos)).map(k => {
+    const a = grupos[k].sort(porRel), key = pre + k, subs = {};
+    if (a.length > MAX_ABIERTO) a.forEach(c => (subs[subDe(c)] ||= []).push(c));
+    const dividir = Object.keys(subs).length > 1;
+    const cuerpo = dividir ? Object.keys(subs).sort((x, y) => (x === "General") - (y === "General") || subs[y].length - subs[x].length || x.localeCompare(y, "es")).map(s => `<details class="sub" data-k="${esc(key + "/" + s)}" ${abierta(key + "/" + s, 99) ? "open" : ""}><summary>${IC.chev}<span class="cn">${esc(s)}</span><b>${subs[s].length}</b></summary><div class="secc">${subs[s].map(filaHtml).join("")}</div></details>`).join("") : a.map(filaHtml).join("");
+    return `<details class="cat" data-k="${esc(key)}" ${abierta(key, a.length) ? "open" : ""}><summary>${IC.chev}<span class="cn">${esc(k)}</span><b>${a.length}</b></summary><div class="secc">${cuerpo}</div></details>`;
+  }).join("");
   const gs = Object.keys(gg).sort((x, y) => x.localeCompare(y, "es"));
   // con un solo grupo no hay carpeta que abrir y cerrar: se ven directamente las categorías
   $("#lista").innerHTML = gs.length === 1 ? pintaCats(gg[gs[0]], gs[0] + "/")
     : gs.map(g => `<details class="grupo" data-k="G:${esc(g)}" ${(!cerradas.has("G:" + g) || q) ? "open" : ""}><summary style="font-size:1.1em">${IC.chev}<span class="cn">${esc(g)}</span><b>${Object.values(gg[g]).reduce((n, a) => n + a.length, 0)}</b></summary>${pintaCats(gg[g], g + "/")}</details>`).join("")
-    || '<div class="vacio">Nada que mostrar con este filtro.</div>';
-  const opts = $$("#lista details:not(.grupo)").map(d => `<option value="${esc(d.dataset.k)}">${esc(d.querySelector(".cn").textContent)} (${d.querySelector("b").textContent})</option>`).join("");
+    || `<div class="vacio"><b>${q ? "Nada para “" + esc($("#buscar").value.trim()) + "”" : "Nada que mostrar con este filtro."}</b><button class="btn" data-q="1">Quitar búsqueda y filtros</button></div>`;
+  $$("#lista details").forEach(d => vistas.add(d.dataset.k));
+  const opts = $$("#lista details.cat").map(d => `<option value="${esc(d.dataset.k)}">${esc(d.querySelector(".cn").textContent)} (${d.querySelector("b").textContent})</option>`).join("");
   $("#catSel").innerHTML = '<option value="">Ir a categoría…</option>' + opts; etqPlegar();
   pintaDet();
   marca();
@@ -1076,29 +1178,38 @@ function listaLinks(c) { // SIEMPRE se ve el link del post original y el del rep
 }
 const aHtml = (l, cls, txt) => `<a class="${cls} ${l.cls}${l.roto ? " roto" : ""}" data-a="ext" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer" title="${esc(l.t)}"${txt ? "" : ` aria-label="${esc(l.t)}"`}>${l.ic}${txt ? esc(l.t) : ""}</a>`;
 const enlacesDe = c => listaLinks(c).map(l => aHtml(l, "lk", true)).join("");
+function tituloLegible(c) {
+  const t = String(c.titulo || ""); if (!/^https?:\/\//i.test(t)) return t;
+  try { const u = new URL(t), h = u.hostname.replace(/^(www|m)\./, ""), seg = u.pathname.split("/").filter(Boolean);
+    if (/instagram\.com$/.test(h)) { const k = /^(reel|reels|tv)$/.test(seg[0]) ? "reel" : "post", cod = seg[1] || seg[0] || ""; return "Instagram · " + k + (cod ? " " + cod.slice(0, 6) + "…" : ""); }
+    return h + (seg[0] ? " · " + seg[0].slice(0, 24) + (seg.length > 1 || seg[0].length > 24 ? "…" : "") : ""); } catch (e) { return t; }
+}
 function filaHtml(c) {
-  const rl = relevancia(c), ls = listaLinks(c), ig = ls.find(l => l.cls === "ig"), mp = ls.find(l => l.cls !== "ig");
-  const rev = c.estado === "revisar", sub = rev ? (c.motivo || "Hay que revisarla") : c.estado === "pendiente" ? "En cola…" : String(c.resumen || "").replace(/\s+/g, " ");
-  return `<div class="rw${db.sel && db.sel[c.id] ? " marca" : ""}${detId === c.id ? " act" : ""}" data-id="${c.id}"><button class="sel" data-a="sel" aria-label="Seleccionar"><i>✓</i></button><button class="rb" data-a="det"><span class="rt">${rev ? '<span class="pt" aria-label="Revisar"></span>' : ""}${esc(c.titulo)}</span><span class="rs${rev ? " av" : ""}">${esc(sub) || "&nbsp;"}</span></button>${rl.n >= 4 || c.fav ? `<span class="rst" role="img" aria-label="Relevante">${IC.star}</span>` : ""}${ig ? aHtml(ig, "li") : ""}${mp ? aHtml(mp, "li") : ""}</div>`;
+  const ls = listaLinks(c), ig = ls.find(l => l.cls === "ig"), mp = ls.find(l => l.cls !== "ig");
+  const rev = c.estado === "revisar", sub = rev ? (c.motivo || "Hay que revisarla") : c.estado === "pendiente" ? "En cola…" : (c.sinIA ? c.sinIA + ". " : "") + (c.sirve ? c.sirve + " · " : "") + String(c.resumen || "").replace(/\s+/g, " "), acc = !rev && c.estado === "ok" && c.accion ? `<span class="chip${c.accion === "Instalar" ? " ok" : ""}" style="font-size:11px;padding:0 7px;margin-right:6px;font-weight:600">${esc(c.accion)}</span>` : "";
+  return `<div class="rw${db.sel && db.sel[c.id] ? " marca" : ""}${detId === c.id ? " act" : ""}" data-id="${c.id}"><button class="sel" data-a="sel" aria-label="Seleccionar"><i>✓</i></button><button class="rb" data-a="det"><span class="rt">${rev ? '<span class="pt" aria-label="Revisar"></span>' : ""}${acc}${esc(rev ? tituloLegible(c) : c.titulo)}</span><span class="rs${rev ? " av" : ""}">${esc(sub) || "&nbsp;"}</span></button>${(() => { const u = uso(c); return u === "descartada" ? '<button class="uso" data-a="uso" data-u="nuevo" aria-label="Recuperar ficha">Recuperar</button>' : `<button class="uso u-${u}" data-a="uso" data-u="${u === "nuevo" ? "quiero" : u === "quiero" ? "hecho" : "nuevo"}" aria-label="Estado: ${USOS.find(x => x[0] === u)[1]}. Toca para cambiar">${u === "quiero" ? "Lo quiero" : u === "hecho" ? "Hecho" : "Nuevo"}</button><button class="uso x" data-a="uso" data-u="descartada" aria-label="Descartar ficha">✕</button>`; })()}${c.fav ? `<span class="rst" role="img" aria-label="Favorita">${IC.star}</span>` : ""}${ig ? aHtml(ig, "li") : ""}${mp ? aHtml(mp, "li") : ""}${rev ? `<div class="racc"><button class="btn sm" data-a="reint">Reintentar</button>${ig ? aHtml({ ...ig, t: c.tipo === "Instagram" ? "Abrir en Instagram" : "Abrir el link" }, "btn sm", true) : ""}</div>` : ""}</div>`;
 }
 // ---- detalle: hoja a pantalla completa en móvil, panel a la derecha en escritorio ----
-let detId = null, detHist = false;
+let detId = null, detHist = false, verMasId = null;
 const esPC = () => matchMedia("(min-width:900px)").matches;
 window.sigImg = el => { let r = []; try { r = JSON.parse(el.dataset.r || "[]"); } catch (e) { } if (r.length) { el.dataset.r = JSON.stringify(r.slice(1)); el.src = r[0]; } else el.remove(); };
 function detalleHtml(c) {
-  const rl = relevancia(c), vio = c.vio || {}, cm = comandos(c), imgs = (c.imgs || []).filter(Boolean), rev = c.estado === "revisar";
+  const vio = c.vio || {}, cm = comandos(c), imgs = (c.imgs || []).filter(Boolean), rev = c.estado === "revisar";
   const repoCh = (c.repos || []).slice(0, 2).map((r, _, A) => { const e = estadoRepo(r); return e ? `<span class="chip ${e.cls}">${A.length > 1 ? esc(r.full.split("/")[1]) + ": " : ""}${e.t}</span>` : ""; }).join("");
   const leido = [vio.voz ? "voz del vídeo" : c.voz === "no" ? "sin voz" : "", vio.imgs ? "texto de las imágenes" : "", vio.frames ? "fotogramas del vídeo" : "", c.repos && c.repos.length ? "README" : ""].filter(Boolean).join(" · ");
   const sel = db.sel && db.sel[c.id];
-  return `<div class="dh"><button class="btn sm" data-a="cerrar" aria-label="Volver a la lista">${IC.back}</button><span>Ficha</span></div><div id="detC"><h2>${esc(c.titulo)}</h2>
-<div class="meta"><span class="chip">${esc(c.categoria || "Otros")}</span>${rl.n ? `<span class="rel r${rl.n}">${c.fav ? "Favorita · " : ""}${ETQ_REL[rl.n]}</span>` : ""}<span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${repoCh}${(c.rotos || []).length ? `<span class="chip bad">${c.rotos.length} enlace(s) roto(s)</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${c.estado === "pendiente" ? '<span class="chip">en cola</span>' : rev ? '<span class="chip warn">revisar</span>' : ""}</div>
-${rev && c.motivo ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo)}</div>` : ""}
+  return `<div class="dh"><button class="btn sm" data-a="cerrar" aria-label="Volver a la lista">${IC.back}</button><span>Ficha</span></div><div id="detC"${rev ? ' class="fall"' : ""}><h2>${esc(rev ? (/^https?:\/\//i.test(String(c.titulo || "")) ? "No se pudo leer" : c.titulo) : c.titulo)}</h2>${rev ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo || "Hay que revisarla")}</div><div class="acs" style="margin:8px 0"><button class="btn pri" data-a="reint">Reintentar</button></div>` : ""}
+<div class="meta"><span class="chip">${esc(c.categoria || "Otros")}</span>${c.fav ? '<span class="rel r5">Favorita</span>' : ""}${c.accion && c.estado === "ok" ? `<span class="chip${c.accion === "Instalar" ? " ok" : ""}">${esc(c.accion)}</span>` : ""}<span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${repoCh}${(c.rotos || []).length ? `<span class="chip bad">${c.rotos.length} enlace(s) roto(s)</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${c.estado === "pendiente" ? '<span class="chip">en cola</span>' : rev ? '<span class="chip warn">revisar</span>' : ""}</div>
 ${imgs.length ? `<img class="mini" src="${esc(imgs[0])}" data-r="${esc(JSON.stringify(imgs.slice(1, 6)))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="sigImg(this)">` : ""}
-${c.resumen ? `<p class="res">${esc(c.resumen)}</p>` : '<p class="nota">Sin resumen todavía.</p>'}
+${c.sinIA ? `<div class="nota" style="color:var(--warn)">${esc(c.sinIA)}</div>` : ""}
+<div class="usos" role="group" aria-label="Estado de la ficha">${USOS.map(([k, t]) => `<button class="btn${uso(c) === k ? " on" : ""}" data-a="uso" data-u="${k}" aria-pressed="${uso(c) === k}">${k === "descartada" && uso(c) === "descartada" ? "Descartada" : t}</button>`).join("")}</div>
+${c.sirve ? `<div class="bl"><b>Sirve para…</b>${esc(c.sirve)}</div>` : ""}${c.resumen ? `<p class="res">${esc(c.resumen)}</p>` : '<p class="nota">Sin resumen todavía.</p>'}${c.detalle && c.detalle !== c.resumen ? (verMasId === c.id ? `<p class="res">${esc(c.detalle)}</p><button class="btn sm" data-a="vermas">Ver menos</button>` : '<button class="btn sm" data-a="vermas">Ver más</button>') : ""}
 ${lista("Puntos clave", c.puntos)}${lista("Skills que propone", c.skills)}${cm.length ? `<div class="bl"><b>Instalación / uso</b>${cm.map(x => `<code class="cmd">${esc(x)}</code>`).join("")}</div>` : ""}${c.limites ? `<div class="bl"><b>Requisitos y límites</b>${esc(c.limites)}</div>` : ""}
 <span class="het" style="margin-top:16px">Links</span><div class="enl gr">${enlacesDe(c) || '<p class="hp">Sin links. Pulsa «Buscar links».</p>'}</div>
 ${c.buscado && c.links && c.links.length ? `<div class="nota">Buscado: ${esc(c.buscado)}</div>` : ""}${c.notas ? `<div class="notas">${esc(c.notas)}</div>` : ""}
-<div class="acs"><button class="btn" data-a="editar">Editar</button><button class="btn" data-a="mover">Mover</button><button class="btn" data-a="fav">${c.fav ? "Quitar favorita" : "Favorita"}</button><button class="btn" data-a="links">Buscar links</button><button class="btn" data-a="sel">${sel ? "Quitar selección" : "Seleccionar"}</button><button class="btn" data-a="texto">Pegar texto</button><button class="btn" data-a="borrar" style="color:var(--bad)">Borrar</button></div>
+<div class="acs"><button class="btn" data-a="editar">Editar</button><button class="btn" data-a="fav">${c.fav ? "Quitar favorita" : "Favorita"}</button><button class="btn" data-a="mas" aria-expanded="${masId === c.id}" aria-label="Más opciones" style="grid-column:1/-1">⋯ Más opciones</button></div>
+${masId === c.id ? `<div class="acs" style="margin-top:0"><button class="btn" data-a="links">Buscar links</button><button class="btn" data-a="sel">${sel ? "Quitar selección" : "Seleccionar"}</button><button class="btn" data-a="texto" style="grid-column:1/-1">Pegar texto del post</button></div>` : ""}
+<div class="acs" style="margin-top:0"><button class="btn" data-a="borrar" style="grid-column:1/-1;color:var(--bad);border-color:var(--bad)">Borrar esta ficha</button></div>
 ${leido ? `<div class="nota">Leído con: ${esc(leido)}</div>` : ""}</div>`;
 }
 function pintaDet(nuevo) {
@@ -1129,12 +1240,12 @@ function comandos(c) { // comandos entre `comillas` que aparecen en la propia fi
 function exportTxt(cards) {
   const lista = (t, a, ord) => a && a.length ? t + ":\n" + a.map((x, i) => ord ? `  ${i + 1}. ${x}` : `  - ${x}`).join("\n") : "";
   const bloque = (c, i) => {
-    const r = c.repos && c.repos[0], rl = relevancia(c), vistos = new Set(), L = [];
+    const r = c.repos && c.repos[0], vistos = new Set(), L = [];
     const add = (t, u) => { if (!u || !/^https?:/i.test(u)) return; const k = claveUrl(u); if (vistos.has(k)) return; vistos.add(k); L.push(`  - ${t}: ${u}`); };
     if (c.tipo !== "Foto") add(c.tipo === "Instagram" ? "Post original (Instagram)" : "Link original (" + c.tipo + ")", c.url);
     (c.repos || []).slice(0, 2).forEach(x => add("Repo GitHub" + (x.stars && x.stars !== "?" ? " (★" + x.stars + ")" : ""), x.url));
     (c.links || []).forEach(l => add(l.t || "Web", l.u)); (c.extra || []).forEach(u => add("Otro link", u));
-    return [`## ${i + 1}. ${c.titulo}`, `Categoría: ${c.categoria}${rl.n ? " · Relevancia: " + ETQ_REL[rl.n] + " (" + rl.n + "/5)" : ""}${c.fav ? " · Favorita" : ""}`,
+    return [`## ${i + 1}. ${c.titulo}`, `Categoría: ${c.categoria}${c.fav ? " · Favorita" : ""}`,
       c.resumen ? "Qué es y para qué sirve: " + c.resumen : "", lista("Puntos clave", c.puntos), lista("Skills que propone", c.skills),
       comandos(c).length ? lista("Instalación / uso (comandos citados en la ficha)", comandos(c), true) : "Instalación / uso: sin comando verificado" + (r ? " (mira el README del repo)" : ""),
       c.limites ? "Requisitos y límites: " + c.limites : "", L.length ? "Links:\n" + L.join("\n") : "Links: ninguno", c.notas ? "Notas de Jorge: " + c.notas : ""].filter(Boolean).join("\n");
@@ -1148,11 +1259,13 @@ function guardarTxt(t) {
 }
 function abrirCC(cards) { $("#ccTxt").value = exportTxt(cards); $("#ccH").textContent = `Exportar .txt · ${cards.length} elemento${cards.length === 1 ? "" : "s"}`; $("#ccGuarda").textContent = N ? "Compartir .txt" : "Guardar .txt"; $("#dcc").showModal(); }
 async function exportar() {
-  let cs = elegidas();
-  if (!cs.length) {
-    cs = visibles().filter(c => c.estado !== "pendiente").sort(ordenExp);
-    if (!cs.length) return aviso("No hay fichas que exportar");
-    if (!await confirmar("Exportar .txt", `<p>No marcaste ninguna ficha. ¿Exportar todo lo visible (${cs.length})?</p>`, "Exportar todo")) return;
+  let cs = db.cards.filter(c => c.estado !== "pendiente" && (selIds()[c.id] || (uso(c) === "quiero"))).sort(ordenExp); // por defecto: «Lo quiero» + seleccionadas
+  {
+    if (!cs.length) {
+      cs = visibles().filter(c => c.estado !== "pendiente").sort(ordenExp);
+      if (!cs.length) return aviso("No hay fichas que exportar");
+      if (!await confirmar("Exportar .txt", `<p>No marcaste ninguna ficha ni hay fichas en «Lo quiero». ¿Exportar lo que se ve (${cs.length})?</p>`, "Exportar lo visible")) return;
+    }
   }
   abrirCC(cs);
 }
@@ -1183,20 +1296,6 @@ $("#selTodas").onclick = () => { visibles().forEach(c => { if (c.estado !== "pen
 $("#selNinguna").onclick = () => { db.sel = {}; guardar(); marca(); };
 $("#bMas").onclick = () => $("#menuMas").classList.toggle("on");
 document.addEventListener("click", e => { if (!e.target.closest("#bMas")) $("#menuMas").classList.remove("on"); });
-// ============ mover (sin arrastrar: un botón y eliges) ============
-let mvCard = null, mvSel = null;
-function abrirMover(c) {
-  mvCard = c; mvSel = null; $("#mvN").value = "";
-  $("#mvD").innerHTML = secciones().map(d => `<button data-g="${esc(d.g)}" data-c="${esc(d.c)}" class="${seccionDe(d.g, d.c) === seccionDe(c.grupo, c.categoria) ? "on" : ""}">${esc(d.g)} › ${esc(d.c)} <span class="sema">${d.n}</span></button>`).join("");
-  $("#dmv").showModal();
-}
-$("#mvD").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; mvSel = { g: b.dataset.g, c: b.dataset.c }; $$("#mvD button").forEach(x => x.classList.toggle("on", x === b)); $("#mvN").value = ""; });
-$("#mvNo").onclick = () => $("#dmv").close();
-$("#mvSi").onclick = () => {
-  const t = $("#mvN").value.trim(); let g, cat;
-  if (t) { const p = t.split(/[›>\/]/).map(x => x.trim()).filter(Boolean); g = p.length > 1 ? p[0] : mvCard.grupo; cat = p.length > 1 ? p[1] : p[0]; } else if (mvSel) { g = mvSel.g; cat = mvSel.c; } else return aviso("Elige una sección o escribe una nueva");
-  $("#dmv").close(); mover(mvCard, g, cat);
-};
 // ============ duplicados y comprobaciones ============
 function confirmar(titulo, html, si = "Aceptar") {
   return new Promise(res => { $("#dT").textContent = titulo; $("#dC").innerHTML = html; $("#dSi").textContent = si; const d = $("#dlg"); $("#dSi").onclick = () => { d.close(); res(true); }; $("#dNo").onclick = () => { d.close(); res(false); }; d.oncancel = () => res(false); d.showModal(); });
@@ -1239,10 +1338,15 @@ function migrarCats() { let n = 0; for (const c of db.cards) { const v = normCat
 function detectar() {
   const { links, total } = sacarLinks($("#txt").value);
   const nuevos = links.filter(u => !yaGuardada(u)).length;
+  $("#detect").style.display = links.length ? "" : "none";
   $("#detect").textContent = !links.length ? "Aún no hay links." : `${links.length} links detectados${total > links.length ? ` (${total - links.length} repetidos quitados)` : ""}${nuevos < links.length ? ` · ${links.length - nuevos} ya estaban guardados` : ""}.`;
 }
 $("#txt").addEventListener("input", detectar);
-$("#bPegar").onclick = () => { const t = N ? N.pegado() : ""; if (t) { $("#txt").value += ($("#txt").value ? "\n" : "") + t; detectar(); } else aviso("El portapapeles está vacío"); };
+$("#bPegar").onclick = async () => {
+  let t = N ? N.pegado() : "";
+  if (!t) { try { t = await navigator.clipboard.readText(); } catch (e) { } } // navegador: pide permiso al tocar
+  if (!t && SRV) { try { t = (await (await fetch("/api/pegar")).json()).texto || ""; } catch (e) { } } // PC: lo lee el servidor
+  if (t) { $("#txt").value += ($("#txt").value ? "\n" : "") + t; detectar(); } else aviso("No hay nada copiado todavía. Copia tus links y vuelve a tocar."); };
 $("#bOrdenar").onclick = () => {
   const { links } = sacarLinks($("#txt").value);
   if (!links.length) { if (db.cards.some(c => c.estado === "pendiente") && !corriendo) { correr(); return; } return aviso("No veo ningún link. Pega algunos primero."); }
@@ -1252,8 +1356,21 @@ $("#bOrdenar").onclick = () => {
   aviso(`Bloque ${n} en marcha: ${r.nuevos} links${r.repes ? `, ${r.repes} repetidos quitados` : ""}. Puedes pegar otro bloque ya.`);
   correr();
 };
-$("#bParar").onclick = () => { pausado = !pausado; $("#bParar").textContent = pausado ? "▶ Reanudar" : "⏸ Pausar"; };
-$("#bloques").addEventListener("click", e => { const n = Number(e.target.dataset.bq); if (!n) return; db.cards = db.cards.filter(c => !(c.bloque === n && c.estado === "pendiente" && c !== actual)); guardar(); pintaBloques(); pintar(); aviso(`Bloque ${n}: cancelé lo que faltaba`); });
+$("#bParar").onclick = () => { pausado = !pausado; $("#bParar").textContent = pausado ? "Reanudar" : "Pausar"; };
+$("#bloques").addEventListener("click", e => {
+  if (e.target.closest("[data-ver]")) return cambiaTab("fichas");
+  const rb = e.target.closest("[data-rb]"), qb = e.target.closest("[data-bq]");
+  if (rb) { // Reiniciar: el link que está trabajando vuelve a empezar de cero; lo ya hecho no se toca
+    if (!actual || actual.bloque !== Number(rb.dataset.rb)) return;
+    actual.reiniciar = true; if (soltar) soltar(); atascado = false; return aviso("Reinicio este link desde el principio.");
+  }
+  if (qb) { // Quitar: se van los pendientes de este bloque (también el que está trabajando); las fichas ya hechas se quedan
+    const n = Number(qb.dataset.bq), activo = actual && actual.bloque === n ? actual : null, antes = db.cards.length;
+    db.cards = db.cards.filter(c => !(c.bloque === n && c.estado === "pendiente"));
+    if (activo && soltar) soltar();
+    guardar(); pintaBloques(); pintar(); aviso(`Quité lo que faltaba del bloque ${n} (${antes - db.cards.length}). Lo ya hecho se queda.`);
+  }
+});
 $("#buscar").addEventListener("input", pintar);
 $("#bReint").onclick = () => { const f = db.cards.filter(c => c.estado === "revisar"); if (!f.length) return aviso("No hay fallidas"); const n = (db.bn || 0) + 1; db.bn = n; f.forEach(c => { c.estado = "pendiente"; c.bloque = n; }); guardar(); cambiaTab("pegar"); pintaBloques(); correr(); };
 $("#bLinksMasivos").onclick = async () => {
@@ -1270,21 +1387,28 @@ $("#bLinksMasivos").onclick = async () => {
   aviso(`Investigadas ${f.length} fichas: ${n} links nuevos encontrados`);
 };
 $("#lista").addEventListener("click", e => {
+  if (e.target.closest("[data-q]")) { $("#buscar").value = ""; filtro = "todo"; return pintar(); }
   const row = e.target.closest(".rw"); if (!row) return; const c = db.cards.find(x => x.id === row.dataset.id); if (!c) return;
   const el = e.target.closest("[data-a]"), a = el && el.dataset.a;
   if (a === "ext") return; // enlace de verdad: el navegador lo abre solo
   if (a === "sel") return alterna(c);
+  if (a === "uso") return ponUso(c, el.dataset.u);
+  if (a === "reint") { const n = (db.bn || 0) + 1; db.bn = n; Object.assign(c, { estado: "pendiente", bloque: n, motivo: "" }); guardar(); pintar(); pintaBloques(); aviso("Reintentando…"); return correr(); }
   abrirDet(c);
 });
+function ponUso(c, u) { c.estadoUso = u; guardar(); pintar(); aviso(u === "descartada" ? "Descartada: la encuentras en el filtro «Descartadas»" : "Marcada como «" + USOS.find(x => x[0] === u)[1] + "»"); }
 function alterna(c) { const m = selIds(); if (m[c.id]) delete m[c.id]; else m[c.id] = 1; guardar(); marca(); }
 $("#det").addEventListener("click", async e => {
   const el = e.target.closest("[data-a]"); if (!el) return; const a = el.dataset.a;
   if (a === "ext") return;
   if (a === "cerrar") return cerrarDet();
   const c = db.cards.find(x => x.id === detId); if (!c) return;
+  if (a === "reint") { const n = (db.bn || 0) + 1; db.bn = n; Object.assign(c, { estado: "pendiente", bloque: n, motivo: "" }); guardar(); pintar(); pintaDet(); pintaBloques(); aviso("Reintentando…"); return correr(); }
+  if (a === "vermas") { verMasId = verMasId === c.id ? null : c.id; return pintaDet(); }
   if (a === "editar") return abrirEditor(c);
-  if (a === "mover") return abrirMover(c);
+  if (a === "mas") { masId = masId === c.id ? null : c.id; return pintaDet(); }
   if (a === "sel") return alterna(c);
+  if (a === "uso") return ponUso(c, el.dataset.u);
   if (a === "links") return pedirLinks(c);
   if (a === "fav") { c.fav = !c.fav; guardar(); return pintar(); }
   if (a === "borrar") { if (await confirmar("Borrar ficha", `<p>¿Borrar «${esc(c.titulo.slice(0, 70))}»?</p>`)) { db.cards = db.cards.filter(x => x !== c); guardar(); cerrarDet(); pintar(); } }
@@ -1295,11 +1419,11 @@ $("#filtros").addEventListener("change", e => { if (e.target.id !== "catSel" || 
 $("#bDup").onclick = quitarDuplicados;
 $("#bComprobar").onclick = comprobarTodo;
 $("#bGuardar").onclick = async () => {
-  db.cfg = { nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim(), groq: $("#kGq").value.trim(), intereses: $("#kInt").value.trim() }; guardar(); muertos = {}; pintar();
+  db.cfg = { nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim(), groq: $("#kGq").value.trim() }; guardar(); muertos = {}; pintar();
   $("#kEstado").textContent = "Probando…";
   const out = [];
-  if (db.cfg.nvidia || db.cfg.openrouter) { const t = await chat("Responde solo: ok", 20); out.push(t ? "IA ✓ funciona" : "IA ✗ " + iaError); } else out.push("IA: sin claves (modo básico)");
-  if (db.cfg.github) { const r = await http("https://api.github.com/rate_limit", { headers: ghH() }); out.push(r.status === 200 ? "GitHub ✓" : "GitHub ✗ token rechazado"); }
+  if (db.cfg.nvidia || db.cfg.openrouter) { const t = await chat("Responde solo: ok", 20); out.push(t ? "IA lista" : "La IA no está lista: " + iaTexto()); } else out.push("Sin clave de IA: funciono en modo básico");
+  if (db.cfg.github) { const r = await http("https://api.github.com/rate_limit", { headers: ghH() }); out.push(r.status === 200 ? "GitHub listo" : "GitHub rechazó el token"); }
   $("#kEstado").textContent = out.join(" · ");
 };
 $("#bBorrar").onclick = async () => { const v = await pregunta("Escribe BORRAR para eliminar todas las fichas", ""); if (v && v.trim().toUpperCase() === "BORRAR") { db.cards = []; db.sel = []; guardar(); if (SRV) postSrv("/api/respaldo", { vaciar: true }); pintar(); aviso("Fichas borradas"); } };
@@ -1307,21 +1431,23 @@ $$("nav button").forEach(b => b.onclick = () => cambiaTab(b.dataset.t));
 // ---- hoja de edición ----
 $("#hX").onclick = $("#hNo").onclick = cerrarEditor;
 $("#hSi").onclick = guardarEditor;
-$("#hL").onclick = $("#hInv").onclick = () => { if (editando) pedirLinks(editando); };
 $("#hAddL").onclick = () => { if (!editando) return; editando.links = editando.links || []; editando.links.push({ t: "", u: "" }); pintarLinksHoja(); const u = $$("#hLnks .lnk .u").pop(); if (u) u.focus(); };
 $("#hLnks").addEventListener("input", e => { if (!editando) return; const i = e.target.dataset.li; if (i === undefined) return; (editando.links[i] = editando.links[i] || { t: "", u: "" })[e.target.dataset.lk] = e.target.value; });
 $("#hLnks").addEventListener("click", e => { const i = e.target.dataset.lx; if (i === undefined || !editando) return; editando.links.splice(+i, 1); pintarLinksHoja(); });
-$("#hGru").addEventListener("input", pintarDestino);
-$("#hCat").addEventListener("input", pintarDestino);
 $("#hDest").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || !editando) return;
-  if (b.dataset.g === "" && b.dataset.c === "") { $("#hCat").value = ""; $("#hCat").focus(); return pintarDestino(); }
+  if (b.dataset.g === "" && b.dataset.c === "") {
+    return pregunta("Sección nueva: escribe Grupo › Categoría", "").then(v => {
+      const t = (v || "").trim(); if (!t) return;
+      const p = t.split(/[›>\/]/).map(x => x.trim()).filter(Boolean);
+      $("#hGru").value = p.length > 1 ? p[0] : ($("#hGru").value || "AI"); $("#hCat").value = p.length > 1 ? p[1] : p[0]; pintarDestino();
+    });
+  }
   $("#hGru").value = b.dataset.g; $("#hCat").value = b.dataset.c; pintarDestino();
 });
 window.__atras = () => {
   if ($("#menuMas").classList.contains("on")) { $("#menuMas").classList.remove("on"); return true; }
   if ($("#dcc").open) { $("#dcc").close(); return true; }
-  if ($("#dmv").open) { $("#dmv").close(); return true; }
   if (editando) { cerrarEditor(); return true; }
   const d = $("#dlg"); if (d.open) { d.close(); return true; }
   if (detId && $("#det").classList.contains("on")) { cerrarDet(); return true; }
@@ -1341,8 +1467,9 @@ window.__chat = (t, fs) => {
   correr();
 };
 try { const k = N && N.claves ? JSON.parse(N.claves()) : {}; if (!db.cfg.nvidia && k.nvidia) db.cfg.nvidia = k.nvidia; if (!db.cfg.openrouter && k.openrouter) db.cfg.openrouter = k.openrouter; } catch (e) { }
-$("#grupo").value = db.grupo || "AI"; $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github; $("#kGq").value = db.cfg.groq || ""; $("#kInt").value = db.cfg.intereses || "";
-srvListo.then(async () => { if (!SRV) return; try { { const r = await (await fetch("/api/respaldo")).json(); if (r.cards && r.cards.length) { const tiene = new Set(db.cards.map(c => c.url)); const antes = db.cards.length; r.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); if (db.cards.length > antes) { db.sel = db.sel && db.sel.length ? db.sel : (r.sel || []); guardar(); pintar(); aviso("Recuperé " + (db.cards.length - antes) + " fichas de la copia"); } } } const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } });
+$("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github; $("#kGq").value = db.cfg.groq || "";
+srvListo.then(async () => { if (!SRV) return; try { { const r = await (await fetch("/api/respaldo")).json(); if (r.cards && r.cards.length) { const tiene = new Set(db.cards.map(c => c.url)); const antes = db.cards.length; r.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); if (db.cards.length > antes) { db.sel = db.sel && db.sel.length ? db.sel : (r.sel || []); guardar(); pintar(); aviso("Recuperé " + (db.cards.length - antes) + " fichas de la copia"); unirRepetidas(); } } } const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } });
+srvListo.then(async () => { if (!SRV) return; try { const v = await (await fetch("/api/version")).json(); if (v && v.version) $("#verInfo").textContent = "Versión " + v.version + (v.actualizado ? " · actualizada " + String(v.actualizado).slice(0, 10) : ""); } catch (e) { } });
 // semilla: investigación precargada. Llega por autoactualización, cifrada (el repo es público); la clave sale de la que ya lleva la APK
 async function cargarSemilla() {
   try {
@@ -1363,11 +1490,11 @@ async function cargarSemilla() {
     if (db.semilla === ver) return;
     const tiene = new Set(db.cards.map(c => c.url));
     sd.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); });
-    db.semilla = ver; migrarCats(); guardar(); pintar();
+    db.semilla = ver; migrarCats(); guardar(); pintar(); unirRepetidas();
   } catch (e) { }
 }
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
-migrarCats(); pintar(); detectar(); cargarSemilla();
+migrarCats(); pintar(); detectar(); if (db.usarSemilla) cargarSemilla(); // las fichas de ejemplo ya no se cargan solas
 if (db.cards.some(c => c.estado === "pendiente")) { const n = (db.bn || 0) + 1; db.bn = n; sesionDesde = n; db.cards.forEach(c => { if (c.estado === "pendiente") c.bloque = n; }); guardar(); pintaBloques(); aviso("Quedaban links a medias: continúo."); correr(); }
 </script>
 </body>

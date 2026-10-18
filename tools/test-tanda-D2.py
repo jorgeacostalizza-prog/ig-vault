@@ -1,0 +1,43 @@
+# Tanda D4-D5-J1 (18/10/2026): cola en movil, Ajustes con una clave visible, version. Movil 390 + PC 1280.
+import sys, os; sys.path.insert(0, "C:/Users/PC/DeskBox/Apps/CODE/IG Info extractor Code/ig-vault-apk/tools")
+from arnes import *
+CD = BASE + "capturas/tanda-D2/"; os.makedirs(CD, exist_ok=True)
+with sync_playwright() as p:
+    for ancho, nom in ((390, "movil"), (1280, "pc")):
+        print("== " + nom)
+        br, pg = pagina(p, ancho)
+        pg.evaluate("""()=>{db.bn=1;sesionDesde=1;for(let i=0;i<4;i++)db.cards.push({id:'q'+i,url:'https://www.instagram.com/p/Q'+i+'/',tipo:'Instagram',estado:'pendiente',bloque:1,grupo:'AI',titulo:'',resumen:'',categoria:'',repos:[],tags:[],fuente:'',motivo:''});
+          actual=db.cards[0];corriendo=true;pintaBloques();etqOrdenar()}""")
+        t = pg.evaluate("document.querySelector('#bloques').innerText + document.querySelector('#bOrdenar').innerText")
+        ok("D4 sin emoji suelto de reloj/mas", not any(x in t for x in "⏳🕒➕"), t)
+        ok("D4 'Aun no hay links' oculto con cola", pg.evaluate("getComputedStyle(document.querySelector('#detect')).display") == "none")
+        ok("D4 barra visible en 0/N", pg.evaluate("document.querySelector('.blq .barra i').getBoundingClientRect().width") > 3)
+        ok("D4 espacio bajo la lista", pg.evaluate("parseFloat(getComputedStyle(document.querySelector('main')).paddingBottom)+parseFloat(getComputedStyle(document.querySelector('#p-pegar')).paddingBottom)") >= (90 if ancho < 600 else 40))
+        pg.evaluate("document.querySelector('main').scrollTop=99999")
+        ok("D4 la nota final se ve entera con scroll", pg.evaluate("(()=>{const n=[...document.querySelectorAll('#p-pegar .nota')].pop().getBoundingClientRect();return n.bottom<=innerHeight-60})()"))
+        pg.screenshot(path=CD + "D4-%s.png" % nom)
+        pg.evaluate("corriendo=false;actual=null;db.cards=[];pintaBloques();cambiaTab('ajustes')")
+        ok("D5 solo la clave de IA visible", pg.evaluate("[...document.querySelectorAll('#p-ajustes input')].filter(i=>i.checkVisibility()).map(i=>i.id).join()") == "kNv")
+        ok("D5 Avanzado trae OpenRouter/GitHub/Groq", pg.evaluate("[...document.querySelectorAll('details.avz input')].map(i=>i.id).join()") == "kOr,kGh,kGq")
+        pg.screenshot(path=CD + "D5-%s.png" % nom)
+        pg.click("details.avz summary"); pg.wait_for_timeout(100)
+        ok("D5 Avanzado se abre", pg.evaluate("!!document.querySelector('#kGh').checkVisibility()"))
+        IA["modo"] = "ok"; pg.fill("#kNv", "nvapi-x"); pg.click("#bGuardar"); pg.wait_for_timeout(1500)
+        ok("D5 dice IA lista", pg.inner_text("#kEstado") == "IA lista", pg.inner_text("#kEstado"))
+        IA["modo"] = "429"; pg.click("#bGuardar"); pg.wait_for_function("document.querySelector('#kEstado').innerText!=='Probando…'",timeout=30000)
+        e = pg.inner_text("#kEstado"); ok("D5 motivo en palabras", "no está lista" in e and "429" not in e and "✗" not in e, e)
+        IA["modo"] = "ok"
+        ok("J1 offline no sale nada ni falla", pg.inner_text("#verInfo") == "")
+        br.close()
+    # PC: servidor simulado
+    br, pg = pagina(p, 1280, nativo=False)
+    pg.route("**/api/ping", lambda r: r.fulfill(json={"ok": True}))
+    pg.route("**/api/version", lambda r: r.fulfill(json={"version": "1.7", "actualizado": "2026-10-18 10:00:00", "origen": "x"}))
+    pg.route("**/api/claves", lambda r: r.fulfill(json={"nvidia": "nvapi-guardada", "openrouter": "", "groq": ""}))
+    pg.route("**/api/respaldo", lambda r: r.fulfill(json={}))
+    pg.route("http://ig.test/", lambda r: r.fulfill(path=BASE + "src/assets/index.html", content_type="text/html; charset=utf-8"))
+    pg.goto("http://ig.test/"); pg.evaluate("localStorage.clear()"); pg.goto("http://ig.test/"); pg.wait_for_timeout(1500)
+    ok("D5 PC: carga la clave guardada sin teclear", pg.input_value("#kNv") == "nvapi-guardada" or pg.evaluate("db.cfg.nvidia") == "nvapi-guardada", pg.input_value("#kNv"))
+    ok("J1 PC: version y fecha", pg.inner_text("#verInfo") == "Versión 1.7 · actualizada 2026-10-18", pg.inner_text("#verInfo"))
+    pg.evaluate("cambiaTab('ajustes')"); pg.screenshot(path=CD + "J1-pc.png"); br.close()
+fin()

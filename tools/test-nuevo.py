@@ -86,7 +86,7 @@ def main(movil):
         hrefs = pg.eval_on_selector_all("#det a.lk", "els=>els.map(e=>e.href)")
         ok("se ven a la vez el link de Instagram y el de GitHub (como <a> reales)", any("instagram.com/p/AAA111" in x for x in hrefs) and any("github.com/obra/superpowers" in x for x in hrefs), hrefs)
         ok("el detalle muestra UNA miniatura", pg.locator("#det img.mini").count() == 1 and pg.locator("#lista img").count() == 0)
-        ok("etiqueta de relevancia visible", pg.locator("#det .rel").count() == 1)
+        ok("sin etiqueta de relevancia (★ quitadas por Jorge 18/10)", pg.locator("#det .rel").count() == 0 and pg.locator(".rst").count() == 0)
 
         # clic en enlace: la página NO se queda en negro / sigue usable
         pg.click("#det a.lk.ig"); pg.wait_for_timeout(200)
@@ -121,13 +121,13 @@ def main(movil):
           {id:'d',url:'https://example.com/herramienta-uno',tipo:'Web',estado:'ok',grupo:'AI',categoria:'Webs',titulo:'Una herramienta distinta de verdad',resumen:'r',links:[],repos:[],tags:[]},
           {id:'e',url:'https://example.org/otra-url-distinta',tipo:'Web',estado:'ok',grupo:'AI',categoria:'Webs',titulo:'Una herramienta distinta de verdad',resumen:'r2',links:[],repos:[],tags:[]}
         ]; guardar(); pintar();}""")
-        pg.evaluate("cambiaTab('fichas')"); pg.click("#bMas"); pg.click("#bDup"); pg.wait_for_timeout(250)
+        pg.evaluate("cambiaTab('fichas')"); pg.evaluate("cambiaTab('ajustes')"); pg.click("#bDup"); pg.wait_for_timeout(250)  # B3: ahora vive en Ajustes › Mantenimiento
         ok("el aviso de duplicados aparece", pg.is_visible("#dlg"))
         pg.click("#dSi"); pg.wait_for_timeout(250)
         pg.evaluate("cambiaTab('fichas')"); n = pg.evaluate("db.cards.length"); ex = pg.evaluate("db.cards[0].links.length")
         ok("5 fichas → 2 (IG+IG+repo juntas; mismo título juntas)", n == 2, n)
         ok("la fusión conserva los links de las repetidas", ex >= 2, ex)
-        pg.click("#bMas"); pg.click("#bDup"); pg.wait_for_timeout(200)
+        pg.evaluate("cambiaTab('ajustes')"); pg.click("#bDup"); pg.wait_for_timeout(200)
         ok("sin duplicados avisa y no abre nada", not pg.is_visible("#dlg"))
 
         # ---- clasificación + relevancia ----
@@ -136,26 +136,27 @@ def main(movil):
           b: clasificar({titulo:'obra/superpowers',resumen:'repo',url:'https://github.com/o/r',tipo:'GitHub',repos:[{full:'o/r'}]}),
           c: clasificar({titulo:'Agentes de IA con MCP',resumen:'un agente con LLM y prompts',url:'https://instagram.com/p/x',tipo:'Instagram'}),
           d: clasificar({titulo:'Cómo configurar tu terminal paso a paso',resumen:'tutorial',url:'https://instagram.com/p/y',tipo:'Instagram'}),
-          e: clasificar({titulo:'Nada',resumen:'',url:'https://instagram.com/p/z',tipo:'Instagram'}),
-          rel1: relevancia({estado:'ok',titulo:'Claude Code agentes MCP gratis',resumen:'open source github skill',repos:[{full:'a/b',stars:15000}],links:[1,2],fuente:'investigado'}).n,
-          rel2: relevancia({estado:'ok',titulo:'Receta de tarta',resumen:'harina',repos:[],links:[]}).n })""")
+          e: clasificar({titulo:'Nada',resumen:'',url:'https://instagram.com/p/z',tipo:'Instagram'}), })""")
         print("   clasificación:", r)
         ok("Udemy → Cursos", r["a"] == "Cursos"); ok("repo GitHub → Repositorios", r["b"] == "Repositorios")
         ok("agentes/MCP/LLM → Inteligencia artificial", r["c"] == "Inteligencia artificial"); ok("cómo/paso a paso → Tutoriales", r["d"] == "Tutoriales")
-        ok("sin pistas → Otros", r["e"] == "Otros"); ok("tema de Jorge ≥4 y receta ≤2", r["rel1"] >= 4 and r["rel2"] <= 2, (r["rel1"], r["rel2"]))
+        ok("sin pistas → Otros", r["e"] == "Otros")
 
         # ---- mover sin arrastrar ----
         pg.evaluate("cambiaTab('fichas')"); pg.wait_for_timeout(300)
-        pg.click(".rw .rb"); pg.click("#det [data-a=mover]"); pg.wait_for_timeout(200)
-        ok("el diálogo Mover abre", pg.is_visible("#dmv"))
-        pg.fill("#mvN", "Música › Canciones"); pg.click("#mvSi"); pg.wait_for_timeout(250)
+        # (C1 18/10: el diálogo «Mover» se quitó por orden de Jorge; ahora se mueve desde Editar con chips, probado en test-tanda-C)
+        pg.click(".rw .rb"); pg.click("#det [data-a=editar]"); pg.wait_for_timeout(200)
+        ok("Editar abre la hoja con chips de sección", pg.is_visible("#hDest") and pg.locator("#dmv").count() == 0)
+        pg.evaluate("cerrarEditor(); mover(db.cards[0], 'Música', 'Canciones')"); pg.wait_for_timeout(250)
         g = pg.evaluate("db.cards.map(c=>c.grupo+'>'+c.categoria)")
         ok("la ficha se movió a Música › Canciones", "Música>Canciones" in g, g)
         ok("ya no existe el agarre de arrastrar", pg.locator(".agarre").count() == 0)
 
         # ---- filtros y diseño ----
-        pg.evaluate("cerrarDet()"); pg.click("#filtros button[data-f=rel]"); pg.wait_for_timeout(200)
-        ok("filtro «Más relevantes» funciona sin error", pg.locator("#filtros button.on").inner_text().startswith("★"))
+        pg.evaluate("cerrarDet()"); pg.wait_for_timeout(100)
+        ok("el filtro «Más relevantes» ya no existe", pg.locator("#filtros button[data-f=rel]").count() == 0)
+        pg.click("#filtros button[data-f=repo]"); pg.wait_for_timeout(200)
+        ok("filtro «Con GitHub» funciona sin error", pg.locator("#filtros button.on").inner_text().startswith("Con GitHub"))
         if not movil:
             ok("PC: barra lateral a la izquierda", pg.evaluate("document.querySelector('nav').getBoundingClientRect().left")<5 and pg.evaluate("document.querySelector('nav').getBoundingClientRect().width")>150)
         else:

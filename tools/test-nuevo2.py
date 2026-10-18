@@ -86,7 +86,8 @@ with sync_playwright() as p:
     pg.evaluate("""()=>{db.cards=[{id:'x1',url:'https://www.instagram.com/p/ZZZ/',tipo:'Instagram',estado:'ok',grupo:'AI',categoria:'Repositorios',titulo:'Con enlaces',resumen:'r',
       repos:[{full:'acme/borrada',url:'https://github.com/acme/borrada',stars:1},{full:'acme/archivada',url:'https://github.com/acme/archivada',stars:5,pushed:'2025-01-01T00:00:00Z'}],
       links:[{t:'Viva',u:'https://ok.test/viva'},{t:'Muerta',u:'https://ok.test/muerta'}],tags:[]}];guardar();pintar();}""")
-    pg.click("#bMas"); pg.click("#bComprobar"); pg.wait_for_function("!comprobando", timeout=40000); pg.wait_for_timeout(300)
+    pg.evaluate("cambiaTab('ajustes')"); pg.click("#bComprobar");  # B3: ahora en Ajustes › Mantenimiento
+    pg.wait_for_function("!comprobando", timeout=40000); pg.wait_for_timeout(300)
     d = pg.evaluate("({rotos:db.cards[0].rotos, arch:db.cards[0].repos[1].archived})")
     ok("detecta el enlace roto y el repo borrado", "https://ok.test/muerta" in d["rotos"] and "https://github.com/acme/borrada" in d["rotos"] and "https://ok.test/viva" not in d["rotos"], d)
     ok("detecta repo archivado", d["arch"] is True)
@@ -111,13 +112,13 @@ with sync_playwright() as p:
     pg.click("#selNinguna"); pg.wait_for_timeout(100)
     ok("«Ninguna» limpia la selección y oculta la barra", not pg.is_visible("#barSel"))
     pg.click("#bExport"); pg.wait_for_selector("#dlg[open]", timeout=3000)
-    ok("sin selección pregunta «¿Exportar todo lo visible?»", "Exportar todo lo visible (3)" in pg.inner_text("#dC"), pg.inner_text("#dC"))
+    ok("sin selección pregunta «¿Exportar todo lo visible?»", "Exportar lo que se ve (3)" in pg.inner_text("#dC"), pg.inner_text("#dC"))
     pg.click("#dSi"); pg.wait_for_selector("#dcc[open]", timeout=3000)
     ok("tras aceptar exporta las 3", pg.input_value("#ccTxt").count("\n## ") == 3)
     pg.click("#ccNo")
     pg.click("#selNinguna") if pg.is_visible("#barSel") else None
     pg.click("#bMas"); pg.wait_for_timeout(100)
-    ok("menú «⋯ Más» con 4 acciones visibles", pg.locator("#menuMas button:visible").count() == 4)
+    ok("menú «⋯ Más» con ≤2 acciones (B3)", 1 <= pg.locator("#menuMas button:visible").count() <= 2)
     pg.mouse.click(5, 5); pg.wait_for_timeout(100)
     ok("el menú se cierra al tocar fuera", not pg.is_visible("#menuMas"))
     ok("ya no existen los botones eliminados", all(pg.locator(i).count() == 0 for i in ["#bSemana", "#bObs", "#bCopiar", "#bComp", "#bReclas", "#bClaude"]))
