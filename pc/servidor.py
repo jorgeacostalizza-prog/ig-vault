@@ -9,6 +9,11 @@ UA = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like G
 MAX_HTTP = 1_500_000
 MAX_VOZ = 12_000_000
 ULTIMO_PING = [0.0]
+# Segundos sin ningun ping ni peticion (y sin peticiones en curso) tras los que el servidor se apaga.
+# IGX_INACTIVIDAD la cambia (solo para pruebas rapidas).
+INACTIVIDAD = float(os.environ.get("IGX_INACTIVIDAD", "180"))
+ACTIVAS = [0]          # peticiones en curso ahora mismo
+ULTIMA_ACT = [time.time()]  # ultima peticion de cualquier tipo (arranque cuenta como actividad)
 BRAVE = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 WEB = os.path.join(AQUI, "web")
@@ -334,6 +339,15 @@ class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
+    def handle(self):  # cuenta peticiones activas: no apagar en medio de un lote
+        ACTIVAS[0] += 1
+        ULTIMA_ACT[0] = time.time()
+        try:
+            super().handle()
+        finally:
+            ULTIMA_ACT[0] = time.time()
+            ACTIVAS[0] -= 1
+
     def _enviar(self, b, tipo, code=200):
         self.send_response(code)
         self.send_header("Content-Type", tipo)
@@ -395,9 +409,12 @@ def ping_ajeno():
 
 def vigilar():
     while True:
-        time.sleep(5)
-        if ULTIMO_PING[0] and time.time() - ULTIMO_PING[0] > 120:
-            log("sin pings 120 s: apagado")
+        time.sleep(min(5, max(0.2, INACTIVIDAD / 4)))
+        if ACTIVAS[0] > 0:
+            continue
+        ult = max(ULTIMO_PING[0], ULTIMA_ACT[0])
+        if time.time() - ult > INACTIVIDAD:
+            log(f"sin pings ni peticiones {INACTIVIDAD:.0f} s: apagado")
             os._exit(0)
 
 
