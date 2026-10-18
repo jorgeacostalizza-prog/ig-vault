@@ -238,7 +238,8 @@ def _bajar(rel, tope):
 
 
 def _sha(b):
-    return hashlib.sha256(b).hexdigest()
+    # git publica con saltos LF aunque en Windows el archivo local tenga CRLF: se compara igual
+    return hashlib.sha256(b.replace(b"\r\n", b"\n")).hexdigest()
 
 
 def _copia_fechada(ruta, carpeta):

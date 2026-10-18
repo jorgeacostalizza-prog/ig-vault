@@ -5,7 +5,8 @@ raiz = os.path.abspath(sys.argv[1])
 ver = sys.argv[2] if len(sys.argv) > 2 else time.strftime("%Y.%m.%d.%H%M")
 def sha(rel):
     with open(os.path.join(raiz, rel), "rb") as f:
-        return hashlib.sha256(f.read()).hexdigest()
+        # git publica con LF aunque el archivo local tenga CRLF (Windows)
+        return hashlib.sha256(f.read().replace(b"\r\n", b"\n")).hexdigest()
 meta = {"version": ver, "fecha": time.strftime("%Y-%m-%d"),
         "index_url": "src/assets/index.html", "index_sha256": sha("src/assets/index.html")}
 if os.path.isfile(os.path.join(raiz, "pc", "servidor.py")):
