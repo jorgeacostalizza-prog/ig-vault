@@ -347,6 +347,8 @@ function migraUso() {
   try { if (!localStorage.getItem("igv-antes-H2")) localStorage.setItem("igv-antes-H2", JSON.stringify({ cards: db.cards, sel: db.sel || {} })); } catch (e) { }
   sin.forEach(c => { c.estadoUso = "nuevo"; }); return sin.length;
 }
+const respaldoYa = () => { if (!SRV) return; clearTimeout(_rsp); try { fetch("/api/respaldo", { method: "POST", body: JSON.stringify({ cards: db.cards, sel: db.sel || [] }), keepalive: true }); } catch (e) { } }; // al acabar un link o cerrar: la copia no se queda atrás
+addEventListener("pagehide", () => respaldoYa());
 let _rsp; // PC: copia de las fichas fuera del navegador (si el perfil se vacía, se restauran solas)
 const guardar = () => { migraUso(); try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } if (SRV) { clearTimeout(_rsp); _rsp = setTimeout(() => postSrv("/api/respaldo", { cards: db.cards, sel: db.sel || [] }), 1500); } };
 
@@ -482,7 +484,7 @@ async function leerIG0(url, base) {
   if (g.comments != null && g.comments > 0) t = (t ? t + "\n" : "") + "Comentarios: " + g.comments;
   const imgs = (g.imgs && g.imgs.length > 1) ? g.imgs : await imgsIG(base);
   if (!imgs.length && g.img) imgs.push(g.img);
-  if (!imgs.length && !g.video && (!t || (t.length < 25 && MURO.test(t)))) return { error: "Instagram no deja leer este post sin iniciar sesión" };
+  if (!imgs.length && !g.video && (!t || (t.length < 25 && MURO.test(t)))) return { error: "Instagram no dejó leer este post; ábrelo con el botón" };
   if (t.length < 25 && MURO.test(t)) t = "";
   return { texto: t, imgs, video: g.video || await videoIG(base) };
 }
@@ -715,9 +717,10 @@ ${ctx}`);
   if (ai && ai.resumen && !fundado(ai.resumen + " " + (ai.titulo || ""), ctx + " " + card.url)) { ai.resumen = ""; ai.titulo = ""; card.motivo = "La IA dijo algo que no sale del post; lo descarté"; } // anti-invención
   { // H1: «Sirve para…» y acción sugerida; sin base real queda vacío y «Solo guardar»
     let sv = ai && typeof ai.sirve === "string" ? ai.sirve.replace(/\s+/g, " ").trim() : "";
-    const base = ctx + " " + card.url + " " + (ai && ai.titulo || "");
+    const base = ctx + " " + card.url + " " + (ai && ai.titulo || "") + " " + (ai && ai.resumen || ""); // el resumen ya pasó «fundado»: sirve cuenta con él (el post puede venir en inglés)
     const wr = [...raices(sv)], fb = raices(base);
-    if (!ai || !ai.resumen || sv.length < 8 || sv.length > 130 || (wr.length && wr.filter(x => fb.has(x)).length / wr.length < 0.3) || !fundado(sv, base)) sv = "";
+    if (sv.length > 130) sv = corto(sv, 110);
+    if (!ai || !ai.resumen || sv.length < 8 || (wr.length && wr.filter(x => fb.has(x)).length / wr.length < 0.3) || !fundado(sv, base)) sv = "";
     const ac = ai && ACCIONES.find(a => sinAcentos(a) === sinAcentos(String(ai.accion || "").trim()));
     card.sirve = sv ? corto(sv, 110) : ""; card.accion = sv && ac ? ac : "Solo guardar";
   }
@@ -1071,13 +1074,15 @@ async function correr() {
     const suelto = new Promise(r => { soltar = r; }); let cortado = false;
     try { await Promise.race([analizar(c), suelto.then(() => { cortado = true; })]); } catch (e) { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = "No pude procesar este link. Prueba «Reintentar»"; c.detalleTecnico = String(e).slice(0, 160); }
     if (cortado) { const i = db.cards.indexOf(c); if (i >= 0 && c.reiniciar) db.cards[i] = { ...copia, estado: "pendiente" }; actual = null; guardar(); pintar(); pintaBloques(); continue; } // reiniciado o quitado: lo que el intento viejo siga haciendo ya no cuenta
-    actual = null; guardar(); pintar(); pintaBloques(); hechos++;
+    if (c.estado === "pendiente") { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = c.motivo || "No terminó de procesarse. Prueba «Reintentar» o ábrelo con el botón"; } // nunca se queda «En cola» tras su turno
+    actual = null; guardar(); respaldoYa(); pintar(); pintaBloques(); hechos++;
     if (c.tipo === "Instagram") await dormir(700);
   }
   corriendo = false; $("#prog").style.display = "none"; etqOrdenar(); pintaBloques();
   const uni = unirRepetidas();
   const ok = db.cards.filter(c => c.estado === "ok").length, rev = db.cards.filter(c => c.estado === "revisar").length;
-  aviso(`Todo listo: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}${uni ? `. Unidas ${uni} repetidas` : ""}. Míralas en «Fichas».`, true);
+  const sin = db.cards.filter(c => c.estado === "pendiente").length; respaldoYa();
+  aviso(`${sin ? "Parado" : "Todo listo"}: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}${sin ? `, ${sin} sin terminar` : ""}${uni ? `. Unidas ${uni} repetidas` : ""}. Míralas en «Fichas».`, true);
 }
 
 // ---- fichas repetidas: mismo título (sin acentos) en el mismo grupo y categoría; la unida conserva todo ----
@@ -1468,7 +1473,7 @@ window.__chat = (t, fs) => {
 };
 try { const k = N && N.claves ? JSON.parse(N.claves()) : {}; if (!db.cfg.nvidia && k.nvidia) db.cfg.nvidia = k.nvidia; if (!db.cfg.openrouter && k.openrouter) db.cfg.openrouter = k.openrouter; } catch (e) { }
 $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github; $("#kGq").value = db.cfg.groq || "";
-srvListo.then(async () => { if (!SRV) return; try { { const r = await (await fetch("/api/respaldo")).json(); if (r.cards && r.cards.length) { const tiene = new Set(db.cards.map(c => c.url)); const antes = db.cards.length; r.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); if (db.cards.length > antes) { db.sel = db.sel && db.sel.length ? db.sel : (r.sel || []); guardar(); pintar(); aviso("Recuperé " + (db.cards.length - antes) + " fichas de la copia"); unirRepetidas(); } } } const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } });
+srvListo.then(async () => { if (!SRV) return; try { { const r = await (await fetch("/api/respaldo")).json(); if (r.cards && r.cards.length) { r.cards.forEach(c => { if (c.estado === "pendiente") Object.assign(c, { estado: "revisar", categoria: "Para revisar", motivo: c.motivo || "Se quedó a medias al cerrar la app. Pulsa «Reintentar»" }); }); const tiene = new Set(db.cards.map(c => c.url)); const antes = db.cards.length; r.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); if (db.cards.length > antes) { db.sel = db.sel && db.sel.length ? db.sel : (r.sel || []); guardar(); pintar(); aviso("Recuperé " + (db.cards.length - antes) + " fichas de la copia"); unirRepetidas(); } } } const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } });
 srvListo.then(async () => { if (!SRV) return; try { const v = await (await fetch("/api/version")).json(); if (v && v.version) $("#verInfo").textContent = "Versión " + v.version + (v.actualizado ? " · actualizada " + String(v.actualizado).slice(0, 10) : ""); } catch (e) { } });
 // semilla: investigación precargada. Llega por autoactualización, cifrada (el repo es público); la clave sale de la que ya lleva la APK
 async function cargarSemilla() {
