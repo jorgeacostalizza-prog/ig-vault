@@ -4,6 +4,10 @@ from arnes import *
 CD = BASE + "capturas/tanda-H2/"; os.makedirs(CD, exist_ok=True)
 def ficha(i, t, **k):
     d = dict(id=i, url="https://a.test/" + i, tipo="Web", estado="ok", bloque=1, grupo="AI", titulo=t, resumen="Resumen de " + t, categoria="Webs", repos=[], tags=[]); d.update(k); return d
+# D7: el estado y descartar de la fila ahora se cambian DESLIZANDO (ya no hay botones en la fila)
+def desliza(pg, sel, dx):
+    pg.locator(sel).scroll_into_view_if_needed(); b = pg.locator(sel).bounding_box(); x0 = b["x"] + b["width"] / 2; y0 = b["y"] + b["height"] / 2
+    pg.mouse.move(x0, y0); pg.mouse.down(); pg.mouse.move(x0 + dx / 2, y0 + 1, steps=4); pg.mouse.move(x0 + dx, y0 + 1, steps=4); pg.mouse.up(); pg.wait_for_timeout(250)
 with sync_playwright() as p:
     for ancho, nom in ((390, "movil"), (1280, "pc")):
         print("== " + nom)
@@ -16,25 +20,25 @@ with sync_playwright() as p:
         # H3 al abrir: filtro Nuevo con contador, filtros visibles
         pg.evaluate("cambiaTab('fichas')")
         ok("abre en Nuevo con contador", pg.evaluate("document.querySelector('#filtros button.on').textContent")=="Nuevo (5)", pg.evaluate("document.querySelector('#filtros').innerText"))
-        t = pg.evaluate("document.querySelector('#filtros').innerText")
+        t = pg.evaluate("document.querySelector('#filtros').innerText+document.querySelector('#hojaF').textContent")
         ok("filtros visibles", all(x in t for x in ["Lo quiero","Hecho","Para revisar","Descartadas"]))
         ok("filtros no cortados", pg.evaluate("[...document.querySelectorAll('#filtros button')].every(b=>b.getBoundingClientRect().right<=innerWidth+1)"))
         # cambiar desde la fila
-        pg.click('.rw[data-id="v0"] .uso:not(.x)'); ok("fila: Nuevo->Lo quiero", pg.evaluate("db.cards[0].estadoUso")=="quiero")
+        desliza(pg, '.rw[data-id="v0"] .rb', 150); ok("fila: Nuevo->Lo quiero", pg.evaluate("db.cards[0].estadoUso")=="quiero")
         ok("sale de la lista Nuevo", pg.evaluate("!document.querySelector('.rw[data-id=\"v0\"]')"))
-        alto = pg.evaluate("Math.min(...[...document.querySelectorAll('.rw .uso')].map(b=>b.getBoundingClientRect().height))")
+        alto = pg.evaluate("Math.min(...[...document.querySelectorAll('.rw .rb')].map(b=>b.getBoundingClientRect().height))")
         ok("objetivo tactil >=44", alto>=44, alto)
         # desde la ficha
         pg.click('.rw[data-id="v1"] [data-a=det]'); pg.click('#det [data-a=uso][data-u=hecho]')
         ok("ficha: Hecho", pg.evaluate("db.cards[1].estadoUso")=="hecho")
         pg.screenshot(path=CD+"ficha-%s.png"%nom); pg.evaluate("cerrarDet()")
         # descartar y recuperar
-        pg.click('.rw[data-id="v2"] .uso.x')
+        desliza(pg, '.rw[data-id="v2"] .rb', -150)
         ok("descartar no borra", pg.evaluate("db.cards.length")==5 and pg.evaluate("db.cards[2].estadoUso")=="descartada")
         ok("descartada oculta en Todo", pg.evaluate("filtro='todo';pintar();!document.querySelector('.rw[data-id=\"v2\"]')"))
         pg.evaluate("filtro='descartada';pintar()"); pg.wait_for_timeout(200); pg.screenshot(path=CD+"descartadas-%s.png"%nom)
         ok("filtro Descartadas la muestra", pg.evaluate("!!document.querySelector('.rw[data-id=\"v2\"]')"))
-        pg.click('.rw[data-id="v2"] .uso'); ok("recuperar -> Nuevo", pg.evaluate("db.cards[2].estadoUso")=="nuevo")
+        desliza(pg, '.rw[data-id="v2"] .rb', 150); ok("recuperar -> Nuevo", pg.evaluate("db.cards[2].estadoUso")=="nuevo")
         # busqueda
         pg.evaluate("db.cards[3].estadoUso='descartada';filtro='nuevo';pintar()")
         pg.fill("#buscar", "Vieja 1"); pg.wait_for_timeout(100); pg.evaluate("pintar()")

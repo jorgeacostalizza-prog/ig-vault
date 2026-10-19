@@ -14,7 +14,7 @@ with sync_playwright() as p:
         pg.evaluate(CARDS); pg.wait_for_timeout(300)
         fila = pg.locator(".rw[data-id=f1]")
         tit = fila.locator(".rt").inner_text()
-        ok("C5 título legible, no URL cruda", "http" not in tit and tit.startswith("Instagram"), tit)
+        ok("C5 título legible, no URL cruda", "http" not in tit and tit.startswith(("Post de Instagram", "Reel de Instagram")), tit)
         ok("C5 botones Reintentar y Abrir en Instagram en la fila", fila.locator("[data-a=reint]").count() == 1 and "Abrir en Instagram" in fila.inner_text(), fila.inner_text())
         h = pg.evaluate("(()=>{const e=document.querySelector('.rw[data-id=f1] .rs');return [e.scrollHeight,e.clientHeight,parseFloat(getComputedStyle(e).lineHeight)]})()")
         ok("C5 motivo en 2 líneas (no 1 ni 3)", 1.5 * h[2] < h[1] <= 2.2 * h[2], h)

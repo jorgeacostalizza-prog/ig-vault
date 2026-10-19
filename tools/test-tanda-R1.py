@@ -53,7 +53,7 @@ with sync_playwright() as p:
         ok("R2 línea larga se acorta (<=111) en vez de perderse", 0 < len(r["s"]) <= 111 and r["a"] == "Instalar", r)
         # R4: recuperar una ficha desde «Descartadas»
         pg.evaluate("""db.cards=[{id:'d1',url:'https://x.test/d1',tipo:'Web',estado:'ok',bloque:1,grupo:'AI',titulo:'Ficha descartada',resumen:'Algo que descarté',categoria:'Webs',repos:[],tags:[],estadoUso:'descartada'}];filtro='todo';cambiaTab('fichas');pintar()""")
-        pg.click('#filtros button[data-f="descartada"]'); pg.wait_for_timeout(300)
+        pg.click('#filtros [data-mas]'); pg.click('#hojaF [data-f="descartada"]'); pg.wait_for_timeout(300)
         ok("R4 la ficha aparece en Descartadas", "Ficha descartada" in pg.inner_text("#lista"))
         pg.click('#lista .rw[data-id="d1"] .rb'); pg.wait_for_timeout(400)
         pg.screenshot(path=CD + "R4-detalle-%s.png" % nom)

@@ -53,8 +53,8 @@ with sync_playwright() as p:
         # 3 titulo de lista no cortado
         if ancho == 390:
             pg.evaluate("document.querySelector('.rw[data-id=o1]')&&0")
-            t = pg.evaluate("(()=>{const e=document.querySelector('.rw[data-id=o1] .rt');return e?{w:e.getBoundingClientRect().height,lh:parseFloat(getComputedStyle(e).lineHeight)}:null})()")
-            ok("3 titulo de lista a 2 lineas en movil", t and t["w"] > t["lh"] * 1.5, t)
+            t = pg.evaluate("(()=>{const e=document.querySelector('.rw[data-id=o1] .rt');return e?{w:e.getBoundingClientRect().height,lh:parseFloat(getComputedStyle(e).lineHeight),cortado:e.scrollHeight>e.clientHeight+1}:null})()")
+            ok("3 (D7) titulo de lista hasta 2 lineas y sin cortar en movil", t and t["w"] <= t["lh"] * 2 + 1 and not t["cortado"], t)
         ok("sin desbordamiento horizontal", pg.evaluate("document.documentElement.scrollWidth<=innerWidth+1"))
         br.close()
 fin()

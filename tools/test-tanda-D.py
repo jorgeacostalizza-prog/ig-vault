@@ -27,8 +27,8 @@ with sync_playwright() as p:
             ok("D1 buscar abre los grupos con resultados", pg.evaluate("[...document.querySelectorAll('#lista details')].every(d=>d.open)"))
             pg.fill("#buscar", ""); pg.dispatch_event("#buscar", "input"); pg.wait_for_timeout(200)
             fl = pg.evaluate("[...document.querySelectorAll('#filtros button')].map(b=>b.textContent)")
-            ok("D2 Para revisar va justo tras Todo (H3: tras los filtros de estado)", [x for x in fl if x != "Plegar todo"][[x.split(" (")[0] for x in fl].index("Todo")+1].startswith("Para revisar"), fl)
-            ok("D2 ningun filtro cortado", pg.evaluate("[...document.querySelectorAll('#filtros>*')].every(b=>{const r=b.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1})"))
+            ok("D2 (D7) filtros de estado en una fila y «Más» con Para revisar tras Todo", [x.split(" (")[0] for x in fl] == ["Nuevo", "Lo quiero", "Hecho", "Todo", "Más"] and pg.evaluate("[...document.querySelectorAll('#hojaF [data-f]')].map(b=>b.dataset.f).join()") == "rev,repo,descartada", fl)
+            ok("D2 (D7) filtros: una fila deslizable, «Más» siempre a la vista", pg.evaluate("(()=>{const m=document.querySelector('#filtros [data-mas]').getBoundingClientRect();return m.left>=0&&m.right<=innerWidth+1})()"))
             ok("D2 sin desbordamiento horizontal", pg.evaluate("document.documentElement.scrollWidth<=innerWidth+1"))
             if esq == "light":
                 c = pg.evaluate("[getComputedStyle(document.documentElement).getPropertyValue('--acx').trim(),getComputedStyle(document.documentElement).getPropertyValue('--bad').trim()]")

@@ -155,7 +155,7 @@ def main(movil):
         # ---- filtros y diseño ----
         pg.evaluate("cerrarDet()"); pg.wait_for_timeout(100)
         ok("el filtro «Más relevantes» ya no existe", pg.locator("#filtros button[data-f=rel]").count() == 0)
-        pg.click("#filtros button[data-f=repo]"); pg.wait_for_timeout(200)
+        pg.click("#filtros [data-mas]"); pg.click("#hojaF [data-f=repo]"); pg.wait_for_timeout(200)
         ok("filtro «Con GitHub» funciona sin error", pg.locator("#filtros button.on").inner_text().startswith("Con GitHub"))
         if not movil:
             ok("PC: barra lateral a la izquierda", pg.evaluate("document.querySelector('nav').getBoundingClientRect().left")<5 and pg.evaluate("document.querySelector('nav').getBoundingClientRect().width")>150)
