@@ -1,8 +1,8 @@
 {
- "version": "2026.10.19.0041",
+ "version": "2026.10.19.0308",
  "fecha": "2026-10-19",
  "index_url": "src/assets/index.html",
- "index_sha256": "40d7ffdce92fa3589eb7587d5223ca3460b071364510b748d77b0d84ad296df6",
+ "index_sha256": "14c606f945bf396245a16674b54fa1415282ffd344078d6ee4ae6ffae0bbf01f",
  "servidor_url": "pc/servidor.py",
  "servidor_sha256": "a87965cb5c888e3ef1c12fb0505f2c156c15f79dec6a1b55ba5a516fdbfdfa93"
 }
