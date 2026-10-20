@@ -31,7 +31,9 @@ textarea:focus,input:focus{outline:2px solid var(--ac);outline-offset:1px}
 .btn:active{transform:scale(.98)}
 .btn[disabled]{opacity:.5}
 .nota{color:var(--mut);font-size:14px;margin:6px 2px}
-.prog{background:var(--s1);border:1px solid var(--ln);border-radius:14px;padding:14px;margin:12px 0}
+.prog{display:flex;align-items:center;gap:10px;padding:0 2px;margin:10px 0 0}
+.prog #progT{display:none}
+.prog #progS{flex:1;min-width:0;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .barra{height:8px;border-radius:8px;background:var(--s2);overflow:hidden;margin:10px 0}
 .barra i{display:block;height:100%;background:var(--ac);width:0;transition:width .3s}
 details{margin:12px 0}
@@ -1167,7 +1169,7 @@ function pintaBloques() {
   $("#bloques").innerHTML = Object.values(bs).sort((x, y) => x.n - y.n).map(b => { const fin = b.h >= b.t, act = !fin && actual && actual.bloque === b.n; return `<div class="blq"><b>Bloque ${b.n}</b> · ${b.h}/${b.t} ${fin ? "✅ terminado" : act ? "· trabajando" : "· en cola"}<div class="barra"><i style="width:${fin || b.h ? Math.round(b.h / b.t * 100) : 4}%"></i></div>${act && atascado ? '<div class="nota" style="color:var(--warn)">Parece atascado: este link no avanza. Puedes reiniciarlo o quitar el bloque.</div>' : ""}${fin ? `<button class="btn pri" data-ver="1">Ver mis ${b.t} fichas</button>` : `<div class="fila">${act ? `<button class="btn sm" data-rb="${b.n}">Reiniciar</button>` : ""}<button class="btn sm" data-bq="${b.n}">Quitar</button></div>`}</div>`; }).join("");
 }
 async function correr() {
-  if (corriendo) return; corriendo = true; pausado = false; $("#prog").style.display = "block"; $("#bParar").textContent = "Pausar"; muertos = {}; etqOrdenar();
+  if (corriendo) return; corriendo = true; pausado = false; $("#prog").style.display = "flex"; $("#bParar").textContent = "Pausar"; muertos = {}; etqOrdenar();
   let hechos = 0;
   while (true) {
     const c = db.cards.find(x => x.estado === "pendiente"); if (!c) break;
@@ -1585,7 +1587,7 @@ $("#det").addEventListener("click", async e => {
   if (a === "links") return pedirLinks(c);
   if (a === "fav") { c.fav = !c.fav; guardar(); return pintar(); }
   if (a === "borrar") { if (await confirmar("Borrar ficha", `<p>¿Borrar «${esc(c.titulo.slice(0, 70))}»?</p>`)) { db.cards = db.cards.filter(x => x !== c); guardar(); cerrarDet(); pintar(); } }
-  if (a === "texto") { const v = await pregunta("Pega aquí el texto del post (la descripción)", c.texto || "", true); if (v && v.trim()) { c.estado = "pendiente"; c.cola = Date.now(); guardar(); cambiaTab("pegar"); $("#prog").style.display = "block"; await analizar(c, v.trim()); guardar(); $("#prog").style.display = "none"; cambiaTab("fichas"); } }
+  if (a === "texto") { const v = await pregunta("Pega aquí el texto del post (la descripción)", c.texto || "", true); if (v && v.trim()) { c.estado = "pendiente"; c.cola = Date.now(); guardar(); cambiaTab("pegar"); $("#prog").style.display = "flex"; await analizar(c, v.trim()); guardar(); $("#prog").style.display = "none"; cambiaTab("fichas"); } }
 });
 $("#filtros").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.dataset.qb) { bloqueSel = null; return pintar(); } if (b.dataset.mas) return $("#hojaF").showModal(); filtro = b.dataset.f; pintar(); });
 $("#hojaF").addEventListener("click", e => { const b = e.target.closest("button"); if (e.target === $("#hojaF") || (b && b.dataset.cerrar)) return $("#hojaF").close(); if (!b) return;
