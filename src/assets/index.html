@@ -285,6 +285,48 @@ a.li.roto{opacity:.45}
 .ltr div{flex:1;min-width:0}.ltr b{display:block;font-size:15px}.ltr span{font-size:13px;color:var(--mut)}
 .ltr .btn{flex:none;min-height:42px;font-size:14px}
 .det-gl{border-radius:14px;margin:8px 0;height:200px}
+/* N2 (21/10): tarjeta limpia, doble toque, lector a pantalla completa, colecciones */
+.fph{position:relative;cursor:pointer;touch-action:pan-x pan-y;user-select:none;-webkit-user-select:none}
+.fph .gl{height:min(52vh,440px)}
+.fov{position:absolute;left:10px;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}
+.fov .sl{background:#000b;color:#fff;border-color:transparent}.fov .sl.ti{background:var(--ac);color:var(--acx)}
+.corz{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;opacity:0}
+.corz svg{width:110px;height:110px;fill:#fff;stroke:none;filter:drop-shadow(0 4px 14px #0008)}
+.corz.on{animation:latido .9s ease-out}
+@keyframes latido{0%{opacity:0;transform:scale(.4)}15%{opacity:1;transform:scale(1.15)}30%{transform:scale(.95)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.port{flex:0 0 100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:24px;text-align:center;background:linear-gradient(140deg,var(--s2),var(--bg))}
+.port span{font-size:52px}.port b{font-size:20px;line-height:1.3;max-width:420px}
+.fsl{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.fcb h3{cursor:pointer}
+.frs{-webkit-line-clamp:2!important}
+.fbt{display:flex;gap:4px;padding:2px 8px 4px;align-items:center}
+.fb{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:0;border-radius:12px;color:var(--tx);font:600 13px system-ui}
+.fb svg{width:25px;height:25px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fb:active{background:var(--s2)}
+.fb[data-fa=quiero].on{color:#e5405e}.fb[data-fa=quiero].on svg{fill:#e5405e;stroke:#e5405e}
+.fb[data-fa=fav].on{color:var(--warn)}.fb[data-fa=fav].on svg{fill:var(--warn)}
+.fb[data-fa=col].on svg{fill:currentColor}.fb[data-fa=hecho].on{color:var(--ok)}
+.fleer{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 14px 10px;width:calc(100% - 28px);flex:none}
+.fleer svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#lector{position:fixed;inset:0;z-index:16;background:var(--bg);display:none;flex-direction:column}
+#lector.on{display:flex;animation:subir .22s cubic-bezier(.2,0,0,1)}
+.lh{display:flex;align-items:center;gap:6px;padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;border-bottom:1px solid var(--ln)}
+.lh span{flex:1}
+#lectC{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.lgl{height:min(48vh,420px)}
+.lcu{max-width:720px;margin:0 auto;padding:14px 18px 28px}
+.lcu h2{font-size:23px;line-height:1.25;margin:4px 0 10px}
+.lsv{font-size:17px;font-weight:600;margin:0 0 6px}
+.lcu h4{margin:22px 0 6px;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.lcu p,.lcu li{font-size:16.5px;line-height:1.6}
+.lcu ul{margin:0;padding-left:22px}
+.lcmd{display:flex;gap:8px;align-items:center;margin:6px 0}.lcmd code{flex:1;min-width:0;font:13.5px/1.4 ui-monospace,Consolas,monospace;background:var(--s1);border-radius:10px;padding:10px;word-break:break-all}
+.lbar{border-top:1px solid var(--ln);background:var(--s1);padding:4px 8px calc(env(safe-area-inset-bottom) + 4px)}
+.lbar .fb{flex-direction:column;gap:2px;font-size:11.5px;min-height:56px}
+#dCol .hb{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:0 14px;margin:4px 0;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 15px system-ui;text-align:left}
+#dCol .hb.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+#dCol input{flex:1;min-width:0}
+@media(prefers-reduced-motion:reduce){.corz.on{animation:none;opacity:0}#lector.on{animation:none}}
 .fmas{display:block;width:100%;margin:6px 0 24px}
 @media(min-width:900px){.gl{height:340px}#p-feed{max-width:680px}}
 </style>
@@ -362,6 +404,11 @@ a.li.roto{opacity:.45}
       <button class="btn pri" id="bGuardar">Guardar y probar</button>
     </div>
     <div class="nota" id="kEstado"></div>
+    <label>Sincronizar móvil y PC</label>
+    <div id="sOff"><div class="nota">Tus fichas se guardan en un repositorio <b>privado</b> tuyo de GitHub y se ven igual en el móvil y en el PC, también las fotos.<br>1. Abre <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=IG%20Extractor" data-a="ext" target="_blank" rel="noopener">esta página de GitHub</a> (ya viene marcado «repo»), baja del todo y pulsa «Generate token».<br>2. Copia la clave (empieza por ghp_) y pégala aquí.<br>3. En el otro aparato, pega la misma clave.</div>
+      <input type="password" id="sTok" autocomplete="off" placeholder="ghp_…"><div class="fila"><button class="btn pri" id="sAct">Activar</button></div></div>
+    <div id="sOn" style="display:none"><div class="fila"><button class="btn" id="sYa">Sincronizar ahora</button><button class="btn" id="sCopia">Copiar clave para el otro aparato</button></div><div class="fila"><button class="btn" id="sQuitar">Desactivar</button></div></div>
+    <div class="nota" id="sEstado"></div>
     <label>Mantenimiento</label>
     <div class="nota">Arreglos que casi nunca hacen falta.</div>
     <div class="fila">
@@ -376,6 +423,14 @@ a.li.roto{opacity:.45}
 </main>
 </div>
 <div id="aviso"></div>
+<div id="lector" role="dialog" aria-modal="true" aria-label="Leer la ficha entera">
+  <div class="lh"><button class="btn sm" data-l="cerrar" aria-label="Volver">‹ Volver</button><span></span><button class="btn sm" data-l="ant" id="lAnt" aria-label="Anterior">‹</button><button class="btn sm" data-l="sig" id="lSig">Siguiente ›</button></div>
+  <div id="lectC"></div>
+  <div class="lbar fbt"></div>
+</div>
+<dialog id="dCol" aria-label="Guardar en una colección"><h2>Guardar en…</h2><div id="colL"></div>
+  <div class="fila" style="flex-wrap:nowrap"><input type="text" id="colN" placeholder="Nueva colección (p. ej. Para instalar)" maxlength="40"><button class="btn sm" id="colAdd">Crear</button></div>
+  <div class="fila"><button class="btn pri" id="colOk">Listo</button></div></dialog>
 <div id="hoja">
   <header><button class="btn sm" id="hX" style="flex:0 0 auto">✕</button><div id="hT">Editar</div></header>
   <div id="hojaC">
@@ -454,7 +509,7 @@ function migraUso() {
 const respaldoYa = () => { if (!SRV) return; clearTimeout(_rsp); try { fetch("/api/respaldo", { method: "POST", body: JSON.stringify({ cards: db.cards, sel: db.sel || [] }), keepalive: true }); } catch (e) { } }; // al acabar un link o cerrar: la copia no se queda atrás
 addEventListener("pagehide", () => respaldoYa());
 let _rsp; // PC: copia de las fichas fuera del navegador (si el perfil se vacía, se restauran solas)
-const guardar = () => { migraUso(); try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } if (SRV) { clearTimeout(_rsp); _rsp = setTimeout(() => postSrv("/api/respaldo", { cards: db.cards, sel: db.sel || [] }), 1500); } };
+const guardar = () => { migraUso(); try { localStorage.setItem("igv", JSON.stringify(db)); } catch (e) { } try { trasGuardar(); } catch (e) { } if (SRV) { clearTimeout(_rsp); _rsp = setTimeout(() => postSrv("/api/respaldo", { cards: db.cards, sel: db.sel || [] }), 1500); } };
 
 // ============ detección de links ============
 const RE_URL = /(?<![\w.\/-])(?:https?:\/\/|(?:www\.)?(?:instagram\.com|youtube\.com|youtu\.be|github\.com)\/)[^\s<>()\[\]"'«»]+/gi;
@@ -1174,15 +1229,15 @@ const claveUrl = u => { // misma publicación aunque cambie la forma del link (u
 const clavesDe = c => { const k = new Set([claveUrl(c.url), ...(c.extra || []).map(claveUrl)]); const r = c.repos && c.repos[0]; if (r) k.add("gh:" + r.full.toLowerCase()); return k; };
 const yaGuardada = u => { const k = claveUrl(u); return db.cards.find(c => clavesDe(c).has(k)); };
 const grupoActual = () => db.grupo || "AI"; // el grupo ya no se pide al pegar: se cambia desde Editar o Mover
-function encolar(links, bloque) {
+function encolar(links, bloque, lote = bloque) {
   let nuevos = 0, repes = 0; const dondeRepes = new Set();
   for (const u of links) {
     const ya = yaGuardada(u);
     if (ya) { repes++; if (ya.lote) dondeRepes.add(ya.lote); continue; }
-    db.cards.push({ bloque, lote: bloque, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", cola: Date.now(), grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+    db.cards.push({ bloque, lote, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", cola: Date.now(), grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
     nuevos++;
   }
-  if (nuevos) { db.lotes = db.lotes || {}; const L = db.lotes[bloque] ||= { t: Date.now(), total: 0 }; L.total += nuevos; }
+  if (nuevos) { db.lotes = db.lotes || {}; db.lotes[lote] ||= { t: Date.now(), dev: DISPO }; }
   guardar(); return { nuevos, repes, dondeRepes: [...dondeRepes] };
 }
 const completa = c => (c.resumen || "").length + 40 * (c.links || []).length + 60 * (c.notas ? 1 : 0) + 30 * (c.imgs || []).length + (c.estado === "ok" ? 200 : 0) + (c.manual ? 100 : 0);
@@ -1231,7 +1286,7 @@ function pintaBloques() {
   const hayCola = db.cards.some(c => c.bloque && c.bloque >= sesionDesde); $("#notaLote").style.display = hayCola ? "" : "none";
   $("#detect").style.display = hayCola || !$("#txt").value.trim() ? "none" : "";
   const bs = {}; db.cards.forEach(c => { if (c.bloque && c.bloque >= sesionDesde) { const b = bs[c.bloque] ||= { n: c.bloque, t: 0, h: 0 }; b.t++; if (c.estado !== "pendiente") b.h++; } });
-  $("#bloques").innerHTML = Object.values(bs).sort((x, y) => x.n - y.n).map(b => { const fin = b.h >= b.t, act = !fin && actual && actual.bloque === b.n; return `<div class="blq"><b>${esc(etqLote(b.n))}</b> · ${b.h}/${b.t} ${fin ? "✅ terminado" : act ? "· trabajando" : "· en cola"}<div class="barra"><i style="width:${fin || b.h ? Math.round(b.h / b.t * 100) : 4}%"></i></div>${act && atascado ? '<div class="nota" style="color:var(--warn)">Parece atascado: este link no avanza. Puedes reiniciarlo o quitar el lote.</div>' : ""}${fin ? `<button class="btn pri" data-ver="${b.n}">Ver este lote (${b.t})</button>` : `<div class="fila">${act ? `<button class="btn sm" data-rb="${b.n}">Reiniciar</button>` : ""}<button class="btn sm" data-bq="${b.n}">Quitar</button></div>`}</div>`; }).join("");
+  $("#bloques").innerHTML = Object.values(bs).sort((x, y) => x.n - y.n).map(b => { const fin = b.h >= b.t, act = !fin && actual && actual.bloque === b.n; return `<div class="blq"><b>${esc(etqLote(loteDeBloque(b.n)))}</b> · ${b.h}/${b.t} ${fin ? "✅ terminado" : act ? "· trabajando" : "· en cola"}<div class="barra"><i style="width:${fin || b.h ? Math.round(b.h / b.t * 100) : 4}%"></i></div>${act && atascado ? '<div class="nota" style="color:var(--warn)">Parece atascado: este link no avanza. Puedes reiniciarlo o quitar el lote.</div>' : ""}${fin ? `<button class="btn pri" data-ver="${loteDeBloque(b.n)}">Ver este lote (${b.t})</button>` : `<div class="fila">${act ? `<button class="btn sm" data-rb="${b.n}">Reiniciar</button>` : ""}<button class="btn sm" data-bq="${b.n}">Quitar</button></div>`}</div>`; }).join("");
   pintaLotesHist();
 }
 async function correr() {
@@ -1261,21 +1316,26 @@ async function correr() {
   const pb = {}; db.cards.forEach(c => { if (c.bloque && c.bloque >= sesionDesde) { const b = pb[c.bloque] ||= { n: c.bloque, t: 0, r: 0, p: 0 }; b.t++; if (c.estado === "revisar") b.r++; if (c.estado === "pendiente") b.p++; } });
   const lis = Object.values(pb).sort((x, y) => y.n - x.n); // lo último que pegó Jorge, arriba
   aviso(`${sin ? "Parado" : "Todo listo"}: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}${sin ? `, ${sin} sin terminar` : ""}${uni ? `. Unidas ${uni} repetidas` : ""}. Toca un lote para verlo.`, true);
-  if (lis.length > 1) { const a = $("#aviso"); lis.slice(0, 6).forEach((b, i) => { const x = document.createElement("button"); x.className = "btn"; x.dataset.lista = b.n; x.style.cssText = "display:block;width:100%;margin-top:6px;min-height:44px;text-align:left"; x.textContent = `${i ? "" : "🆕 "}${etqLote(b.n)}${i ? "" : " (el último)"}: ${b.t} fichas${b.r ? `, ${b.r} para revisar` : ""}${b.p ? `, ${b.p} sin terminar` : ""}`; x.onclick = e => { e.stopPropagation(); verLote(b.n); a.style.display = "none"; }; a.appendChild(x); }); }
-  else if (lis.length === 1) { const a = $("#aviso"), x = document.createElement("button"); x.className = "btn pri"; x.style.cssText = "display:block;width:100%;margin-top:8px;min-height:44px"; x.textContent = "Ver " + etqLote(lis[0].n); x.onclick = e => { e.stopPropagation(); verLote(lis[0].n); a.style.display = "none"; }; a.appendChild(x); }
+  if (lis.length > 1) { const a = $("#aviso"); lis.slice(0, 6).forEach((b, i) => { const x = document.createElement("button"); x.className = "btn"; x.dataset.lista = b.n; x.style.cssText = "display:block;width:100%;margin-top:6px;min-height:44px;text-align:left"; x.textContent = `${i ? "" : "🆕 "}${etqLote(loteDeBloque(b.n))}${i ? "" : " (el último)"}: ${b.t} fichas${b.r ? `, ${b.r} para revisar` : ""}${b.p ? `, ${b.p} sin terminar` : ""}`; x.onclick = e => { e.stopPropagation(); verLote(loteDeBloque(b.n)); a.style.display = "none"; }; a.appendChild(x); }); }
+  else if (lis.length === 1) { const a = $("#aviso"), x = document.createElement("button"); x.className = "btn pri"; x.style.cssText = "display:block;width:100%;margin-top:8px;min-height:44px"; x.textContent = "Ver " + etqLote(loteDeBloque(lis[0].n)); x.onclick = e => { e.stopPropagation(); verLote(loteDeBloque(lis[0].n)); a.style.display = "none"; }; a.appendChild(x); }
 }
 
 // ---- fichas repetidas: misma identidad real (post/repo/URL normalizada) en el mismo grupo; la unida conserva todo; con «Deshacer» ----
 // 21/10: además del mismo post, se unen las fichas que hablan de LO MISMO: mismo repo (si es de lo que va el vídeo) o mismo título con nombre propio
 const GEN_TIT = new Set("herramienta herramientas gratis gratuita gratuitas gratuitos utiles util repositorio repositorios repos nuevas nuevos nueva nuevo mejores mejor tools tool free apps app trucos consejos errores recursos ideas agentes agente skills skill para con los las del una uno sin tus que como cosas".split(" "));
+const GEN_MARCA = new Set("claude code chatgpt openai gemini google anthropic codex cursor instagram github ia ai gpt llm n8n mcp windows mac linux android ios python".split(" "));
+function cabeza(t) { const p = String(t || "").split(/\s*[:|–—]\s*|\s+-\s+/)[0]; if (!p || p.length === String(t).length) return ""; const w = sinAcentos(corrige(p)).replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter(Boolean); return w.some(x => x.length >= 3 && !GEN_TIT.has(x) && !GEN_MARCA.has(x) && !/^\d+$/.test(x)) ? w.join(" ") : ""; } // «Orchestrator.inc: Gestión…» -> «orchestrator inc»
+const HOST_CONOCIDOS = new Set(Object.values(CONOCIDOS).map(u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } }));
+function webPropia(c) { const l = (c.links || []).find(x => /web oficial/i.test(x.t || "")); if (!l) return ""; try { const h = new URL(l.u).hostname.replace(/^www\./, ""); if (HOST_CONOCIDOS.has(h) || esGenerico(l.u) || /github|npmjs|pypi|huggingface|t\.me|discord/.test(h)) return ""; } catch (e) { return ""; } return claveUrl(l.u); }
 function claveTitulo(t) { const w = sinAcentos(corrige(t || "")).replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter(x => (x.length >= 2 || /\d/.test(x)) && !/^(de|y|el|la|en|tu|of|the|and|for|a|o|e|un|es|al|by)$/.test(x)); return w.some(x => x.length >= 3 && !GEN_TIT.has(x) && !/^\d+$/.test(x)) && w.join("").length >= 8 ? w.join(" ") : ""; }
 const tituloHabla = (c, full) => { const t = sinAcentos(corrige(c.titulo || "")); return String(full || "").split("/")[1].toLowerCase().split(/[-_.]+/).filter(x => x.length >= 3 && !GEN_TIT.has(x)).some(x => t.includes(x)); };
 const repoId = c => { const r = (c.repos || [])[0]; if (r && r.full) return r.full.toLowerCase(); const m = String(c.url || "").match(/github\.com\/([\w.-]+)\/([\w.-]+)/i); return m ? (m[1] + "/" + m[2].replace(/\.git$/i, "")).toLowerCase() : ""; };
 function unirRepetidas() {
   const cs = db.cards.filter(c => c.estado === "ok" && c.titulo && !/^https?:/i.test(c.titulo));
   const pad = cs.map((_, i) => i), f = i => pad[i] === i ? i : (pad[i] = f(pad[i])), idx = new Map();
-  const mete = (k, i) => { if (!k) return; if (idx.has(k)) { const a = f(i), b = f(idx.get(k)); if (a !== b) pad[a] = b; } else idx.set(k, i); };
-  cs.forEach((c, i) => { mete("u:" + claveUrl(c.url), i); (c.extra || []).forEach(u => mete("u:" + claveUrl(u), i)); const r = c.repos || []; if (r.length === 1 && tituloHabla(c, r[0].full)) mete("gh:" + r[0].full.toLowerCase(), i); const t = claveTitulo(c.titulo); if (t) mete("t:" + t + "|" + repoId(c), i); }); // mismo título con distinto repo = cosas distintas
+  const rep = cs.map(repoId); // dos fichas con repos distintos nunca se unen por el nombre
+  const mete = (k, i, mirar) => { if (!k) return; if (!idx.has(k)) { idx.set(k, i); return; } const a = f(i), b = f(idx.get(k)); if (a === b) return; if (mirar && rep[a] && rep[b] && rep[a] !== rep[b]) return; pad[a] = b; if (!rep[b]) rep[b] = rep[a]; };
+  cs.forEach((c, i) => { mete("u:" + claveUrl(c.url), i); (c.extra || []).forEach(u => mete("u:" + claveUrl(u), i)); const r = c.repos || []; if (r.length === 1 && tituloHabla(c, r[0].full)) mete("gh:" + r[0].full.toLowerCase(), i); const t = claveTitulo(c.titulo); if (t) mete("t:" + t, i, true); const h = cabeza(c.titulo); if (h) mete("h:" + h, i, true); const w = webPropia(c); if (w) mete("w:" + w, i, true); }); // mismo título, mismo nombre principal o misma web oficial = lo mismo
   const grupos = {}; cs.forEach((c, i) => (grupos[f(i)] ||= []).push(c));
   const peso = c => ["resumen", "detalle", "notas", "imgs", "links", "puntos", "skills", "repos", "tags"].reduce((n, k) => n + (c[k] ? String(JSON.stringify(c[k])).length : 0), 0) + (c.fav ? 1 : 0);
   const uniq = (a, f) => { const v = new Set(); return a.filter(x => { const k = f(x); if (!k || v.has(k)) return false; v.add(k); return true; }); };
@@ -1587,11 +1647,11 @@ $("#bPegar").onclick = async () => {
 $("#bOrdenar").onclick = () => {
   const { links } = sacarLinks($("#txt").value);
   if (!links.length) { if (db.cards.some(c => c.estado === "pendiente") && !corriendo) { correr(); return; } return aviso("No veo ningún link. Pega algunos primero."); }
-  const n = (db.bn || 0) + 1, r = encolar(links, n);
+  const n = (db.bn || 0) + 1, lt = nuevoLote(), r = encolar(links, n, lt); if (!r.nuevos) delete db.lotes[lt];
   const donde = r.dondeRepes && r.dondeRepes.length ? " (ya estaban en " + r.dondeRepes.slice(0, 3).map(etqLote).join(", ") + ")" : "";
   if (!r.nuevos) { $("#txt").value = ""; detectar(); return aviso("Esos links ya estaban todos guardados" + donde + "."); }
   db.bn = n; guardar(); $("#txt").value = ""; detectar(); pintaBloques();
-  aviso(`${etqLote(n)} en marcha: ${r.nuevos} links${r.repes ? `, ${r.repes} repetidos quitados${donde}` : ""}. Puedes pegar otro lote ya.`);
+  aviso(`${etqLote(lt)} en marcha: ${r.nuevos} links${r.repes ? `, ${r.repes} repetidos quitados${donde}` : ""}. Puedes pegar otro lote ya.`);
   correr();
 };
 $("#bParar").onclick = () => { pausado = !pausado; $("#bParar").textContent = pausado ? "Reanudar" : "Pausar"; };
@@ -1679,7 +1739,7 @@ $("#hojaF").addEventListener("change", e => { if (e.target.id !== "catSel" || !e
 $("#bDup").onclick = quitarDuplicados;
 $("#bComprobar").onclick = comprobarTodo;
 $("#bGuardar").onclick = async () => {
-  db.cfg = { nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim(), groq: $("#kGq").value.trim(), intereses: $("#kInt").value.trim() }; guardar(); muertos = {}; pintar();
+  db.cfg = { ...db.cfg, nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim(), groq: $("#kGq").value.trim(), intereses: $("#kInt").value.trim() }; guardar(); muertos = {}; pintar();
   $("#kEstado").textContent = "Probando…";
   const out = [];
   if (db.cfg.nvidia || db.cfg.openrouter) { const t = await chat("Responde solo: ok", 20); out.push(t ? "IA lista" : "La IA no está lista: " + iaTexto()); } else out.push("Sin clave de IA: funciono en modo básico");
@@ -1706,6 +1766,8 @@ $("#hDest").addEventListener("click", e => {
   $("#hGru").value = b.dataset.g; $("#hCat").value = b.dataset.c; pintarDestino();
 });
 window.__atras = () => {
+  if ($("#dCol").open) { $("#dCol").close(); return true; }
+  if (lectorId && !editando) { cerrarLector(); return true; }
   if ($("#menuMas").classList.contains("on")) { $("#menuMas").classList.remove("on"); return true; }
   if ($("#dcc").open) { $("#dcc").close(); return true; }
   if (editando) { cerrarEditor(); return true; }
@@ -1718,9 +1780,9 @@ window.__atras = () => {
 window.__chat = (t, fs) => {
   cambiaTab("pegar");
   $("#txt").value = (fs.length ? `📎 ${fs.length} fotos recibidas\n\n` : "") + t.slice(0, 30000); try { detectar(); } catch (e) { } // se ve lo recibido: da calma
-  const bn = (db.bn || 0) + 1, r = encolar(sacarLinks(t).links, bn), st = Date.now().toString(36);
-  if (fs.length) { db.lotes = db.lotes || {}; const L = db.lotes[bn] ||= { t: Date.now(), total: 0 }; L.total += fs.length; }
-  for (const n of fs) db.cards.push({ bloque: bn, lote: bn, id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", cola: Date.now(), titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+  const bn = (db.bn || 0) + 1, lt = nuevoLote(), r = encolar(sacarLinks(t).links, bn, lt), st = Date.now().toString(36);
+  if (!r.nuevos && !fs.length) delete db.lotes[lt];
+  for (const n of fs) db.cards.push({ bloque: bn, lote: lt, id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", cola: Date.now(), titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
   if (r.nuevos || fs.length) db.bn = bn;
   guardar(); pintaBloques();
   if (!r.nuevos && !fs.length) return aviso(r.repes ? "Esos links ya estaban guardados." : "No encontré links ni fotos.");
@@ -1756,21 +1818,35 @@ async function cargarSemilla() {
 }
 // ============ 21/10/2026: lotes con fecha, temas, «Para ti», fotos reales, Telegram, nombres bien escritos, Inicio tipo red social ============
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-function fechaCorta(t) {
+function fechaCorta(t, conHora) {
   if (!t) return ""; const d = new Date(t), h = new Date(), dia = x => Math.floor(new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime() / 864e5), n = dia(h) - dia(d);
-  if (n === 0) return "hoy"; if (n === 1) return "ayer"; if (n > 1 && n < 7) return "hace " + n + " días";
+  const hh = conHora ? ", " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") : "";
+  if (n === 0) return "hoy" + hh; if (n === 1) return "ayer" + hh; if (n > 1 && n < 7) return "hace " + n + " días";
   return d.getDate() + " " + MESES[d.getMonth()] + (d.getFullYear() !== h.getFullYear() ? " " + d.getFullYear() : "");
 }
 const loteDe = c => Number(c.lote ?? c.bloque ?? 0) || 0;
 const tsId = id => { const v = parseInt(String(id || "").slice(0, 8), 36); return v > 1.7e12 && v < 2.2e12 ? v : 0; };
+const DISPO = N ? "móvil" : "PC";
+function nuevoLote() { db.lotes = db.lotes || {}; let t = Date.now(); while (db.lotes[t]) t++; db.lotes[t] = { t, dev: DISPO }; return t; } // id único aunque pegues en el móvil y en el PC
 function migraLotes() { // las fichas viejas reciben su lote (el bloque en que se pegaron) y cada lote su fecha
   db.lotes = db.lotes || {}; let n = 0;
   for (const c of db.cards) if (c.lote == null && c.bloque != null) { c.lote = c.bloque; n++; }
   for (const c of db.cards) { const k = loteDe(c); if (!k) continue; const L = db.lotes[k] ||= { t: 0, mig: 1 }; const t = tsId(c.id) || c.hecha || 0; if (L.mig && t && (!L.t || t < L.t)) { L.t = t; n++; } }
   return n;
 }
-function etqLote(n) { n = Number(n) || 0; if (!n) return "Fichas antiguas"; const L = (db.lotes || {})[n]; return "Lote " + n + (L && L.t ? " · " + fechaCorta(L.t) : ""); }
-function lotesLista() { const m = {}; for (const c of db.cards) { const n = loteDe(c), l = m[n] ||= { n, k: 0, ok: 0, rev: 0, pen: 0 }; l.k++; if (c.estado === "ok") l.ok++; else if (c.estado === "revisar") l.rev++; else l.pen++; } return Object.values(m).sort((a, b) => b.n - a.n); }
+let _rangoL = null;
+function rangoLotes() { // «Lote 1, 2, 3…» por orden de fecha, igual en todos tus aparatos
+  const ks = Object.keys(db.lotes || {}), firma = ks.length + ":" + ks.join(",").length; if (_rangoL && _rangoL.f === firma) return _rangoL.m;
+  const m = new Map(); ks.map(k => [Number(k), (db.lotes[k] && db.lotes[k].t) || Number(k)]).sort((a, b) => a[1] - b[1] || a[0] - b[0]).forEach(([k], i) => m.set(k, i + 1));
+  _rangoL = { f: firma, m }; return m;
+}
+function etqLote(n) {
+  n = Number(n) || 0; if (!n) return "Fichas antiguas"; const L = (db.lotes || {})[n], k = rangoLotes().get(n) || n;
+  return "Lote " + k + (L && L.t ? " · " + fechaCorta(L.t, true) : "") + (L && L.dev && db.cfg.sync && db.cfg.sync.token ? " · " + L.dev : "");
+}
+const fechaLote = n => ((db.lotes || {})[n] || {}).t || n;
+function lotesLista() { const m = {}; for (const c of db.cards) { const n = loteDe(c), l = m[n] ||= { n, k: 0, ok: 0, rev: 0, pen: 0 }; l.k++; if (c.estado === "ok") l.ok++; else if (c.estado === "revisar") l.rev++; else l.pen++; } return Object.values(m).sort((a, b) => fechaLote(b.n) - fechaLote(a.n)); }
+const loteDeBloque = b => { const c = db.cards.find(x => x.bloque === b); return c ? loteDe(c) : b; };
 function pintaLotesHist() {
   const e = $("#lotesHist"); if (!e) return; const ls = lotesLista(); if (!ls.length) { e.innerHTML = ""; return; }
   e.innerHTML = "<h3>Tus lotes</h3>" + ls.slice(0, 12).map(l => `<div class="ltr"><div><b>${esc(etqLote(l.n))}</b><span>${l.k} ficha${l.k === 1 ? "" : "s"}${l.rev ? ` · ${l.rev} para revisar` : ""}${l.pen ? ` · ${l.pen} en cola` : ""}</span></div><button class="btn" data-vl="${l.n}">Ver</button></div>`).join("");
@@ -1778,7 +1854,7 @@ function pintaLotesHist() {
 function verLote(n) {
   n = Number(n) || 0;
   if (!db.cards.some(c => loteDe(c) === n && c.estado === "ok")) { bloqueSel = n || null; filtro = "todo"; return cambiaTab("fichas"); } // solo fallidas o en cola: se ven en Fichas
-  feedLote = n; feedModo = "ultimo"; feedTema = ""; feedN = 20; cambiaTab("feed");
+  feedLote = n; feedModo = "ultimo"; feedTema = ""; feedCol = ""; feedN = 20; cambiaTab("feed");
 }
 $("#lotesHist").addEventListener("click", e => { const b = e.target.closest("[data-vl]"); if (b) verLote(b.dataset.vl); });
 
@@ -1831,20 +1907,25 @@ const sellosHtml = c => sellos(c).map(([k, t]) => `<span class="sl ${k}">${esc(t
 // ---- «Para ti»: tu perfil + lo que marcas «Lo quiero» / «Descartar» ----
 const PERFIL_DEF = "claude code, skills, plugins, mcp, agentes, windows, gratis, open source, ahorrar tokens, memoria, automatizar, github";
 const kwPerfil = () => String(db.cfg.intereses || PERFIL_DEF).split(/[,;\n]+/).map(x => sinAcentos(x).trim()).filter(x => x.length >= 2);
-function aprendizaje() { const pos = {}, neg = {}; for (const c of db.cards) { const u = uso(c); if (u === "nuevo" || c.estado !== "ok") continue; const w = u === "descartada" ? neg : pos; for (const k of [temaFicha(c), ...(c.tags || [])]) w[k] = (w[k] || 0) + 1; } return { pos, neg }; }
+function aprendizaje() { // aprende de lo que marcas: Lo quiero/Hecho, favoritas, colecciones y lo que abres para leer
+  const pos = {}, neg = {}, suma = (w, c, k) => { for (const x of [temaFicha(c), ...(c.tags || [])]) w[x] = (w[x] || 0) + k; };
+  for (const c of db.cards) { if (c.estado !== "ok") continue; const u = uso(c);
+    if (u === "descartada") suma(neg, c, 1); else if (u === "quiero" || u === "hecho") suma(pos, c, 1);
+    if (c.fav) suma(pos, c, 2); if ((c.cols || []).length) suma(pos, c, 1); if (c.leida) suma(pos, c, .5); }
+  return { pos, neg };
+}
 function paraTi(c, A) {
   const b = blobDe(c), raz = []; let s = 0;
-  for (const k of kwPerfil()) { const re = new RegExp("(^|[^a-z0-9])" + k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "[\\s-]?")); if (re.test(b)) { s += 3; if (raz.length < 3) raz.push("habla de " + k); } }
+  for (const k of kwPerfil()) { const re = new RegExp("(^|[^a-z0-9])" + k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "[\\s-]?")); if (re.test(b)) { s += 3; if (raz.length < 2) raz.push("habla de " + k); } }
   const sl = sellos(c).map(x => x[1]);
   if (sl.includes("Gratis") || sl.includes("Código abierto")) s += 2; if (sl.includes("Activo")) s += 2;
   if (sl.includes("Viejo") || sl.includes("Abandonado")) s -= 5; if (sl.includes("De pago")) s -= 2;
-  if (c.accion === "Instalar") s += 1; if (c.fav) s += 4; if (!c.resumen) s -= 3;
+  if (c.accion === "Instalar") s += 1; if (!c.resumen) s -= 3;
   const t = temaFicha(c), p = A.pos[t] || 0, n = A.neg[t] || 0;
-  if (p > n) { s += Math.min(4, p - n); raz.push("marcaste cosas parecidas"); } else if (n > p) s -= Math.min(4, n - p);
+  if (p > n) { s += Math.min(5, p - n); raz.push("se parece a lo que guardas y te gusta"); } else if (n > p) s -= Math.min(4, n - p);
   for (const tg of c.tags || []) s += Math.min(1, A.pos[tg] || 0) - Math.min(1, A.neg[tg] || 0);
   return { s, raz };
 }
-
 // ---- fotos reales: primero las del post y los fotogramas del vídeo; nunca el mismo banner en varias fichas ----
 const RE_FOTO_POST = /cdninstagram|fbcdn|tikwm|twimg|ytimg|scontent/i;
 const RE_FOTO_GEN = /opengraph\.githubassets|thum\.io|\/og[\/.-]|og-image|og\.png|social|banner/i;
@@ -1856,7 +1937,7 @@ function fotosDe(c, usoImg) {
   return o.slice(0, 4);
 }
 function galeriaHtml(c, cls = "") { const f = fotosDe(c, usoImgs()); return `<div class="gl ${cls}" data-gid="${esc(c.id)}"${f.length ? "" : ' style="display:none"'}>${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="${i ? "lazy" : "eager"}" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`; }
-function cuentaGal(g) { const n = g.querySelectorAll("img").length; g.style.display = n ? "" : "none"; const gn = g.nextElementSibling; if (gn && gn.classList.contains("gn")) gn.textContent = n > 1 ? `${Math.min(n, Math.round(g.scrollLeft / Math.max(1, g.clientWidth)) + 1)}/${n}` : ""; }
+function cuentaGal(g) { const n = g.querySelectorAll("img").length, po = g.querySelector(".port"); if (n && po) po.remove(); g.style.display = n || (po && !n) ? "" : "none"; const gn = g.nextElementSibling; if (gn && gn.classList.contains("gn")) gn.textContent = n > 1 ? `${Math.min(n, Math.round(g.scrollLeft / Math.max(1, g.clientWidth)) + 1)}/${n}` : ""; }
 window.fotoMala = el => { const g = el.parentNode; el.remove(); if (g) cuentaGal(g); };
 document.addEventListener("scroll", e => { const g = e.target; if (g && g.classList && g.classList.contains("gl")) cuentaGal(g); }, true);
 const MINI = (() => { // miniaturas guardadas en el propio dispositivo: las fotos de Instagram caducan a los pocos días
@@ -1874,30 +1955,44 @@ function reducir(src, w = 560) {
   });
 }
 const enseña = t => !!t && !/^persona hablando/i.test(String(t).trim());
+let imgSinSoporte = false;
+async function bajarFoto(u) { // PC: la baja el programa (sin bloqueo del CDN); móvil/navegador: directo
+  if (/^data:/.test(u)) return u; await srvListo;
+  if (SRV) { const r = await postSrv("/api/img", { url: u }); if (r && r.error === "no existe") imgSinSoporte = true; return r && r.status === 200 && r.data ? r.data : ""; } // programa del PC aún sin actualizar: se reintenta en el próximo arranque
+  return u;
+}
+async function miniDe(u) { const s = await bajarFoto(u); return s ? reducir(s) : ""; }
 async function guardaMinis(c) {
   try {
     const fr = fotosTmp.get(c.id) || [], partes = partesFrames || []; fotosTmp.delete(c.id); partesFrames = [];
     const utiles = fr.map((f, i) => [f, partes[i]]).sort((a, b) => enseña(b[1]) - enseña(a[1])).map(x => x[0]); // los fotogramas con algo que leer, primero
     const out = [];
-    for (const u of (c.imgs || []).filter(u => RE_FOTO_POST.test(u)).slice(0, 2)) { const d = await reducir(u); if (d) out.push({ u, d }); }
+    for (const u of (c.imgs || []).filter(u => RE_FOTO_POST.test(u)).slice(0, 2)) { const d = await miniDe(u); if (d) out.push({ u, d }); }
     for (const f of utiles.slice(0, 3)) { const d = await reducir(f); if (d) out.push({ u: "frame", d }); }
-    if (out.length) { await MINI.put(c.id, out.slice(0, 4)); c.minis = Math.min(4, out.length); }
+    if (out.length) { await MINI.put(c.id, out.slice(0, 4)); c.minis = Math.min(4, out.length); subeMinis(c.id, out.slice(0, 4)); }
   } catch (e) { }
+}
+async function minisDeCard(id) { // del aparato; si no están y la sincronización está activa, de la nube (y se quedan guardadas)
+  const v = await MINI.get(id); if (Array.isArray(v) && v.length) return v;
+  const n = await bajaMinisNube(id); if (n && n.length) { await MINI.put(id, n); return n; } return [];
 }
 function rellenaGalerias(root) {
   root.querySelectorAll(".gl[data-gid]").forEach(g => {
-    cuentaGal(g); const c = db.cards.find(x => x.id === g.dataset.gid); if (!c || (!c.minis && !(c.minisDe || []).length)) return;
-    Promise.all([c.id, ...(c.minisDe || [])].map(id => MINI.get(id))).then(rs => {
-      const ms = rs.filter(Array.isArray).flat(); if (!ms.length || !g.isConnected) return;
+    cuentaGal(g); const c = db.cards.find(x => x.id === g.dataset.gid); if (!c) return;
+    if (!c.minis && !c.minisNube && !(c.minisDe || []).length) return;
+    const ids = [...(c.minis || c.minisNube ? [c.id] : []), ...(c.minisDe || [])];
+    Promise.all(ids.map(minisDeCard)).then(rs => {
+      const ms = rs.flat(); if (!ms.length || !g.isConnected) return;
       const ya = new Set(ms.map(m => m.u)); g.querySelectorAll("img").forEach(im => { if (ya.has(im.getAttribute("src"))) im.remove(); });
       g.prepend(...ms.slice(0, 4).map(m => { const im = document.createElement("img"); im.src = m.d; im.alt = ""; return im; }));
       while (g.querySelectorAll("img").length > 5) g.lastElementChild.remove(); cuentaGal(g);
     });
   });
 }
-async function minisAtrasadas() { // fichas que aún no tienen sus fotos guardadas: se intenta una vez, sin molestar
-  const cs = db.cards.filter(c => c.estado === "ok" && !c.minis && !c.minisProb && (c.imgs || []).some(u => RE_FOTO_POST.test(u))).slice(0, 25);
-  for (const c of cs) { if (corriendo) break; c.minisProb = 1; const out = []; for (const u of (c.imgs || []).filter(u => RE_FOTO_POST.test(u)).slice(0, 2)) { const d = await reducir(u); if (d) out.push({ u, d }); } if (out.length) { await MINI.put(c.id, out); c.minis = out.length; } await dormir(600); }
+async function minisAtrasadas() { // fichas que aún no tienen sus fotos guardadas (también las que llegan del otro aparato): una vez, sin molestar
+  await srvListo;
+  const cs = db.cards.filter(c => c.estado === "ok" && !c.minis && !c.minisNube && !(c.minisProb >= (SRV ? 2 : 1)) && (c.imgs || []).some(u => RE_FOTO_POST.test(u))).slice(0, 30);
+  for (const c of cs) { if (corriendo || imgSinSoporte) break; const out = []; for (const u of (c.imgs || []).filter(u => RE_FOTO_POST.test(u)).slice(0, 2)) { const d = await miniDe(u); if (d) out.push({ u, d }); } if (imgSinSoporte) break; c.minisProb = SRV ? 2 : 1; if (out.length) { await MINI.put(c.id, out); c.minis = out.length; subeMinis(c.id, out); } await dormir(500); }
   if (cs.length) { guardar(); if ($("#p-feed").classList.contains("on")) pintaFeed(true); }
 }
 
@@ -1920,39 +2015,53 @@ function linksFeed(c) {
   return ls.map(l => aHtml(l, "", true)).join("");
 }
 
-// ---- Inicio: tus fichas como una red social ----
-let feedModo = "ti", feedLote = null, feedTema = "", feedN = 20;
-const FMODOS = [["ti", "Para ti"], ["ultimo", "Lo último"], ["gratis", "Gratis"], ["quiero", "Lo quiero"], ["hecho", "Hecho"]];
+// ---- Inicio: tus fichas como una red social (tarjeta limpia + leer todo a pantalla completa) ----
+let feedModo = "ti", feedLote = null, feedTema = "", feedCol = "", feedN = 20, feedOrden = null;
+const FMODOS = [["ti", "Para ti"], ["ultimo", "Lo último"], ["fav", "Favoritas"], ["quiero", "Lo quiero"], ["gratis", "Gratis"], ["hecho", "Hecho"]];
+const SVI = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ICF = {
+  cor: SVI('<path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.4 5 7 5c2 0 3.3 1 5 3 1.7-2 3-3 5-3 3.6 0 5.8 3.6 4.5 6.8C19.5 16.4 12 21 12 21z"/>'),
+  est: SVI('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'),
+  col: SVI('<path d="M6 3h12v18l-6-4-6 4z"/>'),
+  ok: SVI('<path d="M5 12l5 5 9-10"/>'),
+  no: SVI('<path d="M6 6l12 12M18 6L6 18"/>'),
+  leer: SVI('<path d="M4 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-5a3 3 0 0 0-3 3"/>')
+};
+const ICO_TEMA = { "Claude Code y skills": "⌨️", "MCP y conectores": "🔌", "Agentes de IA": "🤖", "Ahorrar tokens y memoria": "🧠", "Seguridad": "🛡️", "Vídeo, audio e imagen": "🎬", "Diseño y webs": "🎨", "Apps y programas": "🧩", "Ideas y negocio": "💡", "Aprender": "📚", "Otros": "📌" };
+const nomCol = id => ((db.cols || []).find(x => x.id === id) || {}).n || "";
 function feedCards() {
   const A = aprendizaje(); let cs = db.cards.filter(c => c.estado === "ok" && uso(c) !== "descartada");
   if (feedLote != null) cs = cs.filter(c => loteDe(c) === feedLote);
   if (feedTema) cs = cs.filter(c => temaFicha(c) === feedTema);
-  if (feedModo === "quiero" || feedModo === "hecho") cs = cs.filter(c => uso(c) === feedModo); else cs = cs.filter(c => uso(c) !== "hecho");
+  if (feedCol) cs = cs.filter(c => (c.cols || []).includes(feedCol));
+  if (feedModo === "quiero" || feedModo === "hecho") cs = cs.filter(c => uso(c) === feedModo); else if (!feedCol && feedModo !== "fav") cs = cs.filter(c => uso(c) !== "hecho");
+  if (feedModo === "fav") cs = cs.filter(c => c.fav);
   if (feedModo === "gratis") cs = cs.filter(c => sellos(c).some(x => x[0] === "gr"));
   const sc = new Map(cs.map(c => [c, paraTi(c, A)])), cuando = c => c.hecha || tsId(c.id) || 0;
-  if (feedModo === "ultimo") cs.sort((a, b) => loteDe(b) - loteDe(a) || cuando(b) - cuando(a)); else cs.sort((a, b) => sc.get(b).s - sc.get(a).s || loteDe(b) - loteDe(a));
+  if (feedModo === "ultimo") cs.sort((a, b) => fechaLote(loteDe(b)) - fechaLote(loteDe(a)) || cuando(b) - cuando(a)); else cs.sort((a, b) => sc.get(b).s - sc.get(a).s || fechaLote(loteDe(b)) - fechaLote(loteDe(a)));
+  if (feedOrden) { const pos = new Map(feedOrden.map((id, i) => [id, i])), nuevos = cs.filter(c => !pos.has(c.id)), viejos = cs.filter(c => pos.has(c.id)).sort((a, b) => pos.get(a.id) - pos.get(b.id)); cs = [...nuevos, ...viejos]; } // el orden no salta mientras lo miras
+  feedOrden = cs.map(c => c.id);
   return { cs, sc };
 }
-function guiaHtml(c) {
-  const cm = comandos(c), r = (c.repos || [])[0], li = (t, h) => `<li><b>${t}</b>${h}</li>`, ul = a => `<ul>${a.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`, p = [];
-  p.push(li("Qué es", esc(c.detalle || c.resumen || "El vídeo no lo explica bien: ábrelo con el botón de Instagram.")));
-  if ((c.puntos || []).length) p.push(li("Lo que cuenta el vídeo", ul(c.puntos)));
-  if ((c.skills || []).length) p.push(li("Skills o plugins que propone", ul(c.skills)));
-  p.push(li("Cómo empezar", cm.length ? cm.map(x => `<code class="cmd">${esc(x)}</code>`).join("") : r ? `Abre el GitHub (${esc(r.full)}) y sigue su README.` : (c.links || []).length ? "Abre su web (abajo) y mira cómo se instala." : "El vídeo no dice cómo instalarlo: abre el post y mira los comentarios."));
-  if (c.limites) p.push(li("Ojo con", esc(c.limites)));
-  p.push(li("Para pasárselo a Claude Code", "Marca «Lo quiero». Luego, en Fichas, «Exportar .txt»."));
-  return `<details><summary>${IC.chev}<span class="cn">Explícamelo paso a paso</span></summary><ol class="guia">${p.join("")}</ol></details>`;
+const resetOrden = () => { feedOrden = null; feedN = 20; };
+function portadaHtml(c) { return `<div class="port"><span>${ICO_TEMA[temaFicha(c)] || "📌"}</span><b>${esc(tituloVis(c))}</b></div>`; }
+function botonesHtml(c, grande) {
+  const u = uso(c), b = (k, ic, t, on) => `<button class="fb${on ? " on" : ""}" data-fa="${k}" aria-pressed="${!!on}" title="${t}" aria-label="${t}">${ic}${grande ? `<span>${t}</span>` : ""}</button>`;
+  return b("quiero", ICF.cor, "Lo quiero", u === "quiero") + b("fav", ICF.est, "Favorita", c.fav) + b("col", ICF.col, (c.cols || []).length ? "En " + (c.cols.length === 1 ? nomCol(c.cols[0]) || "colección" : c.cols.length + " colecciones") : "Guardar", (c.cols || []).length) + b("hecho", ICF.ok, "Hecho", u === "hecho") + b("descartada", ICF.no, "Descartar", false);
 }
 function fichaFeed(c, p, top) {
-  const u = uso(c), sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim();
-  const chips = `<span class="sl">${esc(etqLote(loteDe(c)))}</span>${top ? '<span class="sl ti">★ Para ti</span>' : ""}${sellosHtml(c)}<span class="sl">${esc(temaFicha(c))}</span>`;
-  const bt = (k, t) => `<button class="btn${u === k ? " on" : ""}" data-fa="${k}" aria-pressed="${u === k}">${u === k ? "✓ " : ""}${t}</button>`;
-  return `<article class="fc" data-id="${esc(c.id)}"><div class="fcab">${chips}</div>${galeriaHtml(c)}<div class="fcb"><h3>${esc(tituloVis(c))}</h3>${sv ? `<p class="fsv">Sirve para: ${esc(sv)}</p>` : ""}${c.resumen && c.resumen !== c.sirve ? `<p class="frs">${esc(c.resumen)}</p>` : ""}${top && p.raz.length ? `<p class="fpq">Para ti porque ${esc(p.raz.join(" · "))}</p>` : ""}${guiaHtml(c)}</div><div class="fl">${linksFeed(c)}</div><div class="fa">${bt("quiero", "Lo quiero")}${bt("hecho", "Hecho")}${bt("descartada", "Descartar")}</div></article>`;
+  const sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim(), f = fotosDe(c, usoImgs());
+  const gal = `<div class="gl" data-gid="${esc(c.id)}">${f.length || c.minis || c.minisNube ? "" : portadaHtml(c)}${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="${i ? "lazy" : "eager"}" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`;
+  return `<article class="fc" data-id="${esc(c.id)}"><div class="fph" title="Doble toque: Lo quiero · Un toque: leer todo">${gal}<div class="fov"><span class="sl">${esc(etqLote(loteDe(c)))}</span>${top ? '<span class="sl ti">★ Para ti</span>' : ""}</div><div class="corz" aria-hidden="true">${ICF.cor}</div></div>
+<div class="fcb"><div class="fsl">${sellosHtml(c)}<span class="sl">${esc(temaFicha(c))}</span>${(c.cols || []).map(id => nomCol(id) ? `<span class="sl">🔖 ${esc(nomCol(id))}</span>` : "").join("")}</div>
+<h3 data-fa="leer">${esc(tituloVis(c))}</h3>${sv ? `<p class="fsv">Sirve para: ${esc(sv)}</p>` : ""}${c.resumen && c.resumen !== c.sirve ? `<p class="frs">${esc(c.resumen)}</p>` : ""}${top && p.raz.length ? `<p class="fpq">Para ti porque ${esc(p.raz.join(" · "))}</p>` : ""}</div>
+<div class="fbt">${botonesHtml(c)}</div><button class="btn fleer" data-fa="leer">${ICF.leer} Leer todo</button><div class="fl">${linksFeed(c)}</div></article>`;
 }
 function pintaFeed(suave) {
   const y = $("main").scrollTop, ok = db.cards.filter(c => c.estado === "ok");
-  const temas = [...new Set(ok.map(temaFicha))].sort((a, b) => a.localeCompare(b, "es")), lotes = lotesLista().filter(l => l.ok);
+  const temas = [...new Set(ok.map(temaFicha))].sort((a, b) => a.localeCompare(b, "es")), lotes = lotesLista().filter(l => l.ok), cols = (db.cols || []).filter(x => ok.some(c => (c.cols || []).includes(x.id)));
   $("#fbar").innerHTML = FMODOS.map(([k, t]) => `<button data-fm="${k}" class="${feedModo === k ? "on" : ""}">${t}</button>`).join("")
+    + (cols.length ? `<select id="fCol" aria-label="Colección" class="${feedCol ? "on" : ""}"><option value="">Colecciones</option>${cols.map(x => `<option value="${esc(x.id)}"${feedCol === x.id ? " selected" : ""}>🔖 ${esc(x.n)}</option>`).join("")}</select>` : "")
     + `<select id="fLote" aria-label="Lote" class="${feedLote != null ? "on" : ""}"><option value="">Todos los lotes</option>${lotes.map(l => `<option value="${l.n}"${feedLote === l.n ? " selected" : ""}>${esc(etqLote(l.n))} (${l.ok})</option>`).join("")}</select>`
     + `<select id="fTema" aria-label="Tema" class="${feedTema ? "on" : ""}"><option value="">Todos los temas</option>${temas.map(t => `<option${feedTema === t ? " selected" : ""}>${esc(t)}</option>`).join("")}</select>`;
   const { cs, sc } = feedCards();
@@ -1961,23 +2070,217 @@ function pintaFeed(suave) {
   let html = "", ult = null;
   for (const c of cs.slice(0, feedN)) { if (feedModo === "ultimo" && loteDe(c) !== ult) { ult = loteDe(c); html += `<div class="fhd">${esc(etqLote(ult))}</div>`; } html += fichaFeed(c, sc.get(c), top.has(c)); }
   if (cs.length > feedN) html += `<button class="btn fmas" data-fmas="1">Ver ${Math.min(20, cs.length - feedN)} más (quedan ${cs.length - feedN})</button>`;
-  const ab = new Set($$("#feed .fc details[open]").map(d => d.closest(".fc").dataset.id));
-  $("#feed").innerHTML = html; $$("#feed .fc").forEach(f => { if (ab.has(f.dataset.id)) { const d = f.querySelector("details"); if (d) d.open = true; } });
-  rellenaGalerias($("#feed")); if (suave) $("main").scrollTop = y;
+  $("#feed").innerHTML = html; rellenaGalerias($("#feed")); if (suave) $("main").scrollTop = y;
+  if (lectorId) pintaLector();
 }
-$("#fbar").addEventListener("click", e => { const b = e.target.closest("[data-fm]"); if (!b) return; feedModo = b.dataset.fm; feedN = 20; pintaFeed(); $("main").scrollTop = 0; });
-$("#fbar").addEventListener("change", e => { if (e.target.id === "fLote") feedLote = e.target.value === "" ? null : Number(e.target.value); if (e.target.id === "fTema") feedTema = e.target.value; feedN = 20; pintaFeed(); $("main").scrollTop = 0; });
+function refrescaTarjeta(c) { // cambia solo esa tarjeta (sin recolocar ni recargar fotos)
+  $$(`.fc[data-id="${CSS.escape(c.id)}"] .fbt, #lector .lbar`).forEach(e => { e.innerHTML = botonesHtml(c, e.classList.contains("lbar")); });
+  $$(`.fc[data-id="${CSS.escape(c.id)}"] .fsl`).forEach(e => { e.innerHTML = sellosHtml(c) + `<span class="sl">${esc(temaFicha(c))}</span>` + (c.cols || []).map(id => nomCol(id) ? `<span class="sl">🔖 ${esc(nomCol(id))}</span>` : "").join(""); });
+}
+function accionFeed(c, a, art) {
+  if (a === "leer") return abrirLector(c.id);
+  if (a === "col") return elegirColeccion(c);
+  if (a === "fav") { c.fav = !c.fav; guardar(); refrescaTarjeta(c); return aviso(c.fav ? "★ En favoritas" : "Quitada de favoritas"); }
+  const antes = uso(c), nuevo = antes === a ? "nuevo" : a; c.estadoUso = nuevo; guardar();
+  const volver = () => { c.estadoUso = antes; guardar(); resetOrden(); pintar(); if ($("#p-feed").classList.contains("on")) pintaFeed(true); };
+  if (nuevo === "descartada") { const e = art || $(`.fc[data-id="${CSS.escape(c.id)}"]`); if (e) e.remove(); if (lectorId === c.id) cerrarLector(); return aviso("Descartada", false, volver); }
+  refrescaTarjeta(c); aviso(nuevo === "quiero" ? "♥ Lo quiero" : nuevo === "hecho" ? "✓ Hecho" : "Vuelve a «Nuevo»", false, volver);
+}
+function meGusta(id, ph) {
+  const c = db.cards.find(x => x.id === id); if (!c) return;
+  const z = ph && ph.querySelector(".corz"); if (z) { z.classList.remove("on"); void z.offsetWidth; z.classList.add("on"); }
+  if (uso(c) !== "quiero") { const antes = uso(c); c.estadoUso = "quiero"; guardar(); refrescaTarjeta(c); aviso("♥ Lo quiero", false, () => { c.estadoUso = antes; guardar(); refrescaTarjeta(c); }); }
+}
+$("#fbar").addEventListener("click", e => { const b = e.target.closest("[data-fm]"); if (!b) return; feedModo = b.dataset.fm; resetOrden(); pintaFeed(); $("main").scrollTop = 0; });
+$("#fbar").addEventListener("change", e => { if (e.target.id === "fLote") feedLote = e.target.value === "" ? null : Number(e.target.value); if (e.target.id === "fTema") feedTema = e.target.value; if (e.target.id === "fCol") feedCol = e.target.value; resetOrden(); pintaFeed(); $("main").scrollTop = 0; });
 $("#feed").addEventListener("click", e => {
-  if (e.target.closest("[data-fq]")) { feedModo = "ti"; feedLote = null; feedTema = ""; return pintaFeed(); }
+  if (e.target.closest("[data-fq]")) { feedModo = "ti"; feedLote = null; feedTema = ""; feedCol = ""; resetOrden(); return pintaFeed(); }
   if (e.target.closest("[data-fp]")) return cambiaTab("pegar");
   if (e.target.closest("[data-fmas]")) { feedN += 20; return pintaFeed(true); }
-  const b = e.target.closest("[data-fa]"); if (!b) return; const c = db.cards.find(x => x.id === b.closest(".fc").dataset.id); if (!c) return;
-  ponUso(c, uso(c) === b.dataset.fa ? "nuevo" : b.dataset.fa);
+  const b = e.target.closest("[data-fa]"); if (!b) return; const art = b.closest(".fc"), c = art && db.cards.find(x => x.id === art.dataset.id); if (!c) return;
+  accionFeed(c, b.dataset.fa, art);
 });
+{ // doble toque en la foto = Lo quiero (como dar like); un toque = leer todo
+  let pd = null, tap = { t: 0, id: "" }, tm = 0;
+  const F = $("#feed");
+  F.addEventListener("pointerdown", e => { pd = e.target.closest(".fph") ? { x: e.clientX, y: e.clientY, t: Date.now() } : null; });
+  F.addEventListener("pointerup", e => {
+    const ph = e.target.closest(".fph"); if (!ph || !pd || e.target.closest("a,button")) return;
+    if (Math.abs(e.clientX - pd.x) > 12 || Math.abs(e.clientY - pd.y) > 12 || Date.now() - pd.t > 400) return;
+    const id = ph.closest(".fc").dataset.id, now = Date.now(); clearTimeout(tm);
+    if (tap.id === id && now - tap.t < 330) { tap = { t: 0, id: "" }; meGusta(id, ph); }
+    else { tap = { t: now, id }; tm = setTimeout(() => { tap = { t: 0, id: "" }; abrirLector(id); }, 340); }
+  });
+}
+// ---- leer todo a pantalla completa ----
+let lectorId = null;
+function lectorHtml(c) {
+  const cm = comandos(c), r = (c.repos || [])[0], sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim(), vio = c.vio || {};
+  const lista = (t, a) => a && a.length ? `<h4>${t}</h4><ul>${a.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "";
+  const leido = [vio.voz ? "la voz del vídeo" : "", vio.imgs ? "el texto de las imágenes" : "", vio.frames ? "lo que se ve en el vídeo" : "", r ? "el README del repo" : ""].filter(Boolean);
+  const f = fotosDe(c, usoImgs());
+  return `<div class="gl lgl" data-gid="${esc(c.id)}">${f.length || c.minis || c.minisNube ? "" : portadaHtml(c)}${f.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>
+<div class="lcu"><div class="fsl">${sellosHtml(c)}<span class="sl">${esc(temaFicha(c))}</span><span class="sl">${esc(etqLote(loteDe(c)))}</span></div>
+<h2>${esc(tituloVis(c))}</h2>${sv ? `<p class="lsv">Sirve para: ${esc(sv)}</p>` : ""}
+<h4>Qué es</h4><p>${esc(c.detalle || c.resumen || "El vídeo no lo explica bien: ábrelo con el botón de Instagram.")}</p>
+${lista("Lo que cuenta el vídeo", c.puntos)}${lista("Skills o plugins que propone", c.skills)}
+<h4>Cómo empezar</h4>${cm.length ? cm.map(x => `<div class="lcmd"><code>${esc(x)}</code><button class="btn sm" data-lc="${esc(x)}">Copiar</button></div>`).join("") : `<p>${r ? `Abre el GitHub (${esc(r.full)}) y sigue su README.` : (c.links || []).length ? "Abre su web (abajo) y mira cómo se instala." : "El vídeo no dice cómo instalarlo: abre el post y mira los comentarios."}</p>`}
+${c.limites ? `<h4>Ojo con</h4><p>${esc(c.limites)}</p>` : ""}
+<h4>Links</h4><div class="enl gr">${linksFeed(c).replace(/<a class=" /g, '<a class="lk ')}</div>
+${c.notas ? `<h4>Tus notas</h4><div class="notas">${esc(c.notas)}</div>` : ""}
+<div class="acs"><button class="btn" data-l="editar">Editar / escribir notas</button><button class="btn" data-l="claude">Pasar a Claude Code</button></div>
+${leido.length ? `<p class="nota">Lo he sacado de: ${esc(leido.join(", "))}.</p>` : ""}</div>`;
+}
+function pintaLector() {
+  const c = db.cards.find(x => x.id === lectorId); if (!c) return cerrarLector();
+  const C = $("#lectC"), y = C.scrollTop; C.innerHTML = lectorHtml(c); $("#lector .lbar").innerHTML = botonesHtml(c, true); rellenaGalerias(C); C.scrollTop = y;
+  const i = (feedOrden || []).indexOf(c.id); $("#lSig").disabled = !(feedOrden && i >= 0 && i < feedOrden.length - 1); $("#lAnt").disabled = !(feedOrden && i > 0);
+}
+function abrirLector(id) {
+  const c = db.cards.find(x => x.id === id); if (!c) return; lectorId = id; c.leida = Date.now(); guardar();
+  $("#lectC").scrollTop = 0; pintaLector(); $("#lector").classList.add("on"); document.body.style.overflow = "hidden";
+}
+function cerrarLector() { lectorId = null; $("#lector").classList.remove("on"); document.body.style.overflow = ""; }
+function pasoLector(d) { const i = (feedOrden || []).indexOf(lectorId), j = i + d; if (i < 0 || j < 0 || j >= feedOrden.length) return; lectorId = feedOrden[j]; const c = db.cards.find(x => x.id === lectorId); if (c) { c.leida = Date.now(); guardar(); } $("#lectC").scrollTop = 0; pintaLector(); }
+$("#lector").addEventListener("click", async e => {
+  const c = db.cards.find(x => x.id === lectorId); if (!c) return;
+  const l = e.target.closest("[data-l]"), cp = e.target.closest("[data-lc]"), fa = e.target.closest("[data-fa]");
+  if (cp) return copiar(cp.dataset.lc);
+  if (fa) return accionFeed(c, fa.dataset.fa);
+  if (!l) return; const a = l.dataset.l;
+  if (a === "cerrar") return cerrarLector();
+  if (a === "sig") return pasoLector(1);
+  if (a === "ant") return pasoLector(-1);
+  if (a === "editar") return abrirEditor(c);
+  if (a === "claude") return abrirCC([c]);
+});
+document.addEventListener("keydown", e => { if (!lectorId || editando || $("#dcc").open || $("#dCol").open) return; if (e.key === "Escape") cerrarLector(); if (e.key === "ArrowRight") pasoLector(1); if (e.key === "ArrowLeft") pasoLector(-1); });
+// ---- colecciones (como «Guardados» de Instagram) ----
+function elegirColeccion(c) {
+  db.cols = db.cols || []; const d = $("#dCol");
+  const pinta = () => { $("#colL").innerHTML = db.cols.map(x => `<button class="hb${(c.cols || []).includes(x.id) ? " on" : ""}" data-ci="${esc(x.id)}">🔖 ${esc(x.n)} <b>${db.cards.filter(k => (k.cols || []).includes(x.id)).length}</b></button>`).join("") || '<p class="hp">Aún no tienes colecciones. Crea la primera aquí abajo.</p>'; };
+  pinta(); $("#colN").value = "";
+  $("#colL").onclick = e => { const b = e.target.closest("[data-ci]"); if (!b) return; const id = b.dataset.ci; c.cols = c.cols || []; c.cols = c.cols.includes(id) ? c.cols.filter(x => x !== id) : [...c.cols, id]; guardar(); pinta(); refrescaTarjeta(c); };
+  $("#colAdd").onclick = () => { const n = $("#colN").value.trim(); if (!n) return $("#colN").focus(); let x = db.cols.find(k => sinAcentos(k.n) === sinAcentos(n)); if (!x) { x = { id: "k" + Date.now().toString(36), n: n.slice(0, 40), t: Date.now() }; db.cols.push(x); } c.cols = [...new Set([...(c.cols || []), x.id])]; guardar(); $("#colN").value = ""; pinta(); refrescaTarjeta(c); };
+  $("#colN").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#colAdd").click(); } };
+  $("#colOk").onclick = () => d.close(); d.showModal();
+}
 $("#kInt").addEventListener("change", () => { db.cfg.intereses = $("#kInt").value.trim(); guardar(); });
 const RE_REINT = /conexi|tiempo|m[aá]s tarde|a medias|tard[oó]|no respondi|no termin|no pude procesar|no pude abrir/i;
+// ============ sincronizar móvil y PC por internet: un repositorio PRIVADO de GitHub tuyo («ig-extractor-datos») ============
+// Fichas repartidas en 8 archivos (cada aparato solo baja los que cambiaron), meta.json (lotes, colecciones, borradas) y minis/<id>.json (fotos).
+const SYNC_REPO = "ig-extractor-datos", NTROZOS = 8, LOCALES = ["minis", "minisProb", "leida", "cola"];
+const syncOn = () => !!(db.cfg.sync && db.cfg.sync.token && db.cfg.sync.owner);
+const hashTxt = t => { let h = 2166136261; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + ":" + t.length; };
+const trozoDe = id => parseInt(hashTxt(String(id)).split(":")[0], 36) % NTROZOS;
+const paraNube = c => { const o = {}; for (const k of Object.keys(c)) if (!LOCALES.includes(k)) o[k] = c[k]; return o; };
+const firmaDe = c => { const o = paraNube(c); delete o.mod; return hashTxt(JSON.stringify(o)); };
+const B64 = {
+  de: s => { const bin = atob(String(s).replace(/\s+/g, "")), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new TextDecoder().decode(u); },
+  a: t => { const u = new TextEncoder().encode(t); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+};
+const ghApi = (url, opt = {}) => http(url.startsWith("http") ? url : "https://api.github.com" + url, { method: opt.method || "GET", body: opt.body || "", headers: { Accept: "application/vnd.github+json", Authorization: "Bearer " + db.cfg.sync.token, "X-GitHub-Api-Version": "2022-11-28", ...(opt.body ? { "Content-Type": "application/json" } : {}), ...(opt.headers || {}) } });
+const rutaS = r => `/repos/${db.cfg.sync.owner}/${SYNC_REPO}/contents/${r}`;
+async function leerCrudo(ruta) { const r = await ghApi(rutaS(ruta) + "?t=" + Date.now(), { headers: { Accept: "application/vnd.github.raw+json" } }); return r.status === 200 ? r.body : r.status === 404 ? "" : null; }
+async function escribirNube(ruta, texto, sha) {
+  const r = await ghApi(rutaS(ruta), { method: "PUT", body: JSON.stringify({ message: "IG Extractor (" + DISPO + ")", content: B64.a(texto), ...(sha ? { sha } : {}) }) });
+  if (r.status === 200 || r.status === 201) { try { return JSON.parse(r.body).content.sha; } catch (e) { return "?"; } }
+  return r.status === 409 || r.status === 422 ? "conflicto" : null;
+}
+let syncEst = { shas: {}, firmas: {}, th: {} }; try { syncEst = { ...syncEst, ...JSON.parse(localStorage.getItem("igv-sync") || "{}") }; } catch (e) { }
+const guardaSyncEst = () => { try { localStorage.setItem("igv-sync", JSON.stringify(syncEst)); } catch (e) { } };
+let sincronizando = false, syncError = "", syncUlt = 0, _pide = 0;
+function marcaCambios() { // lo que cambió en este aparato desde la última vez lleva la hora de ahora; lo que desapareció, a «borradas»
+  const ahora = Date.now(), vistos = new Set(); db.borradas = db.borradas || {};
+  for (const c of db.cards) { if (c.estado === "pendiente") continue; vistos.add(c.id); const f = firmaDe(c);
+    if (syncEst.firmas[c.id] !== f) { c.mod = Math.max(ahora, (c.mod || 0) + 1); if (db.borradas[c.id]) delete db.borradas[c.id]; } }
+  for (const id of Object.keys(syncEst.firmas)) if (!vistos.has(id) && !db.cards.some(c => c.id === id)) db.borradas[id] = ahora;
+  for (const [id, t] of Object.entries(db.borradas)) if (ahora - t > 90 * 864e5) delete db.borradas[id]; // las borradas viejas se olvidan a los 90 días
+}
+function fusionaNube(cards, meta) { // gana la versión más reciente de cada ficha; nada se pierde salvo lo borrado a propósito
+  let n = 0; db.borradas = db.borradas || {};
+  if (meta) {
+    for (const [id, t] of Object.entries(meta.borradas || {})) if (!db.borradas[id] || t > db.borradas[id]) db.borradas[id] = t;
+    db.lotes = db.lotes || {}; for (const [k, L] of Object.entries(meta.lotes || {})) if (!db.lotes[k]) { db.lotes[k] = L; n++; }
+    db.cols = db.cols || []; for (const x of meta.cols || []) { const y = db.cols.find(k => k.id === x.id); if (!y) { db.cols.push(x); n++; } else if ((x.t || 0) > (y.t || 0)) Object.assign(y, x); }
+  }
+  for (const r of cards || []) {
+    if (!r || !r.id || (db.borradas[r.id] || 0) >= (r.mod || 0)) continue;
+    const i = db.cards.findIndex(c => c.id === r.id), l = db.cards[i];
+    if (!l) { db.cards.push({ ...r }); n++; continue; }
+    if (l === actual || l.estado === "pendiente") continue;
+    if ((r.mod || 0) > (l.mod || 0)) { const loc = {}; for (const k of LOCALES) if (l[k] !== undefined) loc[k] = l[k]; db.cards[i] = { ...r, ...loc }; n++; }
+  }
+  const antes = db.cards.length; db.cards = db.cards.filter(c => !(db.borradas[c.id] && db.borradas[c.id] > (c.mod || 0))); n += antes - db.cards.length;
+  return n;
+}
+async function sincronizar(manual) {
+  if (!syncOn() || sincronizando) return; sincronizando = true; syncError = ""; pintaSync();
+  try {
+    for (let intento = 0; intento < 2; intento++) {
+      marcaCambios();
+      const lis = await ghApi(rutaS("fichas") + "?t=" + Date.now()); if (lis.status !== 200 && lis.status !== 404) throw new Error(lis.status === 401 ? "la clave de GitHub no vale" : "GitHub no responde (" + lis.status + ")");
+      const shas = {}; if (lis.status === 200) for (const f of JSON.parse(lis.body)) shas[f.name] = f.sha;
+      const remoto = {}; let cambios = 0;
+      for (let k = 0; k < NTROZOS; k++) { const nom = k + ".json"; if (shas[nom] && shas[nom] !== syncEst.shas[nom]) { const t = await leerCrudo("fichas/" + nom); if (t == null) throw new Error("no pude leer la nube"); try { remoto[nom] = JSON.parse(t).cards || []; } catch (e) { remoto[nom] = []; } } }
+      const mt = await leerCrudo("meta.json"); let meta = null; if (mt) { try { meta = JSON.parse(mt); } catch (e) { } }
+      cambios += fusionaNube(Object.values(remoto).flat(), meta);
+      // subir lo que tenga este aparato distinto de la nube
+      let conflicto = false;
+      for (let k = 0; k < NTROZOS; k++) {
+        const nom = k + ".json", mios = db.cards.filter(c => c.estado !== "pendiente" && trozoDe(c.id) === k).sort((a, b) => a.id < b.id ? -1 : 1).map(paraNube);
+        const txt = JSON.stringify({ cards: mios }), h = hashTxt(txt);
+        if (shas[nom] && syncEst.shas[nom] === shas[nom] && syncEst.th[nom] === h) continue; // igual que la nube
+        if (!shas[nom] && !mios.length) continue;
+        if (remoto[nom] && hashTxt(JSON.stringify({ cards: remoto[nom].slice().sort((a, b) => a.id < b.id ? -1 : 1) })) === h) { syncEst.shas[nom] = shas[nom]; syncEst.th[nom] = h; continue; }
+        const sha = await escribirNube("fichas/" + nom, txt, shas[nom]);
+        if (sha === "conflicto") { conflicto = true; break; } if (!sha) throw new Error("no pude subir a la nube");
+        syncEst.shas[nom] = sha; syncEst.th[nom] = h;
+      }
+      if (!conflicto) {
+        const ord = o => Object.fromEntries(Object.entries(o || {}).sort((a, b) => a[0] < b[0] ? -1 : 1)), mtxt = JSON.stringify({ v: 1, lotes: ord(db.lotes), cols: (db.cols || []).slice().sort((a, b) => a.id < b.id ? -1 : 1), borradas: ord(db.borradas) });
+        if (mtxt !== mt) { const msh = await ghApi(rutaS("meta.json") + "?t=" + Date.now()); let sh = null; try { sh = msh.status === 200 ? JSON.parse(msh.body).sha : null; } catch (e) { } const r = await escribirNube("meta.json", mtxt, sh); if (r === "conflicto") conflicto = true; }
+      }
+      for (const c of db.cards) if (c.estado !== "pendiente") syncEst.firmas[c.id] = firmaDe(c);
+      for (const id of Object.keys(syncEst.firmas)) if (!db.cards.some(c => c.id === id)) delete syncEst.firmas[id];
+      guardaSyncEst(); guardarSinSync();
+      if (cambios) { _rangoL = null; pintar(); pintaLotesHist(); if ($("#p-feed").classList.contains("on")) pintaFeed(true); if (!corriendo) unirRepetidas(); }
+      if (!conflicto) break;
+    }
+    syncUlt = Date.now(); subeMinisPendientes();
+    if (manual) aviso("Sincronizado: " + db.cards.length + " fichas en este aparato");
+  } catch (e) { syncError = String(e.message || e); if (manual) aviso("No pude sincronizar: " + syncError, true); }
+  sincronizando = false; pintaSync();
+}
+const guardarSinSync = () => { _sinPedir = true; guardar(); _sinPedir = false; };
+let _sinPedir = false;
+function trasGuardar() { if (!syncOn() || _sinPedir) return; clearTimeout(_pide); _pide = setTimeout(() => sincronizar(), 6000); }
+setInterval(() => { if (syncOn() && !document.hidden) sincronizar(); }, 120000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && syncOn() && Date.now() - syncUlt > 20000) sincronizar(); });
+async function subeMinis(id, arr) {
+  const c = db.cards.find(x => x.id === id); if (!syncOn() || !c || c.minisNube) return;
+  const r = await escribirNube("minis/" + id + ".json", JSON.stringify(arr)); if (r && r !== null) { c.minisNube = 1; guardar(); }
+}
+async function subeMinisPendientes() { const cs = db.cards.filter(c => c.minis && !c.minisNube).slice(0, 10); for (const c of cs) { const v = await MINI.get(c.id); if (Array.isArray(v) && v.length) await subeMinis(c.id, v); } }
+async function bajaMinisNube(id) { if (!syncOn()) return null; const c = db.cards.find(x => x.id === id); if (c && !c.minisNube && !(db.cards.some(k => (k.minisDe || []).includes(id)))) return null; const t = await leerCrudo("minis/" + id + ".json"); try { return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+function pintaSync() {
+  const e = $("#sEstado"); if (!e) return; const on = syncOn();
+  $("#sOn").style.display = on ? "" : "none"; $("#sOff").style.display = on ? "none" : "";
+  e.textContent = !on ? "" : sincronizando ? "Sincronizando…" : syncError ? "Error: " + syncError : syncUlt ? "Sincronizado " + fechaCorta(syncUlt, true) + " · cuenta " + db.cfg.sync.owner : "Activa · cuenta " + db.cfg.sync.owner;
+}
+async function activarSync() {
+  const tok = $("#sTok").value.trim(); if (!tok) return aviso("Pega primero la clave de GitHub");
+  db.cfg.sync = { token: tok, owner: "" }; $("#sEstado").textContent = "Comprobando la clave…";
+  const u = await ghApi("/user"); if (u.status !== 200) { db.cfg.sync = null; guardar(); pintaSync(); return aviso(u.status === 401 ? "Esa clave de GitHub no vale. Cópiala otra vez." : "No pude hablar con GitHub (" + u.status + ")", true); }
+  const login = JSON.parse(u.body).login; db.cfg.sync.owner = login;
+  let r = await ghApi(`/repos/${login}/${SYNC_REPO}`);
+  if (r.status === 404) { r = await ghApi("/user/repos", { method: "POST", body: JSON.stringify({ name: SYNC_REPO, private: true, auto_init: true, description: "Datos de IG Extractor (se sincronizan solos entre móvil y PC)" }) }); if (r.status !== 201) { db.cfg.sync = null; guardar(); pintaSync(); return aviso("La clave necesita el permiso «repo» para crear tu carpeta privada. Crea otra marcando «repo».", true); } await dormir(1500); }
+  else if (r.status === 200 && !JSON.parse(r.body).private) { db.cfg.sync = null; guardar(); pintaSync(); return aviso("Ya tienes un repositorio «" + SYNC_REPO + "» y es PÚBLICO. Ponlo privado en GitHub y vuelve a probar.", true); }
+  syncEst = { shas: {}, firmas: {}, th: {} }; guardaSyncEst(); guardar(); $("#sTok").value = ""; pintaSync(); await sincronizar(true);
+}
 // arranque: lotes, nombres corregidos, duplicados unidos (con Deshacer) y fotos guardadas, solos
-{ let cambio = migraLotes(); if (db.corrV !== 1) { db.cards.forEach(corrigeCard); db.corrV = 1; cambio = 1; } if (cambio) guardar(); }
+{ let cambio = 0; { const vis = new Set(); for (const c of db.cards) { if (!c.id || vis.has(c.id)) { c.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7); cambio = 1; } vis.add(c.id); } } // ids repetidos (las fichas de ejemplo venían todas con «t»)
+  cambio = migraLotes() || cambio; if (db.corrV !== 1) { db.cards.forEach(corrigeCard); db.corrV = 1; cambio = 1; } if (cambio) guardar(); }
 $("#kInt").value = db.cfg.intereses || PERFIL_DEF;
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
 migrarCats(); pintar(); detectar(); { try { const u = deshacerVivo(); if (u) aviso("Se unieron " + u.gr.reduce((n, g) => n + g.orig.length - 1, 0) + " repetidas hace poco"); } catch (e) { } } if (db.usarSemilla) cargarSemilla(); // las fichas de ejemplo ya no se cargan solas
@@ -1986,6 +2289,9 @@ reconciliar = true;
 if (!corriendo && db.cards.some(c => c.estado === "ok")) cambiaTab("feed"); else pintaLotesHist();
 if (db.unirV !== "2026-10-21") { db.unirV = "2026-10-21"; guardar(); setTimeout(() => { if (!corriendo) unirRepetidas(); }, 1200); }
 setTimeout(() => { if (!corriendo) minisAtrasadas(); }, 4000);
+pintaSync(); if (syncOn()) setTimeout(() => sincronizar(), 2500);
+$("#sAct").onclick = activarSync; $("#sYa").onclick = () => sincronizar(true); $("#sCopia").onclick = () => { copiar(db.cfg.sync.token); aviso("Clave copiada: pégala en Ajustes del otro aparato"); };
+$("#sQuitar").onclick = async () => { if (await confirmar("Desactivar sincronización", "<p>Tus fichas se quedan en este aparato y en tu GitHub. Solo deja de sincronizar.</p>", "Desactivar")) { db.cfg.sync = null; guardar(); pintaSync(); } };
 </script>
 </body>
 </html>

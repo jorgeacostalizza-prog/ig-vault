@@ -152,6 +152,27 @@ def frames(d):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+MAX_IMG = 6_000_000
+
+
+def img(d):
+    """Baja una imagen (p. ej. del CDN de Instagram, que caduca) y la devuelve como data URL para guardarla como miniatura."""
+    import base64
+    url = d.get("url") or ""
+    if not url.lower().startswith(("http://", "https://")):
+        return {"status": 0, "error": "url no valida"}
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "image/avif,image/webp,image/*,*/*;q=0.8"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            tipo = (r.headers.get("Content-Type") or "image/jpeg").split(";")[0].strip()
+            b = r.read(MAX_IMG + 1)
+        if not tipo.startswith("image/") or len(b) < 500 or len(b) > MAX_IMG:
+            return {"status": 0, "error": "no es una imagen valida"}
+        return {"status": 200, "data": f"data:{tipo};base64," + base64.b64encode(b).decode()}
+    except Exception as e:
+        return {"status": 0, "error": str(e)[:200]}
+
+
 OBSIDIAN = r"C:\Users\PC\DeskBox\Apps\CODE\Claudes Things\IG Extractor Obsidian"
 
 
@@ -393,7 +414,7 @@ class H(BaseHTTPRequestHandler):
             d = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
         except Exception:
             return self._json({"status": 0, "body": "", "error": "json invalido"}, 400)
-        f = {"/api/http": http, "/api/voz": voz, "/api/abrir": abrir, "/api/frames": frames, "/api/respaldo": respaldo_guardar}.get(self.path.split("?")[0])
+        f = {"/api/http": http, "/api/voz": voz, "/api/abrir": abrir, "/api/frames": frames, "/api/img": img, "/api/respaldo": respaldo_guardar}.get(self.path.split("?")[0])
         if not f:
             return self._json({"error": "no existe"}, 404)
         self._json(f(d))
