@@ -1,6 +1,6 @@
 """IG Extractor: servidor local (solo libreria estandar). Sirve la web y hace de puente sin CORS."""
-import ast, hashlib, json, mimetypes, os, shutil, subprocess, sys, threading, time, uuid
-import urllib.error, urllib.request
+import ast, hashlib, json, mimetypes, os, re, shutil, subprocess, sys, threading, time, uuid
+import urllib.error, urllib.parse, urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
@@ -41,8 +41,33 @@ def claves():
     return r
 
 
+def _publica(host):
+    """False si el nombre apunta a esta maquina o a la red local (evita usar el servidor como proxy hacia dentro)."""
+    import ipaddress, socket
+    try:
+        for i in socket.getaddrinfo(host, None):
+            ip = ipaddress.ip_address(i[4][0])
+            if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast or ip.is_unspecified:
+                return False
+        return True
+    except Exception:
+        return False
+
+
+class _SoloPublicas(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not _publica(urllib.parse.urlparse(newurl).hostname or ""):
+            raise urllib.error.URLError("redireccion a red local bloqueada")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_OPENER = urllib.request.build_opener(_SoloPublicas)
+
+
 def http(d):
     url = d.get("url") or ""
+    if url.lower().startswith(("http://", "https://")) and not _publica(urllib.parse.urlparse(url).hostname or ""):
+        return {"status": 0, "body": "", "error": "direccion local no permitida"}
     if not url.lower().startswith(("http://", "https://")):
         return {"status": 0, "body": "", "error": "solo http/https"}
     h = {"User-Agent": UA, "Accept-Language": "es,en;q=0.8"}
@@ -52,7 +77,7 @@ def http(d):
                                  method=(d.get("method") or "GET").upper())
     try:
         try:
-            r = urllib.request.urlopen(req, timeout=30)
+            r = _OPENER.open(req, timeout=30)
         except urllib.error.HTTPError as e:
             r = e  # 4xx/5xx: tambien devolvemos el cuerpo
         with r:
@@ -161,9 +186,11 @@ def img(d):
     url = d.get("url") or ""
     if not url.lower().startswith(("http://", "https://")):
         return {"status": 0, "error": "url no valida"}
+    if not _publica(urllib.parse.urlparse(url).hostname or ""):
+        return {"status": 0, "error": "direccion local no permitida"}
     try:
         req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "image/avif,image/webp,image/*,*/*;q=0.8"})
-        with urllib.request.urlopen(req, timeout=20) as r:
+        with _OPENER.open(req, timeout=20) as r:
             tipo = (r.headers.get("Content-Type") or "image/jpeg").split(";")[0].strip()
             b = r.read(MAX_IMG + 1)
         if not tipo.startswith("image/") or len(b) < 500 or len(b) > MAX_IMG:
@@ -179,20 +206,45 @@ OBSIDIAN = r"C:\Users\PC\DeskBox\Apps\CODE\Claudes Things\IG Extractor Obsidian"
 
 RESP = os.path.join(os.path.expanduser("~"), ".ig-extractor")
 
+_LOCK_RESP = threading.Lock()
+
+
+def _copia_respaldo(lleno):
+    """Guarda la copia actual con fecha antes de cambiarla y conserva solo las 5 ultimas."""
+    if not os.path.exists(lleno):
+        return
+    shutil.copy2(lleno, os.path.join(RESP, "respaldo." + time.strftime("%Y%m%d-%H%M%S") + ".json"))
+    viejas = sorted(f for f in os.listdir(RESP) if re.fullmatch(r"respaldo\.\d{8}-\d{6}\.json", f))
+    for f in viejas[:-5]:
+        try:
+            os.remove(os.path.join(RESP, f))
+        except OSError:
+            pass
+
+
 def respaldo_guardar(d):
     # copia de las fichas fuera del navegador; nunca pisa una copia llena con una vacía (salvo "vaciar")
-    os.makedirs(RESP, exist_ok=True)
-    lleno = os.path.join(RESP, "respaldo.json")
-    if d.get("vaciar"):
-        if os.path.exists(lleno):
-            os.replace(lleno, os.path.join(RESP, "respaldo-borrado.json"))
-        return {"ok": True}
-    if not d.get("cards"):
-        return {"ok": True, "ignorado": True}
-    with open(lleno + ".tmp", "w", encoding="utf-8") as f:
-        json.dump({"cards": d["cards"], "sel": d.get("sel", [])}, f, ensure_ascii=False)
-    os.replace(lleno + ".tmp", lleno)
-    return {"ok": True}
+    # ni con una lista que de golpe tiene menos de la mitad (se aparta como respaldo-sospechoso.json)
+    with _LOCK_RESP:
+        os.makedirs(RESP, exist_ok=True)
+        lleno = os.path.join(RESP, "respaldo.json")
+        if d.get("vaciar"):
+            if os.path.exists(lleno):
+                os.replace(lleno, os.path.join(RESP, "respaldo-borrado." + time.strftime("%Y%m%d-%H%M%S") + ".json"))
+            return {"ok": True}
+        if not d.get("cards"):
+            return {"ok": True, "ignorado": True}
+        nuevo = {"cards": d["cards"], "sel": d.get("sel", [])}
+        antes = len(respaldo_leer().get("cards") or [])
+        destino = lleno
+        if antes >= 6 and len(nuevo["cards"]) < antes * 0.5:
+            destino = os.path.join(RESP, "respaldo-sospechoso.json")
+        else:
+            _copia_respaldo(lleno)
+        with open(destino + ".tmp", "w", encoding="utf-8") as f:
+            json.dump(nuevo, f, ensure_ascii=False)
+        os.replace(destino + ".tmp", destino)
+        return {"ok": True, **({"sospechoso": True} if destino != lleno else {})}
 
 def respaldo_leer():
     try:
@@ -380,7 +432,17 @@ class H(BaseHTTPRequestHandler):
     def _json(self, obj, code=200):
         self._enviar(json.dumps(obj, ensure_ascii=False).encode("utf-8"), "application/json; charset=utf-8", code)
 
+    def _origen_ok(self):
+        """Solo la propia app: Host de esta maquina (contra DNS rebinding) y, si trae Origin, que sea el mismo servidor (contra otras webs)."""
+        okh = {f"127.0.0.1:{PORT}", f"localhost:{PORT}"}
+        if (self.headers.get("Host") or "").lower() not in okh:
+            return False
+        o = self.headers.get("Origin")
+        return not o or o.lower() in {"http://" + h for h in okh}
+
     def do_GET(self):
+        if not self._origen_ok():
+            return self._json({"error": "origen no permitido"}, 403)
         p = self.path.split("?")[0]
         if p == "/api/ping":
             ULTIMO_PING[0] = time.time()
@@ -409,8 +471,12 @@ class H(BaseHTTPRequestHandler):
             self._enviar(fh.read(), tipo)
 
     def do_POST(self):
+        if not self._origen_ok():
+            return self._json({"error": "origen no permitido"}, 403)
         try:
             n = int(self.headers.get("Content-Length") or 0)
+            if n > 40_000_000:
+                return self._json({"error": "demasiado grande"}, 413)
             d = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
         except Exception:
             return self._json({"status": 0, "body": "", "error": "json invalido"}, 400)
@@ -429,8 +495,13 @@ def ping_ajeno():
 
 
 def vigilar():
+    t0 = time.time()
     while True:
         time.sleep(min(5, max(0.2, INACTIVIDAD / 4)))
+        ahora = time.time()
+        if ahora - t0 > 30 + min(5, max(0.2, INACTIVIDAD / 4)):  # el PC estuvo suspendido: la pagina aun no ha podido mandar su ping
+            ULTIMA_ACT[0] = ahora
+        t0 = ahora
         if ACTIVAS[0] > 0:
             continue
         ult = max(ULTIMO_PING[0], ULTIMA_ACT[0])

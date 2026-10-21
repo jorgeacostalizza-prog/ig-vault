@@ -21,8 +21,8 @@ with sync_playwright() as p:
         pg.evaluate("cambiaTab('fichas')")
         ok("abre en Nuevo con contador", pg.evaluate("document.querySelector('#filtros button.on').textContent")=="Nuevo (5)", pg.evaluate("document.querySelector('#filtros').innerText"))
         t = pg.evaluate("document.querySelector('#filtros').innerText+document.querySelector('#hojaF').textContent")
-        ok("filtros visibles", all(x in t for x in ["Lo quiero","Hecho","Para revisar","Descartadas"]))
-        ok("filtros no cortados", pg.evaluate("[...document.querySelectorAll('#filtros button')].every(b=>b.getBoundingClientRect().right<=innerWidth+1)"))
+        ok("filtros visibles", all(x in t for x in ["Lo quiero","Hecho","Para revisar","Papelera"]))
+        ok("filtros no cortados", pg.evaluate("[...document.querySelectorAll('#filtros button[data-mas]')].every(b=>b.getBoundingClientRect().right<=innerWidth+1)"))
         # cambiar desde la fila
         desliza(pg, '.rw[data-id="v0"] .rb', 150); ok("fila: Nuevo->Lo quiero", pg.evaluate("db.cards[0].estadoUso")=="quiero")
         ok("sale de la lista Nuevo", pg.evaluate("!document.querySelector('.rw[data-id=\"v0\"]')"))

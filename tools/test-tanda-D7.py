@@ -37,10 +37,10 @@ with sync_playwright() as p:
             ok("1 solo icono de fuente por fila", pg.evaluate("[...document.querySelectorAll('#lista .rw')].every(r=>r.querySelectorAll('a.li').length<=1)"))
             # (3) filtros en una fila con scroll
             f = pg.evaluate("(()=>{const b=[...document.querySelectorAll('#filtros button')].map(x=>x.getBoundingClientRect().top);const e=document.querySelector('#filtros');return {una:Math.max(...b)-Math.min(...b)<2,n:b.length,sc:e.scrollWidth>e.clientWidth,txt:[...document.querySelectorAll('#filtros button')].map(x=>x.textContent)}})()")
-            ok("filtros en 1 fila: " + str(f["txt"]), f["una"] and f["n"] == 5 and f["txt"][-1].startswith("Más"), f)
+            ok("filtros en 1 fila: " + str(f["txt"]), f["una"] and f["n"] == 6 and f["txt"][-1].startswith("Más"), f)
             if nom == "movil": ok("la fila de filtros se desliza (scroll horizontal) y «Más» queda visible", f["sc"] and pg.evaluate("(()=>{const b=document.querySelector('#filtros [data-mas]').getBoundingClientRect();return b.right<=innerWidth&&b.left>=0})()"), f)
             pg.click("#filtros [data-mas]"); pg.wait_for_timeout(200)
-            ok("hoja «Más» con Para revisar, Con GitHub, Descartadas, categoría y Plegar", pg.evaluate("(()=>{const t=document.querySelector('#hojaF').innerText;return document.querySelector('#hojaF').open&&['Para revisar','Con GitHub','Descartadas','Ir a categoría','Plegar todo'].every(x=>t.includes(x))})()"))
+            ok("hoja «Más» con Para revisar, Con GitHub, categoría y Plegar", pg.evaluate("(()=>{const t=document.querySelector('#hojaF').innerText;return document.querySelector('#hojaF').open&&['Para revisar','Con GitHub','Ir a categoría','Plegar todo'].every(x=>t.includes(x))})()"))
             if nom == "movil": pg.screenshot(path=CD + "hoja-%s.png" % tag)
             pg.click("#hojaF [data-f=repo]"); pg.wait_for_timeout(200)
             ok("filtro «Con GitHub» desde la hoja", pg.evaluate("filtro")=="repo" and pg.locator("#lista .rw").count()==4 and pg.locator("#filtros button.on").inner_text().startswith("Con GitHub"))
