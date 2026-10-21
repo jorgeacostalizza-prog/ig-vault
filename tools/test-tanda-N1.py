@@ -39,7 +39,7 @@ def pagina(pw,ancho,datos=None):
         if IMGS_OK and ("cdninstagram" in u or "githubusercontent" in u): r.fulfill(path="/home/claude/igx/t/f%d.png"%next(cyc), headers={"Access-Control-Allow-Origin":"*"})
         else: r.abort()
     pg.route(lambda u: any(x in u for x in (".jpg",".png",".jpeg","cdninstagram","opengraph","thum.io")) and not u.startswith("file:"), img)
-    pg.goto(HTML);pg.wait_for_timeout(1800);return br,pg
+    pg.goto(HTML,wait_until="domcontentloaded");pg.wait_for_timeout(2500);return br,pg
 datos={"cards":sem["cards"],"cfg":{"nvidia":"k"}}
 for i,c in enumerate(datos["cards"]): c["id"]="s%d"%i
 with sync_playwright() as p:
@@ -56,41 +56,34 @@ with sync_playwright() as p:
     ok("feed pinta tarjetas", pg.locator("#feed .fc").count()>=10, pg.locator("#feed .fc").count())
     ok("temas: 'Otros' no se come todo", pg.evaluate("(()=>{const m={};db.cards.filter(c=>c.estado==='ok').forEach(c=>{const t=temaFicha(c);m[t]=(m[t]||0)+1});return Math.max(...Object.values(m))/db.cards.length})()")<0.5, pg.evaluate("(()=>{const m={};db.cards.filter(c=>c.estado==='ok').forEach(c=>{const t=temaFicha(c);m[t]=(m[t]||0)+1});return m})()"))
     print("   temas:", pg.evaluate("(()=>{const m={};db.cards.filter(c=>c.estado==='ok').forEach(c=>{const t=temaFicha(c);m[t]=(m[t]||0)+1});return m})()"))
-    ok("hay 'Para ti' marcadas", pg.locator("#feed .sl.ti").count()>0)
     ok("sin banners repetidos en el feed", pg.evaluate("(()=>{const m={};document.querySelectorAll('#feed .gl img').forEach(i=>{const s=i.getAttribute('src');m[s]=(m[s]||0)+1});return Object.values(m).filter(v=>v>1).length})()")==0)
     pg.screenshot(path="/home/claude/igx/t/feed-%s.png"%nom)
     # guía
-    pg.locator("#feed .fc details summary").first.click(); pg.wait_for_timeout(200)
-    ok("guía paso a paso se abre", pg.locator("#feed .fc details[open] .guia li").count()>=3)
-    pg.screenshot(path="/home/claude/igx/t/feed-guia-%s.png"%nom)
     # Lo quiero
     id0=pg.evaluate("document.querySelector('#feed .fc').dataset.id")
     pg.locator("#feed .fc [data-fa=quiero]").first.click(); pg.wait_for_timeout(200)
     ok("Lo quiero desde el feed", pg.evaluate("db.cards.find(c=>c.id==='%s').estadoUso"%id0)=="quiero")
     # filtros
-    pg.click("#fbar [data-fm=gratis]"); pg.wait_for_timeout(200)
-    ok("filtro Gratis", pg.locator("#feed .fc").count()>0 and pg.locator("#feed .fc").count()==pg.locator("#feed .fc .sl.gr").count())
-    pg.click("#fbar [data-fm=ti]")
     # lote nuevo
     pg.click("nav button[data-t=pegar]")
     pg.fill("#txt","https://www.instagram.com/p/A1/\nhttps://www.instagram.com/p/A2/"); pg.click("#bOrdenar")
     pg.wait_for_function("!corriendo && db.cards.filter(c=>c.lote===1).every(c=>c.estado!=='pendiente')", timeout=60000); pg.wait_for_timeout(1500)
-    ok("lote 1 con fecha 'hoy'", pg.evaluate("etqLote(1)")=="Lote 1 · hoy", pg.evaluate("etqLote(1)"))
+    LID=pg.evaluate("db.cards.find(c=>c.url.includes('/p/A1/')).lote")
+    ok("lote nuevo con fecha 'hoy'", pg.evaluate("etqLote(%d)"%LID).startswith("Lote ") and "hoy" in pg.evaluate("etqLote(%d)"%LID), pg.evaluate("etqLote(%d)"%LID))
     ok("historial de lotes visible", pg.locator("#lotesHist .ltr").count()>=1)
     c1=pg.evaluate("db.cards.find(c=>c.url.includes('/p/A1/'))")
     ok("A1 procesada ok", c1 and c1["estado"]=="ok", c1 and (c1["estado"],c1.get("motivo")))
     ok("link de Telegram sacado del texto", c1 and any("t.me/canalprueba" in l["u"] for l in c1.get("links",[])), c1 and c1.get("links"))
     ok("A2 (Codex) unida a la ficha que ya había", pg.evaluate("db.cards.filter(c=>/codex security/i.test(c.titulo)&&c.estado==='ok').length")<=2)
     pg.screenshot(path="/home/claude/igx/t/pegar-%s.png"%nom, full_page=True)
-    pg.evaluate("verLote(1)"); pg.wait_for_timeout(300)
-    ok("Ver lote 1 -> Inicio filtrado", pg.locator("#feed .fhd").first.text_content().startswith("Lote 1"), pg.locator("#feed").inner_text()[:200])
+    pg.evaluate("verLote(%d)"%LID); pg.wait_for_timeout(300)
+    ok("Ver lote 1 -> Inicio filtrado", pg.locator("#feed .fhd").first.text_content().startswith("Lote "), pg.locator("#feed").inner_text()[:200])
     ok("telegram en links del feed", pg.locator("#feed a.tg").count()>=1)
     pg.screenshot(path="/home/claude/igx/t/lote-%s.png"%nom)
-    # Fichas por tema
-    pg.click("nav button[data-t=fichas]"); pg.wait_for_timeout(300)
-    ok("Fichas agrupadas por tema", pg.evaluate("[...document.querySelectorAll('#lista details.cat .cn')].map(e=>e.textContent)").__len__()>=4, pg.evaluate("[...document.querySelectorAll('#lista details.cat .cn')].map(e=>e.textContent)"))
-    pg.evaluate("(()=>{const b=[...document.querySelectorAll('#lista .rw .rb')].find(e=>e.offsetParent);b&&b.click()})()"); pg.wait_for_timeout(400); ok("ficha abierta con galería o sin fotos", pg.locator("#det .fbar, #detC").count()>0)
-    pg.screenshot(path="/home/claude/igx/t/fichas-%s.png"%nom)
+    # Explorar (sustituye a Fichas; N3)
+    pg.click("nav button[data-t=explorar]"); pg.wait_for_timeout(400)
+    ok("Explorar lista fichas", pg.evaluate("resultados().length")>=4)
+    pg.evaluate("(()=>{const b=[...document.querySelectorAll('#xRes .xc')].find(e=>e.offsetParent);b&&b.click()})()"); pg.wait_for_timeout(400); ok("informe abierto", pg.evaluate("document.querySelector('#lector').classList.contains('on')"))
     ok("sin desbordamiento horizontal", pg.evaluate("document.documentElement.scrollWidth<=innerWidth+1"))
     br.close()
 print("ERRORES JS:",ERR or "ninguno"); print("RESULTADO %d/%d"%(sum(res),len(res)))

@@ -327,6 +327,110 @@ a.li.roto{opacity:.45}
 #dCol .hb.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
 #dCol input{flex:1;min-width:0}
 @media(prefers-reduced-motion:reduce){.corz.on{animation:none;opacity:0}#lector.on{animation:none}}
+/* ---- N3 (21/10/2026): Explorar (filtros de tienda), Mi lista, historias de lotes, informe como una web ---- */
+.hist{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:6px 2px 10px}
+.hist::-webkit-scrollbar{display:none}
+.hi{flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;color:var(--tx);width:70px;padding:0}
+.hb2{position:relative;width:62px;height:62px;border-radius:50%;padding:3px;background:var(--ln);display:block;overflow:hidden}
+.hi.on .hb2{background:var(--ac)}
+.hb2 img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;border:2px solid var(--bg)}
+.hb2 em{position:absolute;inset:3px;border-radius:50%;display:grid;place-items:center;font:700 15px system-ui;font-style:normal;color:var(--tx);background:color-mix(in srgb,var(--bg) 55%,transparent)}
+.hi small{font:600 11.5px/1.2 system-ui;color:var(--mut);text-align:center;max-width:72px}
+.hi.on small{color:var(--tx)}
+#p-explorar,#p-lista{max-width:1240px}
+.xtop{display:flex;flex-direction:column;gap:8px;margin:4px 0 6px}
+.xtop input{height:48px;border-radius:14px}
+.xsel{display:flex;gap:8px}
+.xsel select,.xsel .btn{flex:1;min-width:0;min-height:44px;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 14px system-ui;padding:0 10px}
+.xsel .btn.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.xact{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.fchip{min-height:34px;padding:0 12px;border-radius:17px;border:1px solid var(--ac);background:none;color:var(--tx);font:600 13px system-ui}
+.xcols{display:block}
+.xpanel{display:none}
+.xn{color:var(--mut);font-size:13.5px;margin:6px 2px 8px}
+.xres{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.xc{position:relative;background:var(--s1);border:1px solid var(--ln);border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;min-width:0}
+.xc:hover{border-color:var(--mut)}
+.xim{height:150px;flex:none}
+.xim .port span{font-size:34px}.xim .port b{font-size:14px}
+.xq{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:50%;border:0;background:#000a;color:#fff;display:grid;place-items:center}
+.xq svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2}
+.xq.on svg{fill:#e5405e;stroke:#e5405e}
+.xb{padding:10px 12px 12px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.xf{font:600 11.5px system-ui;color:var(--mut)}
+.xb h3{margin:0;font-size:15px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-wrap:balance}
+.xb p{margin:0;font-size:13px;color:var(--mut);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.xb .fsl{margin:2px 0 0}
+.xc.rev h3{color:var(--warn)}
+.fgr{border-bottom:1px solid var(--ln);padding:6px 0 12px}
+.fgr h4{margin:10px 2px 6px;font-size:12.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.fck{display:flex;align-items:center;gap:10px;min-height:40px;margin:0;font-weight:500;font-size:14.5px;cursor:pointer;padding:0 4px;border-radius:10px}
+.fck:hover{background:var(--s2)}
+.fck input{width:19px;height:19px;accent-color:var(--ac);flex:none;margin:0}
+.fck span{flex:1;min-width:0}.fck b{font:600 12px system-ui;color:var(--mut)}
+.fck.cero{opacity:.45}
+.frango{display:flex;flex-direction:column;gap:8px;margin-top:6px}.frango label{flex:1;margin:0;font:600 12px system-ui;color:var(--mut);display:flex;flex-direction:column;gap:4px}
+.frango input,.fgr select{width:100%;min-height:42px;border-radius:10px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:14px system-ui;padding:0 8px}
+#dFil{margin:auto auto 0;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;border-radius:18px 18px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+#dFil .fila{position:sticky;bottom:0;background:var(--s1);padding-top:8px}
+.lhd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 4px}
+.lhd h2{margin:0;font-size:22px}.lhd p{margin:2px 0 0;color:var(--mut);font-size:14px}
+.lhd .btn{flex:none}
+.lt{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin:18px 2px 6px}
+.lr{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--ln)}
+.lr.hecho .ltx b{text-decoration:line-through;opacity:.6}
+.lchk{flex:none;width:30px;height:30px;border-radius:9px;border:2px solid var(--mut);background:none;color:var(--acx);display:grid;place-items:center;padding:0}
+.lr.hecho .lchk{background:var(--ok);border-color:var(--ok)}
+.lchk svg{width:18px;height:18px;stroke:var(--bg);fill:none;stroke-width:3}
+.lmi{flex:none;width:64px;height:64px;border-radius:12px}
+.lmi .port span{font-size:22px}.lmi .port b{display:none}.lmi .port{padding:0}
+.ltx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:0;color:var(--tx);padding:0;font:inherit;cursor:pointer}
+.ltx b{font-size:15px;line-height:1.3}.ltx span{font-size:13px;color:var(--mut);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ltx code{font:12px ui-monospace,Consolas,monospace;background:var(--s2);border-radius:6px;padding:2px 6px;align-self:flex-start;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ltx i{font:normal 11.5px system-ui;color:var(--mut)}
+.lac{flex:none;display:flex;align-items:center;gap:6px}
+.lcol{margin:14px 0 0}.lcol summary{position:static}
+#lTit{font-weight:700;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ihero{display:flex;flex-direction:column}
+.ihead{padding:14px 18px 4px;max-width:720px;width:100%;margin:0 auto}
+.ihead h1{font-size:25px;line-height:1.22;margin:4px 0 8px;text-wrap:balance}
+.ver{border-radius:14px;padding:12px 14px;margin:10px 0;display:flex;flex-direction:column;gap:4px;border:1px solid var(--ln);background:var(--s1)}
+.ver b{font-size:16px}.ver span{font-size:14px;color:var(--mut)}
+.ver.v-si{border-color:var(--ok)}.ver.v-si b{color:var(--ok)}
+.ver.v-puede{border-color:var(--warn)}.ver.v-puede b{color:var(--warn)}
+.drs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0}
+.dr{background:var(--s1);border:1px solid var(--ln);border-radius:12px;padding:9px 11px;min-width:0}
+.dr span{display:block;font:600 11px system-ui;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}.dr b{font-size:14px;overflow-wrap:anywhere}
+.iacc{display:none}
+.inav{position:sticky;top:0;z-index:2;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 18px;background:var(--bg);border-bottom:1px solid var(--ln)}
+.inav::-webkit-scrollbar{display:none}
+.inav a{flex:none;min-height:36px;display:inline-flex;align-items:center;padding:0 12px;border-radius:18px;background:var(--s2);color:var(--tx);text-decoration:none;font:600 13px system-ui}
+.lcu section{scroll-margin-top:60px}
+.lcu .sub{font-size:13px;color:var(--mut);margin:12px 0 4px}
+.trad{margin-top:10px;background:var(--s1);border-radius:14px;padding:10px 14px}
+.trad summary{position:static;min-height:40px;font-size:14px;background:none}
+.orig{white-space:pre-wrap;font-size:14px!important;color:var(--mut)}
+.pc{display:grid;grid-template-columns:1fr;gap:10px}
+.pc>div{background:var(--s1);border:1px solid var(--ln);border-radius:14px;padding:10px 14px}
+.pc>div b{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.3px}
+.pc>div:first-child b{color:var(--ok)}.pc>div:last-child b{color:var(--bad)}
+.ipie{margin-top:26px;border-top:1px solid var(--ln);padding-top:10px}.ipie p{font-size:13.5px!important;color:var(--mut)}
+@media(min-width:560px){.drs{grid-template-columns:repeat(4,minmax(0,1fr))}.pc{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){
+  .xtop{flex-direction:row;align-items:center}.xtop input{flex:1}.xsel{flex:none}.xsel select{min-width:170px}#xMasF,#xFecha{display:none}
+  .xcols{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:start}
+  .xpanel{display:block;position:sticky;top:0;max-height:calc(100dvh - 40px);overflow-y:auto;padding-right:6px}
+  .xres{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.xim{height:170px}
+  #lista2{max-width:900px}
+  #lector .lbar{display:none}
+  .ihero{flex-direction:row;gap:28px;max-width:1180px;margin:0 auto;width:100%;padding:18px 24px 6px}
+  .igal{flex:0 0 46%;min-width:0}.igal .lgl{height:420px;border-radius:18px}
+  .ihead{padding:0;margin:0;flex:1}
+  .iacc{display:flex;border:1px solid var(--ln);border-radius:14px;margin-top:6px}
+  .iacc .fb{flex-direction:column;gap:2px;font-size:11.5px;min-height:58px}
+  .inav{justify-content:center}
+}
+
 .fmas{display:block;width:100%;margin:6px 0 24px}
 @media(min-width:900px){.gl{height:340px}#p-feed{max-width:680px}}
 </style>
@@ -355,10 +459,19 @@ a.li.roto{opacity:.45}
   </section>
 
   <section class="pan" id="p-feed">
+    <div class="hist" id="hist" role="group" aria-label="Tus lotes"></div>
     <div class="fbar" id="fbar" role="group" aria-label="Qué ver"></div>
     <div id="feed"></div>
   </section>
 
+  <section class="pan" id="p-explorar">
+    <div class="xtop"><input type="search" id="xQ" placeholder="Buscar en tus posts…" aria-label="Buscar en tus posts">
+      <div class="xsel"><select id="xFecha" aria-label="Fecha"></select><select id="xOrden" aria-label="Ordenar"></select><button class="btn" id="xMasF">Filtros</button></div></div>
+    <div class="xact" id="xAct"></div>
+    <div class="xcols"><aside class="xpanel" id="xPanel" aria-label="Filtros"></aside>
+      <div class="xmain"><div class="xn" id="xN"></div><div class="xres" id="xRes"></div></div></div>
+  </section>
+  <section class="pan" id="p-lista"><div id="lista2"></div></section>
   <section class="pan" id="p-fichas">
     <div class="izq">
     <div class="fila top"><input type="search" id="buscar" placeholder="Buscar…" aria-label="Buscar en tus fichas">
@@ -373,6 +486,7 @@ a.li.roto{opacity:.45}
     <dialog id="hojaF" aria-label="Más filtros"><h2>Más filtros</h2>
       <button class="hb" data-f="rev">Para revisar <b id="nRev"></b></button>
       <button class="hb" data-f="repo">Con GitHub <b id="nRepo"></b></button>
+      <button class="hb" data-f="descartada">Descartadas <b id="nDesc"></b></button>
       <label for="catSel" style="margin:12px 2px 4px">Ir a categoría</label><select id="catSel"></select>
       <button class="hb" data-p="1" id="bPlegar" style="margin-top:8px">Plegar todo</button>
       <button class="hb" data-cerrar="1" style="margin-top:8px;justify-content:center">Cerrar</button>
@@ -423,10 +537,11 @@ a.li.roto{opacity:.45}
 </div>
 <div id="aviso"></div>
 <div id="lector" role="dialog" aria-modal="true" aria-label="Leer la ficha entera">
-  <div class="lh"><button class="btn sm" data-l="cerrar" aria-label="Volver">‹ Volver</button><span></span><button class="btn sm" data-l="ant" id="lAnt" aria-label="Anterior">‹</button><button class="btn sm" data-l="sig" id="lSig">Siguiente ›</button></div>
+  <div class="lh"><button class="btn sm" data-l="cerrar" aria-label="Atrás">‹ Atrás</button><span id="lTit"></span><button class="btn sm" data-l="ant" id="lAnt" aria-label="Anterior">‹</button><button class="btn sm" data-l="sig" id="lSig">Siguiente ›</button></div>
   <div id="lectC"></div>
   <div class="lbar fbt"></div>
 </div>
+<dialog id="dFil" aria-label="Filtros"><h2>Filtros</h2><div id="dFilC"></div><div class="fila"><button class="btn pri" id="dFilOk">Ver resultados</button></div></dialog>
 <dialog id="dCol" aria-label="Guardar en una colección"><h2>Guardar en…</h2><div id="colL"></div>
   <div class="fila" style="flex-wrap:nowrap"><input type="text" id="colN" placeholder="Nueva colección (p. ej. Para instalar)" maxlength="40"><button class="btn sm" id="colAdd">Crear</button></div>
   <div class="fila"><button class="btn pri" id="colOk">Listo</button></div></dialog>
@@ -452,8 +567,9 @@ a.li.roto{opacity:.45}
 </div>
 <nav>
   <button data-t="feed"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Inicio</button>
-  <button data-t="pegar" class="on"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Pegar</button>
-  <button data-t="fichas"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>Fichas</button>
+  <button data-t="pegar" class="on"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Añadir</button>
+  <button data-t="explorar"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span>Explorar</button>
+  <button data-t="lista"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg></span>Mi lista</button>
   <button data-t="ajustes"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>Ajustes</button>
 </nav>
 <dialog id="dcc"><h2 id="ccH">Exportar .txt para Claude Code</h2>
@@ -1234,7 +1350,7 @@ function encolar(links, bloque, lote = bloque) {
   for (const u of links) {
     const ya = yaGuardada(u);
     if (ya) { repes++; if (ya.lote) dondeRepes.add(ya.lote); continue; }
-    db.cards.push({ bloque, lote, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", cola: Date.now(), grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+    db.cards.push({ bloque, lote, añadida: Date.now(), id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", cola: Date.now(), grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
     nuevos++;
   }
   if (nuevos) { db.lotes = db.lotes || {}; db.lotes[lote] ||= { t: Date.now(), dev: DISPO }; }
@@ -1386,11 +1502,10 @@ function aviso(t, fijo, undo) { const a = $("#aviso"); a.textContent = t; a.styl
   if (undo) { const b = document.createElement("button"); b.className = "btn"; b.id = "avDeshacer"; b.textContent = "Deshacer"; b.style.cssText = "margin-left:10px;min-height:44px;flex:none"; b.onclick = e => { e.stopPropagation(); a.style.display = "none"; clearTimeout(aviso.t); undo(); }; a.appendChild(b); aviso.t = setTimeout(() => a.style.display = "none", 9000); return; }
   if (des) aviso.t = setTimeout(() => a.style.display = "none", 30000); else if (!fijo) aviso.t = setTimeout(() => a.style.display = "none", 4500); } // fijo = no se quita solo: se cierra tocándolo
 $("#aviso").addEventListener("click", () => { $("#aviso").style.display = "none"; });
-function cambiaTab(t) { $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + t)); if (t !== "fichas" && detId) cerrarDet(); if (t === "fichas") pintar(); if (t === "feed") pintaFeed(); if (t === "pegar") pintaLotesHist(); $("main").scrollTop = 0; }
 const miles = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : String(n);
 const ordenCat = (a, b) => ((a === "Para revisar") - (b === "Para revisar")) || (a === "Sin clasificar") - (b === "Sin clasificar") || a.localeCompare(b, "es");
 let filtro = "nuevo", bloqueSel = null; const vistas = new Set(); // bloqueSel: ver solo una lista (se toca en el aviso final)
-const FILTROS = [["nuevo", "Nuevo"], ["quiero", "Lo quiero"], ["hecho", "Hecho"], ["todo", "Todo"], ["descartada", "🗑️ Papelera"]], FILTROS_MAS = [["rev", "Para revisar"], ["repo", "Con GitHub"]];
+const FILTROS = [["nuevo", "Nuevo"], ["quiero", "Lo quiero"], ["hecho", "Hecho"], ["todo", "Todo"]], FILTROS_MAS = [["rev", "Para revisar"], ["repo", "Con GitHub"], ["descartada", "Descartadas"]];
 function pasaFiltro(c, f = filtro) {
   if (bloqueSel && loteDe(c) !== bloqueSel) return false;
   if (f === "descartada") return uso(c) === "descartada";
@@ -1410,7 +1525,7 @@ function pintar() {
   $("#cuenta").textContent = db.cards.length ? db.cards.length + " fichas" : "";
   { const enMas = FILTROS_MAS.find(x => x[0] === filtro), n = k => db.cards.filter(c => pasaFiltro(c, k)).length;
     $("#filtros").innerHTML = (bloqueSel ? `<button data-qb="1" class="on">${esc(etqLote(bloqueSel))} ✕</button>` : "") + FILTROS.map(([k, t]) => `<button data-f="${k}" class="${filtro === k ? "on" : ""}">${t}${k === "todo" ? "" : ` (${n(k)})`}</button>`).join("") + `<button data-mas="1" aria-haspopup="dialog" class="${enMas ? "on" : ""}">${enMas ? enMas[1] + " (" + n(filtro) + ")" : "Más"}</button>`;
-    $("#nRev").textContent = n("rev"); $("#nRepo").textContent = n("repo");
+    $("#nRev").textContent = n("rev"); $("#nRepo").textContent = n("repo"); $("#nDesc").textContent = n("descartada");
     $$("#hojaF [data-f]").forEach(b => b.classList.toggle("on", b.dataset.f === filtro)); }
   if (!db.cards.length) { $("#lista").innerHTML = '<div class="vacio"><b>Todavía no hay fichas</b>Ve a «Pegar», mete tus links y pulsa «Ordenar».</div>'; return marca(); }
   const gg = {}; cards.forEach(c => ((gg[c.grupo || "AI"] ||= {})[c.estado === "revisar" ? "Para revisar" : c.estado === "pendiente" ? "En cola" : temaFicha(c)] ||= []).push(c)); // grupo principal > tema (lo que de verdad es)
@@ -1430,13 +1545,14 @@ function pintar() {
   $("#lista").innerHTML = gs.length === 1 ? pintaCats(gg[gs[0]], gs[0] + "/")
     : gs.map(g => `<details class="grupo" data-k="G:${esc(g)}" ${(!cerradas.has("G:" + g) || q) ? "open" : ""}><summary style="font-size:1.1em">${IC.chev}<span class="cn">${esc(g)}</span><b>${Object.values(gg[g]).reduce((n, a) => n + a.length, 0)}</b></summary>${pintaCats(gg[g], g + "/")}</details>`).join("")
     || `<div class="vacio"><b>${q ? "Nada para “" + esc($("#buscar").value.trim()) + "”" : "Nada que mostrar con este filtro."}</b><button class="btn" data-q="1">Quitar búsqueda y filtros</button></div>`;
-  if (filtro === "descartada" && cards.length) $("#lista").insertAdjacentHTML("afterbegin", `<div class="nota" style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin:0 0 10px"><span>Aquí están las fichas que descartaste. Desliza una a la derecha para recuperarla.</span><button class="btn" data-vaciar="1" style="color:var(--bad);border-color:var(--bad);flex:none">Vaciar papelera</button></div>`);
   $$("#lista details").forEach(d => vistas.add(d.dataset.k));
   const opts = $$("#lista details.cat").map(d => `<option value="${esc(d.dataset.k)}">${esc(d.querySelector(".cn").textContent)} (${d.querySelector("b").textContent})</option>`).join("");
   $("#catSel").innerHTML = '<option value="">Ir a categoría…</option>' + opts; etqPlegar();
   pintaDet();
   marca();
   if ($("#p-feed").classList.contains("on")) pintaFeed(true);
+  if ($("#p-explorar").classList.contains("on")) pintaExplorar();
+  if ($("#p-lista").classList.contains("on")) pintaLista();
 }
 const lista = (t, a, ord) => a && a.length ? `<div class="bl"><b>${t}</b><${ord ? "ol" : "ul"}>${a.map(x => `<li>${esc(x)}</li>`).join("")}</${ord ? "ol" : "ul"}></div>` : "";
 const SV = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
@@ -1698,7 +1814,7 @@ $("#lista").addEventListener("click", e => {
 });
 function ponUso(c, u) {
   const antes = uso(c); c.estadoUso = u; guardar(); pintar();
-  aviso(u === "descartada" ? "A la papelera: la encuentras en el filtro «Papelera»" : "Marcada como «" + USOS.find(x => x[0] === u)[1] + "»", false, () => { c.estadoUso = antes; guardar(); pintar(); aviso("Vuelve a «" + USOS.find(x => x[0] === antes)[1] + "»"); });
+  aviso(u === "descartada" ? "A la papelera: la encuentras en Explorar › Papelera" : "Marcada como «" + USOS.find(x => x[0] === u)[1] + "»", false, () => { c.estadoUso = antes; guardar(); pintar(); aviso("Vuelve a «" + USOS.find(x => x[0] === antes)[1] + "»"); });
 }
 // D7: deslizar la fila. Derecha = Lo quiero (Hecho si ya lo es; Recuperar si estaba descartada). Izquierda = Descartar. Teclado: flechas en el titulo.
 const accDer = c => ({ nuevo: ["quiero", "Lo quiero"], quiero: ["hecho", "Hecho"], hecho: null, descartada: ["nuevo", "Recuperar"] })[uso(c)];
@@ -1732,13 +1848,6 @@ $("#det").addEventListener("click", async e => {
   if (a === "fav") { c.fav = !c.fav; guardar(); return pintar(); }
   if (a === "borrar") { if (await confirmar("Borrar ficha", `<p>¿Borrar «${esc(c.titulo.slice(0, 70))}»?</p>`)) { db.cards = db.cards.filter(x => x !== c); guardar(); cerrarDet(); pintar(); } }
   if (a === "texto") { const v = await pregunta("Pega aquí el texto del post (la descripción)", c.texto || "", true); if (v && v.trim()) { c.estado = "pendiente"; c.cola = Date.now(); guardar(); cambiaTab("pegar"); $("#prog").style.display = "flex"; await analizar(c, v.trim()); guardar(); $("#prog").style.display = "none"; cambiaTab("fichas"); } }
-});
-$("#lista").addEventListener("click", async e => { // Papelera: vaciar borra de verdad lo descartado, con confirmación y Deshacer
-  if (!e.target.closest("[data-vaciar]")) return;
-  const fuera = db.cards.filter(c => uso(c) === "descartada"); if (!fuera.length) return;
-  const v = await pregunta("Escribe VACIAR para borrar para siempre las " + fuera.length + " fichas de la papelera", ""); if (!v || v.trim().toUpperCase() !== "VACIAR") return;
-  const copia = fuera.map(c => JSON.parse(JSON.stringify(c))); db.cards = db.cards.filter(c => uso(c) !== "descartada"); guardar(); pintar();
-  aviso("Papelera vaciada (" + copia.length + ")", false, () => { db.cards.push(...copia); guardar(); pintar(); aviso("Fichas recuperadas"); });
 });
 $("#filtros").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.dataset.qb) { bloqueSel = null; return pintar(); } if (b.dataset.mas) return $("#hojaF").showModal(); filtro = b.dataset.f; pintar(); });
 $("#hojaF").addEventListener("click", e => { const b = e.target.closest("button"); if (e.target === $("#hojaF") || (b && b.dataset.cerrar)) return $("#hojaF").close(); if (!b) return;
@@ -1791,7 +1900,7 @@ window.__chat = (t, fs) => {
   $("#txt").value = (fs.length ? `📎 ${fs.length} fotos recibidas\n\n` : "") + t.slice(0, 30000); try { detectar(); } catch (e) { } // se ve lo recibido: da calma
   const bn = (db.bn || 0) + 1, lt = nuevoLote(), r = encolar(sacarLinks(t).links, bn, lt), st = Date.now().toString(36);
   if (!r.nuevos && !fs.length) delete db.lotes[lt];
-  for (const n of fs) db.cards.push({ bloque: bn, lote: lt, id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", cola: Date.now(), titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+  for (const n of fs) db.cards.push({ bloque: bn, lote: lt, añadida: Date.now(), id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", cola: Date.now(), titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
   if (r.nuevos || fs.length) db.bn = bn;
   guardar(); pintaBloques();
   if (!r.nuevos && !fs.length) return aviso(r.repes ? "Esos links ya estaban guardados." : "No encontré links ni fotos.");
@@ -1862,7 +1971,7 @@ function pintaLotesHist() {
 }
 function verLote(n) {
   n = Number(n) || 0;
-  if (!db.cards.some(c => loteDe(c) === n && c.estado === "ok")) { bloqueSel = n || null; filtro = "todo"; return cambiaTab("fichas"); } // solo fallidas o en cola: se ven en Fichas
+  if (!db.cards.some(c => loteDe(c) === n && c.estado === "ok")) { FIL = { ...FIL0(), lote: String(n), marca: ["revisar"] }; return ir("explorar"); } // solo fallidas: se ven en Explorar
   feedLote = n; feedModo = "ultimo"; feedTema = ""; feedCol = ""; feedN = 20; cambiaTab("feed");
 }
 $("#lotesHist").addEventListener("click", e => { const b = e.target.closest("[data-vl]"); if (b) verLote(b.dataset.vl); });
@@ -2060,13 +2169,14 @@ function botonesHtml(c, grande) {
 }
 function fichaFeed(c, p, top) {
   const sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim(), f = fotosDe(c, usoImgs());
-  const gal = `<div class="gl" data-gid="${esc(c.id)}">${f.length || c.minis || c.minisNube ? "" : portadaHtml(c)}${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="${i ? "lazy" : "eager"}" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`;
-  return `<article class="fc" data-id="${esc(c.id)}"><div class="fph" title="Doble toque: Lo quiero · Un toque: leer todo">${gal}<div class="fov"><span class="sl">${esc(etqLote(loteDe(c)))}</span>${top ? '<span class="sl ti">★ Para ti</span>' : ""}</div><div class="corz" aria-hidden="true">${ICF.cor}</div></div>
+  const gal = `<div class="gl" data-gid="${esc(c.id)}">${f.length ? "" : portadaHtml(c)}${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="${i ? "lazy" : "eager"}" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`;
+  return `<article class="fc" data-id="${esc(c.id)}"><div class="fph" title="Doble toque: Lo quiero · Un toque: leer todo">${gal}<div class="fov"><span class="sl">${esc(etqAñadida(c))}</span>${top ? '<span class="sl ti">★ Para ti</span>' : ""}</div><div class="corz" aria-hidden="true">${ICF.cor}</div></div>
 <div class="fcb"><div class="fsl">${sellosHtml(c)}<span class="sl">${esc(temaFicha(c))}</span>${(c.cols || []).map(id => nomCol(id) ? `<span class="sl">🔖 ${esc(nomCol(id))}</span>` : "").join("")}</div>
 <h3 data-fa="leer">${esc(tituloVis(c))}</h3>${sv ? `<p class="fsv">Sirve para: ${esc(sv)}</p>` : ""}${c.resumen && c.resumen !== c.sirve ? `<p class="frs">${esc(c.resumen)}</p>` : ""}${top && p.raz.length ? `<p class="fpq">Para ti porque ${esc(p.raz.join(" · "))}</p>` : ""}</div>
 <div class="fbt">${botonesHtml(c)}</div><button class="btn fleer" data-fa="leer">${ICF.leer} Leer todo</button><div class="fl">${linksFeed(c)}</div></article>`;
 }
 function pintaFeed(suave) {
+  $("#hist").innerHTML = historiasHtml();
   const y = $("main").scrollTop, ok = db.cards.filter(c => c.estado === "ok");
   const temas = [...new Set(ok.map(temaFicha))].sort((a, b) => a.localeCompare(b, "es")), lotes = lotesLista().filter(l => l.ok), cols = (db.cols || []).filter(x => ok.some(c => (c.cols || []).includes(x.id)));
   $("#fbar").innerHTML = FMODOS.map(([k, t]) => `<button data-fm="${k}" class="${feedModo === k ? "on" : ""}">${t}</button>`).join("")
@@ -2121,49 +2231,7 @@ $("#feed").addEventListener("click", e => {
     else { tap = { t: now, id }; tm = setTimeout(() => { tap = { t: 0, id: "" }; abrirLector(id); }, 340); }
   });
 }
-// ---- leer todo a pantalla completa ----
 let lectorId = null;
-function lectorHtml(c) {
-  const cm = comandos(c), r = (c.repos || [])[0], sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim(), vio = c.vio || {};
-  const lista = (t, a) => a && a.length ? `<h4>${t}</h4><ul>${a.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "";
-  const leido = [vio.voz ? "la voz del vídeo" : "", vio.imgs ? "el texto de las imágenes" : "", vio.frames ? "lo que se ve en el vídeo" : "", r ? "el README del repo" : ""].filter(Boolean);
-  const f = fotosDe(c, usoImgs());
-  return `<div class="gl lgl" data-gid="${esc(c.id)}">${f.length || c.minis || c.minisNube ? "" : portadaHtml(c)}${f.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>
-<div class="lcu"><div class="fsl">${sellosHtml(c)}<span class="sl">${esc(temaFicha(c))}</span><span class="sl">${esc(etqLote(loteDe(c)))}</span></div>
-<h2>${esc(tituloVis(c))}</h2>${sv ? `<p class="lsv">Sirve para: ${esc(sv)}</p>` : ""}
-<h4>Qué es</h4><p>${esc(c.detalle || c.resumen || "El vídeo no lo explica bien: ábrelo con el botón de Instagram.")}</p>
-${lista("Lo que cuenta el vídeo", c.puntos)}${lista("Skills o plugins que propone", c.skills)}
-<h4>Cómo empezar</h4>${cm.length ? cm.map(x => `<div class="lcmd"><code>${esc(x)}</code><button class="btn sm" data-lc="${esc(x)}">Copiar</button></div>`).join("") : `<p>${r ? `Abre el GitHub (${esc(r.full)}) y sigue su README.` : (c.links || []).length ? "Abre su web (abajo) y mira cómo se instala." : "El vídeo no dice cómo instalarlo: abre el post y mira los comentarios."}</p>`}
-${c.limites ? `<h4>Ojo con</h4><p>${esc(c.limites)}</p>` : ""}
-<h4>Links</h4><div class="enl gr">${linksFeed(c).replace(/<a class=" /g, '<a class="lk ')}</div>
-${c.notas ? `<h4>Tus notas</h4><div class="notas">${esc(c.notas)}</div>` : ""}
-<div class="acs"><button class="btn" data-l="editar">Editar / escribir notas</button><button class="btn" data-l="claude">Pasar a Claude Code</button></div>
-${leido.length ? `<p class="nota">Lo he sacado de: ${esc(leido.join(", "))}.</p>` : ""}</div>`;
-}
-function pintaLector() {
-  const c = db.cards.find(x => x.id === lectorId); if (!c) return cerrarLector();
-  const C = $("#lectC"), y = C.scrollTop; C.innerHTML = lectorHtml(c); $("#lector .lbar").innerHTML = botonesHtml(c, true); rellenaGalerias(C); C.scrollTop = y;
-  const i = (feedOrden || []).indexOf(c.id); $("#lSig").disabled = !(feedOrden && i >= 0 && i < feedOrden.length - 1); $("#lAnt").disabled = !(feedOrden && i > 0);
-}
-function abrirLector(id) {
-  const c = db.cards.find(x => x.id === id); if (!c) return; lectorId = id; c.leida = Date.now(); guardar();
-  $("#lectC").scrollTop = 0; pintaLector(); $("#lector").classList.add("on"); document.body.style.overflow = "hidden";
-}
-function cerrarLector() { lectorId = null; $("#lector").classList.remove("on"); document.body.style.overflow = ""; }
-function pasoLector(d) { const i = (feedOrden || []).indexOf(lectorId), j = i + d; if (i < 0 || j < 0 || j >= feedOrden.length) return; lectorId = feedOrden[j]; const c = db.cards.find(x => x.id === lectorId); if (c) { c.leida = Date.now(); guardar(); } $("#lectC").scrollTop = 0; pintaLector(); }
-$("#lector").addEventListener("click", async e => {
-  const c = db.cards.find(x => x.id === lectorId); if (!c) return;
-  const l = e.target.closest("[data-l]"), cp = e.target.closest("[data-lc]"), fa = e.target.closest("[data-fa]");
-  if (cp) return copiar(cp.dataset.lc);
-  if (fa) return accionFeed(c, fa.dataset.fa);
-  if (!l) return; const a = l.dataset.l;
-  if (a === "cerrar") return cerrarLector();
-  if (a === "sig") return pasoLector(1);
-  if (a === "ant") return pasoLector(-1);
-  if (a === "editar") return abrirEditor(c);
-  if (a === "claude") return abrirCC([c]);
-});
-document.addEventListener("keydown", e => { if (!lectorId || editando || $("#dcc").open || $("#dCol").open) return; if (e.key === "Escape") cerrarLector(); if (e.key === "ArrowRight") pasoLector(1); if (e.key === "ArrowLeft") pasoLector(-1); });
 // ---- colecciones (como «Guardados» de Instagram) ----
 function elegirColeccion(c) {
   db.cols = db.cols || []; const d = $("#dCol");
@@ -2287,6 +2355,277 @@ async function activarSync() {
   else if (r.status === 200 && !JSON.parse(r.body).private) { db.cfg.sync = null; guardar(); pintaSync(); return aviso("Ya tienes un repositorio «" + SYNC_REPO + "» y es PÚBLICO. Ponlo privado en GitHub y vuelve a probar.", true); }
   syncEst = { shas: {}, firmas: {}, th: {} }; guardaSyncEst(); guardar(); $("#sTok").value = ""; pintaSync(); await sincronizar(true);
 }
+// ============ N3 (21/10/2026): app reorganizada — Inicio (red social), Explorar (filtros como una tienda), Informe (como una web), Mi lista, Atrás de verdad ============
+// ---- cuándo se añadió cada ficha (solo fechas reales; las fichas viejas sin fecha lo dicen) ----
+function añadida(c) { if (c.añadida) return c.añadida; const L = c.lote && (db.lotes || {})[c.lote]; if (L && L.t) return L.t; if (c.bloque) return tsId(c.id) || 0; return 0; }
+const DIA = 864e5, hoy0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); };
+function etqAñadida(c) { const t = añadida(c); return t ? "Añadido " + fechaCorta(t, true) : "Sin fecha (de antes)"; }
+const FECHAS = [["hoy", "Hoy", t => t >= hoy0()], ["ayer", "Ayer", t => t >= hoy0() - DIA && t < hoy0()], ["7d", "Últimos 7 días", t => t >= hoy0() - 6 * DIA], ["30d", "Último mes", t => t >= hoy0() - 29 * DIA], ["viejo", "Hace más de un mes", t => t && t < hoy0() - 29 * DIA], ["sin", "Sin fecha", t => !t]];
+// ---- navegación: «atrás» vuelve a la pantalla anterior; desde Inicio pide pulsar otra vez para salir ----
+const TABS = ["feed", "explorar", "lista", "pegar", "ajustes"];
+let pila = [{ v: "feed" }], _salir = 0;
+function muestra(e) {
+  const v = e.v, tab = TABS.includes(v) ? v : (pila.slice().reverse().find(x => TABS.includes(x.v)) || { v: "feed" }).v;
+  $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === tab)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + tab));
+  if (v === "informe") { lectorId = e.id; pintaLector(); $("#lector").classList.add("on"); document.body.style.overflow = "hidden"; }
+  else { if ($("#lector").classList.contains("on")) { $("#lector").classList.remove("on"); document.body.style.overflow = ""; } lectorId = null;
+    if (tab === "feed") pintaFeed(true); if (tab === "explorar") pintaExplorar(); if (tab === "lista") pintaLista(); if (tab === "pegar") pintaLotesHist(); }
+}
+function ir(v, p = {}) {
+  const e = { v, ...p }, top = pila[pila.length - 1];
+  if (TABS.includes(v)) { // pestañas: siempre Inicio debajo, para que atrás vuelva a Inicio
+    const nueva = v === "feed" ? [{ v: "feed" }] : [{ v: "feed" }, e];
+    const reempl = top && TABS.includes(top.v) && top.v !== "feed" && v !== "feed";
+    pila = nueva; if (!N) { try { (reempl ? history.replaceState : history.pushState).call(history, { n: pila.length }, ""); } catch (x) { } }
+    muestra(e); $("main").scrollTop = 0; return;
+  }
+  pila.push(e); if (!N) { try { history.pushState({ n: pila.length }, ""); } catch (x) { } } muestra(e);
+}
+function volver() { if (pila.length <= 1) return false; pila.pop(); muestra(pila[pila.length - 1]); return true; }
+function atrasUI() { if (!N && pila.length > 1) { try { history.back(); return; } catch (x) { } } volver(); } // botones «‹ Atrás» de la app
+addEventListener("popstate", () => { if (detHist) return; if (cierraCapas()) { try { history.pushState({ n: pila.length }, ""); } catch (x) { } return; } volver(); });
+function cierraCapas() { // lo que está encima (diálogos, editor) se cierra antes que la pantalla
+  for (const id of ["#dCol", "#dFil", "#dcc", "#dlg", "#hojaF"]) { const d = $(id); if (d && d.open) { d.close(); return true; } }
+  if ($("#menuMas").classList.contains("on")) { $("#menuMas").classList.remove("on"); return true; }
+  if (editando) { cerrarEditor(); return true; }
+  return false;
+}
+window.__atras = () => {
+  if (cierraCapas()) return true;
+  if (volver()) return true;
+  if (Date.now() - _salir < 2500) return false; // segunda vez seguida: ahora sí sale
+  _salir = Date.now(); aviso("Pulsa atrás otra vez para salir"); return true;
+};
+function cambiaTab(t) { ir(t === "fichas" ? "explorar" : t); } // las llamadas antiguas siguen funcionando
+function abrirLector(id) { const c = db.cards.find(x => x.id === id); if (!c) return; c.leida = Date.now(); guardar(); $("#lectC").scrollTop = 0; if (lectorId && pila[pila.length - 1].v === "informe") { pila[pila.length - 1].id = id; muestra(pila[pila.length - 1]); } else ir("informe", { id }); }
+function cerrarLector() { if (pila[pila.length - 1].v === "informe") atrasUI(); }
+document.addEventListener("keydown", e => { if (e.key !== "Escape" || editando) return; if (cierraCapas()) return; if (pila.length > 1) atrasUI(); });
+
+// ---- Explorar: buscador + filtros como en una tienda online ----
+const FIL0 = () => ({ q: "", fecha: "", desde: "", hasta: "", lote: "", temas: [], precio: [], marca: [], estado: [], orden: "nuevo" });
+let FIL = FIL0(); try { const g = JSON.parse(localStorage.getItem("igv-filtros") || "null"); if (g) FIL = { ...FIL0(), ...g, q: "" }; } catch (e) { }
+const guardaFil = () => { try { localStorage.setItem("igv-filtros", JSON.stringify(FIL)); } catch (e) { } };
+const MARCAS = [["quiero", "♥ Lo quiero", c => uso(c) === "quiero"], ["fav", "★ Favoritas", c => !!c.fav], ["col", "🔖 En una colección", c => (c.cols || []).length > 0], ["hecho", "✓ Hecho", c => uso(c) === "hecho"], ["nuevo", "Sin marcar", c => uso(c) === "nuevo" && !c.fav && !(c.cols || []).length], ["descartada", "🗑️ Papelera", c => uso(c) === "descartada"], ["revisar", "⚠ No se pudo leer", c => c.estado === "revisar"]];
+const PRECIOS = [["gratis", "Gratis o código abierto", c => sellos(c).some(x => x[0] === "gr")], ["pago", "De pago", c => sellos(c).some(x => x[1] === "De pago")], ["instalar", "Se puede instalar", c => c.accion === "Instalar" || comandos(c).length > 0], ["activo", "Repo activo", c => sellos(c).some(x => x[1] === "Activo")]];
+const ORDENES = [["nuevo", "Más nuevo"], ["viejo", "Más antiguo"], ["ti", "Para ti"], ["az", "A-Z"], ["estrellas", "Más estrellas en GitHub"]];
+const textoBusca = c => sinAcentos([c.titulo, c.sirve, c.resumen, c.detalle, (c.puntos || []).join(" "), (c.tags || []).join(" "), ...(c.repos || []).map(r => r.full), (c.links || []).map(l => l.u).join(" "), c.notas, c.url].join(" "));
+function pasaFil(c, sin) { // sin = el grupo de filtros que no se aplica (para contar cuántos saldrían en cada opción)
+  if (c.estado === "pendiente") return false;
+  const t = añadida(c);
+  if (sin !== "fecha") { if (FIL.fecha) { const f = FECHAS.find(x => x[0] === FIL.fecha); if (f && !f[2](t)) return false; }
+    if (FIL.desde && !(t && t >= new Date(FIL.desde + "T00:00").getTime())) return false; if (FIL.hasta && !(t && t < new Date(FIL.hasta + "T00:00").getTime() + DIA)) return false; }
+  if (sin !== "lote" && FIL.lote !== "" && String(loteDe(c)) !== String(FIL.lote)) return false;
+  if (sin !== "temas" && FIL.temas.length && !FIL.temas.includes(c.estado === "ok" ? temaFicha(c) : "No se pudo leer")) return false;
+  if (sin !== "precio" && FIL.precio.length && !FIL.precio.every(k => PRECIOS.find(x => x[0] === k)[2](c))) return false;
+  const marcas = FIL.marca.length ? FIL.marca : [];
+  if (sin !== "marca") { if (marcas.length) { if (!marcas.some(k => MARCAS.find(x => x[0] === k)[2](c))) return false; } else if (uso(c) === "descartada" || c.estado === "revisar") return false; }
+  if (FIL.q) { const qs = sinAcentos(FIL.q).split(/\s+/).filter(Boolean), b = textoBusca(c); if (!qs.every(q => b.includes(q))) return false; }
+  return true;
+}
+function resultados() {
+  const A = aprendizaje(), cs = db.cards.filter(c => pasaFil(c)), sc = new Map(cs.map(c => [c, paraTi(c, A).s])), st = c => Math.max(0, ...(c.repos || []).map(r => Number(r.stars) || 0));
+  const o = FIL.orden; cs.sort(o === "viejo" ? (a, b) => (añadida(a) || 9e15) - (añadida(b) || 9e15) : o === "ti" ? (a, b) => sc.get(b) - sc.get(a) : o === "az" ? (a, b) => tituloVis(a).localeCompare(tituloVis(b), "es") : o === "estrellas" ? (a, b) => st(b) - st(a) : (a, b) => añadida(b) - añadida(a) || (b.hecha || 0) - (a.hecha || 0));
+  return cs;
+}
+function cuenta(grupo, prueba) { return db.cards.filter(c => pasaFil(c, grupo) && prueba(c)).length; }
+function panelFiltros() {
+  const ck = (grupo, k, t, n, on) => `<label class="fck${n ? "" : " cero"}"><input type="checkbox" data-g="${grupo}" value="${esc(k)}"${on ? " checked" : ""}><span>${t}</span><b>${n}</b></label>`;
+  const rd = (k, t, n) => `<label class="fck${n ? "" : " cero"}"><input type="radio" name="ffecha" data-g="fecha" value="${k}"${FIL.fecha === k ? " checked" : ""}><span>${t}</span><b>${n}</b></label>`;
+  const temas = [...TEMAS.map(x => x[0]), "Otros", "No se pudo leer"].map(t => [t, cuenta("temas", c => (c.estado === "ok" ? temaFicha(c) : "No se pudo leer") === t)]).filter(x => x[1] || FIL.temas.includes(x[0]));
+  const lotes = lotesLista().filter(l => l.k);
+  return `<div class="fgr"><h4>Cuándo lo añadiste</h4>${rd("", "Cualquier fecha", cuenta("fecha", () => true))}${FECHAS.map(([k, t, f]) => rd(k, t, cuenta("fecha", c => f(añadida(c))))).join("")}
+<div class="frango"><label>Desde<input type="date" id="fDesde" value="${esc(FIL.desde)}"></label><label>Hasta<input type="date" id="fHasta" value="${esc(FIL.hasta)}"></label></div></div>
+<div class="fgr"><h4>Lote</h4><select id="fLoteX"><option value="">Todos los lotes</option>${lotes.map(l => `<option value="${l.n}"${String(FIL.lote) === String(l.n) ? " selected" : ""}>${esc(etqLote(l.n))} (${l.k})</option>`).join("")}</select></div>
+<div class="fgr"><h4>Lo que has marcado</h4>${MARCAS.map(([k, t, f]) => ck("marca", k, t, cuenta("marca", f), FIL.marca.includes(k))).join("")}</div>
+<div class="fgr"><h4>Precio y estado</h4>${PRECIOS.map(([k, t, f]) => ck("precio", k, t, cuenta("precio", f), FIL.precio.includes(k))).join("")}</div>
+<div class="fgr"><h4>Tema</h4>${temas.map(([t, n]) => ck("temas", t, esc(t), n, FIL.temas.includes(t))).join("")}</div>
+<button class="btn" data-fx="limpiar">Quitar todos los filtros</button>`;
+}
+function chipsActivos() {
+  const out = [], x = (k, t) => out.push(`<button class="fchip" data-quita="${esc(k)}">${esc(t)} ✕</button>`);
+  if (FIL.fecha) x("fecha", FECHAS.find(f => f[0] === FIL.fecha)[1]); if (FIL.desde) x("desde", "Desde " + FIL.desde); if (FIL.hasta) x("hasta", "Hasta " + FIL.hasta);
+  if (FIL.lote !== "") x("lote", etqLote(FIL.lote)); FIL.marca.forEach(k => x("marca:" + k, MARCAS.find(m => m[0] === k)[1])); FIL.precio.forEach(k => x("precio:" + k, PRECIOS.find(m => m[0] === k)[1])); FIL.temas.forEach(k => x("temas:" + k, k));
+  return out.join("");
+}
+function tarjetaX(c) {
+  const f = fotosDe(c, usoImgs()), sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim() || primeraFrase(c.resumen), u = uso(c), rev = c.estado === "revisar";
+  return `<article class="xc${rev ? " rev" : ""}" data-id="${esc(c.id)}"><div class="xim gl" data-gid="${esc(c.id)}">${f.length ? "" : portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
+<button class="xq${u === "quiero" ? " on" : ""}" data-fa="quiero" aria-pressed="${u === "quiero"}" aria-label="Lo quiero">${ICF.cor}</button>
+<div class="xb"><div class="xf">${esc(etqAñadida(c))}</div><h3>${esc(rev ? "No se pudo leer" : tituloVis(c))}</h3><p>${esc(rev ? c.motivo || "" : sv)}</p><div class="fsl">${rev ? '<button class="btn sm" data-fa="reint">Reintentar</button>' : sellosHtml(c) + `<span class="sl">${esc(temaFicha(c))}</span>`}${c.fav ? '<span class="sl pg">★</span>' : ""}</div></div></article>`;
+}
+let expN = 30;
+function pintaExplorar() {
+  const cs = resultados(), act = chipsActivos();
+  $("#xPanel").innerHTML = panelFiltros(); $("#xQ").value !== FIL.q && ($("#xQ").value = FIL.q);
+  $("#xOrden").innerHTML = ORDENES.map(([k, t]) => `<option value="${k}"${FIL.orden === k ? " selected" : ""}>${t}</option>`).join("");
+  $("#xFecha").innerHTML = `<option value="">Cualquier fecha</option>` + FECHAS.map(([k, t]) => `<option value="${k}"${FIL.fecha === k ? " selected" : ""}>${t}</option>`).join("");
+  const nAct = (FIL.fecha ? 1 : 0) + (FIL.desde ? 1 : 0) + (FIL.hasta ? 1 : 0) + (FIL.lote !== "" ? 1 : 0) + FIL.marca.length + FIL.precio.length + FIL.temas.length;
+  $("#xMasF").textContent = nAct ? `Filtros (${nAct})` : "Filtros"; $("#xMasF").classList.toggle("on", nAct > 0);
+  $("#xAct").innerHTML = act; $("#xN").textContent = cs.length + (cs.length === 1 ? " resultado" : " resultados");
+  $("#xRes").innerHTML = cs.length ? cs.slice(0, expN).map(tarjetaX).join("") + (cs.length > expN ? `<button class="btn fmas" data-xmas="1">Ver más (quedan ${cs.length - expN})</button>` : "") : `<div class="fvac"><b>Nada con estos filtros</b><button class="btn" data-fx="limpiar">Quitar filtros</button></div>`;
+  if (FIL.marca.length === 1 && FIL.marca[0] === "descartada" && cs.length) $("#xRes").insertAdjacentHTML("afterbegin", `<div class="nota" style="grid-column:1/-1;display:flex;gap:10px;align-items:center;justify-content:space-between;margin:0 0 10px"><span>Aquí están las fichas que descartaste. Ábrelas y pulsa «Lo quiero» para recuperarlas.</span><button class="btn" data-vaciar="1" style="color:var(--bad);border-color:var(--bad);flex:none">Vaciar papelera</button></div>`);
+  rellenaGalerias($("#xRes"));
+}
+document.addEventListener("click", async e => { // Papelera: vaciar borra de verdad lo descartado, con confirmación y Deshacer
+  if (!e.target.closest("[data-vaciar]")) return;
+  const fuera = db.cards.filter(c => uso(c) === "descartada"); if (!fuera.length) return;
+  const v = await pregunta("Escribe VACIAR para borrar para siempre las " + fuera.length + " fichas de la papelera", ""); if (!v || v.trim().toUpperCase() !== "VACIAR") return;
+  const copia = fuera.map(c => JSON.parse(JSON.stringify(c))); db.cards = db.cards.filter(c => uso(c) !== "descartada"); guardar(); pintaExplorar();
+  aviso("Papelera vaciada (" + copia.length + ")", false, () => { db.cards.push(...copia); guardar(); pintaExplorar(); aviso("Fichas recuperadas"); });
+});
+function cambiaFil(e) {
+  const t = e.target, g = t.dataset && t.dataset.g;
+  if (t.id === "fDesde") FIL.desde = t.value; else if (t.id === "fHasta") FIL.hasta = t.value; else if (t.id === "fLoteX") FIL.lote = t.value;
+  else if (g === "fecha") FIL.fecha = t.value; else if (g) { const a = new Set(FIL[g]); t.checked ? a.add(t.value) : a.delete(t.value); FIL[g] = [...a]; } else return;
+  expN = 30; guardaFil(); pintaExplorar(); if ($("#dFil").open) $("#dFilC").innerHTML = panelFiltros();
+}
+$("#xPanel").addEventListener("change", cambiaFil); $("#dFilC").addEventListener("change", cambiaFil);
+const limpiarFil = () => { FIL = { ...FIL0(), orden: FIL.orden }; $("#xQ").value = ""; expN = 30; guardaFil(); pintaExplorar(); if ($("#dFil").open) $("#dFilC").innerHTML = panelFiltros(); };
+document.addEventListener("click", e => { if (e.target.closest("[data-fx=limpiar]")) limpiarFil(); });
+$("#xQ").addEventListener("input", () => { FIL.q = $("#xQ").value.trim(); expN = 30; pintaExplorar(); });
+$("#xOrden").addEventListener("change", () => { FIL.orden = $("#xOrden").value; guardaFil(); pintaExplorar(); });
+$("#xFecha").addEventListener("change", () => { FIL.fecha = $("#xFecha").value; guardaFil(); pintaExplorar(); });
+$("#xMasF").onclick = () => { $("#dFilC").innerHTML = panelFiltros(); $("#dFil").showModal(); };
+$("#dFilOk").onclick = () => $("#dFil").close();
+$("#xAct").addEventListener("click", e => { const b = e.target.closest("[data-quita]"); if (!b) return; const [g, v] = b.dataset.quita.split(":");
+  if (v !== undefined) FIL[g] = FIL[g].filter(x => x !== v); else if (g === "lote") FIL.lote = ""; else FIL[g] = ""; guardaFil(); pintaExplorar(); });
+$("#xRes").addEventListener("click", e => {
+  if (e.target.closest("[data-xmas]")) { expN += 30; return pintaExplorar(); }
+  const art = e.target.closest(".xc"); if (!art) return; const c = db.cards.find(x => x.id === art.dataset.id); if (!c) return;
+  const b = e.target.closest("[data-fa]");
+  if (b && b.dataset.fa === "reint") { const n = (db.bn || 0) + 1; db.bn = n; Object.assign(c, { estado: "pendiente", bloque: n, motivo: "", cola: Date.now() }); guardar(); aviso("Reintentando…"); pintaExplorar(); return correr(); }
+  if (b) { accionFeed(c, b.dataset.fa); const q = art.querySelector(".xq"); if (q) { q.classList.toggle("on", uso(c) === "quiero"); } return; }
+  if (c.estado === "revisar") { abrir(c.url); return; }
+  abrirLector(c.id);
+});
+
+// ---- Mi lista: lo que quieres añadir a tu PC / Claude Code ----
+function filaLista(c) {
+  const cm = comandos(c), hecho = uso(c) === "hecho", f = fotosDe(c, usoImgs());
+  return `<div class="lr${hecho ? " hecho" : ""}" data-id="${esc(c.id)}"><button class="lchk" data-li="hecho" aria-pressed="${hecho}" aria-label="${hecho ? "Hecho" : "Marcar como hecho"}">${hecho ? ICF.ok : ""}</button>
+<div class="lmi gl" data-gid="${esc(c.id)}">${f.length ? "" : portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
+<button class="ltx" data-li="abrir"><b>${esc(tituloVis(c))}</b><span>${esc(String(c.sirve || "").replace(/^sirve para:?\s*/i, "") || primeraFrase(c.resumen))}</span>${cm.length ? `<code>${esc(cm[0])}</code>` : ""}<i>${esc(etqAñadida(c))} · ${esc(temaFicha(c))}</i></button>
+<div class="lac">${c.fav ? '<span class="sl pg">★</span>' : ""}<button class="btn sm" data-li="quitar" title="Quitar de mi lista">Quitar</button></div></div>`;
+}
+function pintaLista() {
+  const ok = db.cards.filter(c => c.estado === "ok"), por = ok.filter(c => (uso(c) === "quiero" || c.fav) && uso(c) !== "hecho" && uso(c) !== "descartada"), hechas = ok.filter(c => uso(c) === "hecho");
+  const cols = (db.cols || []).map(x => [x, ok.filter(c => (c.cols || []).includes(x.id))]).filter(x => x[1].length), tot = por.length + hechas.length;
+  por.sort((a, b) => (!!b.fav - !!a.fav) || añadida(b) - añadida(a));
+  $("#lista2").innerHTML = `<div class="lhd"><div><h2>Mi lista</h2><p>${tot ? `${hechas.length} de ${tot} hechas` : "Aún está vacía"}</p></div>${por.length ? '<button class="btn pri" data-li="cc">Pasar a Claude Code</button>' : ""}</div>
+${tot ? `<div class="barra"><i style="width:${Math.round(hechas.length / Math.max(1, tot) * 100)}%"></i></div>` : ""}
+${por.length ? `<h3 class="lt">Por añadir (${por.length})</h3>${por.map(filaLista).join("")}` : `<div class="fvac"><b>Aquí va lo que quieres instalar o probar</b>Pulsa ♥ o ★ en cualquier post y aparece aquí. Luego lo pasas a Claude Code con un botón.<br><br><button class="btn pri" data-li="ini">Ver mis posts</button></div>`}
+${cols.map(([x, cs]) => `<details class="lcol" open><summary>${IC.chev}<span class="cn">🔖 ${esc(x.n)}</span><b>${cs.length}</b></summary>${cs.map(filaLista).join("")}</details>`).join("")}
+${hechas.length ? `<details class="lcol"><summary>${IC.chev}<span class="cn">✓ Hecho</span><b>${hechas.length}</b></summary>${hechas.map(filaLista).join("")}</details>` : ""}`;
+  rellenaGalerias($("#lista2"));
+}
+$("#lista2").addEventListener("click", e => {
+  const b = e.target.closest("[data-li]"); if (!b) return; const a = b.dataset.li;
+  if (a === "ini") return ir("feed");
+  if (a === "cc") { const cs = db.cards.filter(c => c.estado === "ok" && (uso(c) === "quiero" || c.fav) && uso(c) !== "hecho" && uso(c) !== "descartada"); return abrirCC(cs); }
+  const r = b.closest(".lr"), c = r && db.cards.find(x => x.id === r.dataset.id); if (!c) return;
+  if (a === "abrir") return abrirLector(c.id);
+  if (a === "hecho") { const antes = uso(c); c.estadoUso = antes === "hecho" ? "quiero" : "hecho"; guardar(); pintaLista(); return aviso(c.estadoUso === "hecho" ? "✓ Hecho" : "Vuelve a «Por añadir»", false, () => { c.estadoUso = antes; guardar(); pintaLista(); }); }
+  if (a === "quitar") { const a0 = uso(c), f0 = c.fav; c.estadoUso = "nuevo"; c.fav = false; guardar(); pintaLista(); return aviso("Quitado de tu lista", false, () => { c.estadoUso = a0; c.fav = f0; guardar(); pintaLista(); }); }
+});
+
+// ---- Inicio: lotes como «historias» arriba, y en cada post cuándo lo añadiste ----
+function historiasHtml() {
+  const ls = lotesLista().filter(l => l.ok).slice(0, 15); if (!ls.length) return "";
+  const bola = (n, et, sub, on, img) => `<button class="hi${on ? " on" : ""}" data-hl="${n}"><span class="hb2">${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<em>${esc(et)}</em></span><small>${esc(sub)}</small></button>`;
+  const img = n => { const c = db.cards.find(c => loteDe(c) === n && c.estado === "ok" && (c.imgs || []).length); return c ? fotosDe(c, usoImgs())[0] : ""; };
+  return bola("", "Todo", "Todos", feedLote == null, "") + ls.map(l => { const L = (db.lotes || {})[l.n], t = L && L.t; return bola(l.n, String(l.ok), t ? fechaCorta(t, true) : "Sin fecha", feedLote === l.n, img(l.n)); }).join("");
+}
+$("#hist").addEventListener("click", e => { const b = e.target.closest("[data-hl]"); if (!b) return; feedLote = b.dataset.hl === "" ? null : Number(b.dataset.hl); feedModo = feedLote == null ? "ti" : "ultimo"; resetOrden(); pintaFeed(); $("main").scrollTop = 0; });
+
+// ---- el informe se completa solo con la IA: pros y contras, dificultad, traducción del texto original ----
+let completando = false;
+async function completarInforme(c, aMano) {
+  if (!hayIA() || !c || c.estado !== "ok") return false;
+  const material = [c.titulo, c.resumen, c.detalle, (c.puntos || []).join("\n"), (c.skills || []).join("\n"), (c.como || []).join("\n"), c.limites, ...(c.repos || []).map(r => r.full + ": " + (r.desc || ""))].filter(Boolean).join("\n").slice(0, 3500);
+  const orig = String(c.texto || "").replace(/\[(VOZ|TEXTO|LO QUE)[^\]]*\]/g, "\n").trim().slice(0, 2500);
+  const j = await chatJson(`Eres un analista que ayuda a decidir si merece la pena instalar o probar algo. Usa SOLO el material; si algo no está, déjalo vacío. Responde SOLO JSON:
+{"pros":["2 a 4 ventajas concretas que salen del material"],"contras":["0 a 3 pegas, límites o requisitos que salen del material (no inventes)"],"dificultad":"Fácil | Media | Difícil | (vacío si no se sabe)","tipo":"UNO de: Skill | Plugin | Servidor MCP | App | Web | Repositorio | Curso | Idea | Otro","para_quien":"una frase: a quién le sirve","traduccion":"si el TEXTO ORIGINAL está en otro idioma, tradúcelo al español completo y claro; si ya está en español o no hay, cadena vacía"}
+MATERIAL:
+${material}
+TEXTO ORIGINAL DEL POST:
+${orig || "(no hay)"}`);
+  if (!j) { if (aMano) aviso("La IA no respondió ahora. Prueba otra vez en un rato."); return false; }
+  const base = material + " " + orig, lim = (a, n) => Array.isArray(a) ? a.map(x => corrige(String(x || "").trim())).filter(x => x.length > 3 && fundado(x, base)).slice(0, n) : [];
+  c.pros = lim(j.pros, 4); c.contras = lim(j.contras, 3);
+  c.dificultad = ["Fácil", "Media", "Difícil"].find(x => sinAcentos(x) === sinAcentos(String(j.dificultad || "").trim())) || "";
+  c.tipoCosa = String(j.tipo || "").slice(0, 30); c.paraQuien = corrige(String(j.para_quien || "").slice(0, 200));
+  if (j.traduccion && orig && String(j.traduccion).length > 20) c.trad = String(j.traduccion).slice(0, 3000);
+  c.informeV = 1; guardar(); return true;
+}
+async function completarPendientes() { // de una en una, en segundo plano, sin estorbar a un lote
+  if (completando || corriendo || !hayIA()) return; completando = true;
+  try { for (const c of db.cards.filter(x => x.estado === "ok" && !x.informeV && !x.informeProb).slice(0, 12)) { if (corriendo) break; c.informeProb = 1; await completarInforme(c); if (lectorId === c.id) pintaLector(); await dormir(800); } } catch (e) { }
+  completando = false;
+}
+setInterval(() => { if (!document.hidden) completarPendientes(); }, 90000);
+
+// ---- el informe de cada post, como una página web ordenada ----
+function veredicto(c) {
+  const p = paraTi(c, aprendizaje()), sl = sellos(c).map(x => x[1]), por = [...p.raz];
+  if (sl.includes("Gratis") || sl.includes("Código abierto")) por.push("es gratis"); if (sl.includes("Activo")) por.push("se sigue actualizando");
+  if (sl.includes("De pago")) por.push("ojo: es de pago"); if (sl.includes("Viejo") || sl.includes("Abandonado")) por.push("ojo: lleva tiempo sin actualizarse");
+  const k = p.s >= 9 ? ["si", "Sí, encaja contigo"] : p.s >= 4 ? ["puede", "Puede interesarte"] : ["no", "No parece para ti"];
+  return { k: k[0], t: k[1], por: [...new Set(por)].slice(0, 4) };
+}
+function datoRapido(t, v) { return `<div class="dr"><span>${t}</span><b>${esc(v || "—")}</b></div>`; }
+function lectorHtml(c) {
+  const cm = comandos(c), r = (c.repos || [])[0], sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim(), vio = c.vio || {}, ve = veredicto(c), sl = sellos(c), er = r && estadoRepo(r);
+  const f = fotosDe(c, usoImgs()), L = (db.lotes || {})[loteDe(c)];
+  const lis = (a, ord) => `<${ord ? "ol" : "ul"}>${a.map(x => `<li>${esc(x)}</li>`).join("")}</${ord ? "ol" : "ul"}>`;
+  const precio = (sl.find(x => ["Gratis", "Código abierto", "De pago"].includes(x[1])) || [])[1] || "";
+  const dif = c.dificultad || (cm.length ? "Fácil (hay comando)" : r ? "Media (sigue su README)" : "");
+  const leido = [vio.voz ? "la voz del vídeo" : "", vio.imgs ? "el texto de las imágenes" : "", vio.frames ? "lo que se ve en el vídeo" : "", r ? "el README del repo" : ""].filter(Boolean);
+  const secc = [["que", "Qué es"], ["video", "Lo que dice el post"], ["como", "Cómo empezar"], ["pros", "Pros y contras"], ["links", "Links"]];
+  const links = listaLinks(c).map(l => /(^|\/\/)(t\.me|telegram\.me)\//i.test(l.u) ? { ...l, cls: "tg", ic: IC.tg, t: "Telegram" } : l);
+  if (!r && c.tipo !== "GitHub") links.push({ cls: "bs", ic: IC.lupa, t: "Buscar «" + tituloVis(c).replace(/[:|–—].*$/, "").trim() + "» en GitHub", u: "https://github.com/search?q=" + encodeURIComponent(tituloVis(c).replace(/[:|–—].*$/, "").trim()) + "&type=repositories" });
+  return `<div class="ihero"><div class="igal"><div class="gl lgl" data-gid="${esc(c.id)}">${f.length ? "" : portadaHtml(c)}${f.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div></div>
+<div class="ihead"><div class="fsl">${sl.map(([k, t]) => `<span class="sl ${k}">${esc(t)}</span>`).join("")}<span class="sl">${esc(temaFicha(c))}</span></div>
+<h1>${esc(tituloVis(c))}</h1>${sv ? `<p class="lsv">${esc(mayus(sv))}</p>` : ""}
+<div class="ver v-${ve.k}"><b>¿Te interesa? ${ve.t}</b>${ve.por.length ? `<span>${esc(mayus(ve.por.join(", ")))}.</span>` : ""}${c.paraQuien ? `<span>${esc(c.paraQuien)}</span>` : ""}</div>
+<div class="drs">${datoRapido("Precio", precio)}${datoRapido("Actualizado", er ? er.t.replace(/^[^\wÁ-ú]+/, "") : "")}${datoRapido("Dificultad", dif)}${datoRapido("Tipo", c.tipoCosa || c.accion || "")}</div>
+<div class="iacc fbt">${botonesHtml(c, true)}</div></div></div>
+<div class="inav" role="navigation" aria-label="Secciones">${secc.map(([k, t]) => `<a href="#i-${k}" data-ir="i-${k}">${t}</a>`).join("")}</div>
+<div class="lcu">
+<section id="i-que"><h4>Qué es</h4><p>${esc(c.detalle || c.resumen || "El post no lo explica bien: ábrelo con el botón de Instagram.")}</p></section>
+<section id="i-video"><h4>Lo que dice el post</h4>${(c.puntos || []).length ? lis(c.puntos) : ""}${(c.skills || []).length ? `<p class="sub">Skills o plugins que propone:</p>${lis(c.skills)}` : ""}
+${c.trad ? `<div class="trad"><p class="sub">Traducido al español</p><p>${esc(c.trad)}</p>${c.texto ? `<details><summary>Ver el texto original</summary><p class="orig">${esc(c.texto)}</p></details>` : ""}</div>` : c.texto ? `<details class="trad"><summary>Ver el texto original del post</summary><p class="orig">${esc(c.texto)}</p></details>` : ""}
+${!(c.puntos || []).length && !c.trad && !c.texto ? '<p class="nota">No hay más texto de este post.</p>' : ""}</section>
+<section id="i-como"><h4>Cómo empezar</h4>${(c.como || []).length ? lis(c.como, true) : ""}${cm.filter(x => !(c.como || []).includes(x)).map(x => `<div class="lcmd"><code>${esc(x)}</code><button class="btn sm" data-lc="${esc(x)}">Copiar</button></div>`).join("")}${!(c.como || []).length && !cm.length ? `<p>${r ? `Abre su GitHub (${esc(r.full)}) y sigue el README.` : (c.links || []).length ? "Abre su web (abajo) y mira cómo se instala." : "El post no dice cómo instalarlo: ábrelo y mira los comentarios."}</p>` : ""}${c.limites ? `<p class="sub">Requisitos: ${esc(c.limites)}</p>` : ""}</section>
+<section id="i-pros"><h4>Pros y contras</h4>${(c.pros || []).length || (c.contras || []).length ? `<div class="pc"><div><b>A favor</b>${lis(c.pros || [])}</div><div><b>En contra</b>${(c.contras || []).length ? lis(c.contras) : "<p>El post no dice ninguna pega.</p>"}</div></div>` : hayIA() ? `<p class="nota">${c.informeProb && !c.informeV ? "La IA lo está preparando…" : "Aún no está hecho."}</p><button class="btn" data-l="completar">Completar el informe con la IA</button>` : '<p class="nota">Pon una clave de IA en Ajustes para que se haga solo.</p>'}</section>
+<section id="i-links"><h4>Links</h4><div class="enl gr">${links.map(l => aHtml(l, "lk", true)).join("")}</div></section>
+${c.notas ? `<section><h4>Tus notas</h4><div class="notas">${esc(c.notas)}</div></section>` : ""}
+<div class="ipie"><p>${esc(etqAñadida(c))}${loteDe(c) ? " · " + esc(etqLote(loteDe(c)).replace(/ · .*$/, "")) : ""}${L && L.dev ? " · desde el " + esc(L.dev) : ""}${leido.length ? ". Lo he sacado de " + esc(leido.join(", ")) : ""}.</p>
+<div class="acs"><button class="btn" data-l="editar">Editar / escribir notas</button><button class="btn" data-l="claude">Pasar a Claude Code</button><button class="btn" data-l="borrar" style="grid-column:1/-1;color:var(--bad)">Borrar</button></div></div></div>`;
+}
+function pintaLector() {
+  const c = db.cards.find(x => x.id === lectorId); if (!c) return;
+  const C = $("#lectC"), y = C.scrollTop; C.innerHTML = lectorHtml(c); $("#lector .lbar").innerHTML = botonesHtml(c, true); rellenaGalerias(C); C.scrollTop = y;
+  $("#lTit").textContent = tituloVis(c);
+  const i = (feedOrden || []).indexOf(c.id); $("#lSig").disabled = !(feedOrden && i >= 0 && i < feedOrden.length - 1); $("#lAnt").disabled = !(feedOrden && i > 0);
+  if (!c.informeV && !c.informeProb && hayIA()) { c.informeProb = 1; completarInforme(c).then(ok => { if (ok && lectorId === c.id) pintaLector(); }); }
+}
+function pasoLector(d) { const i = (feedOrden || []).indexOf(lectorId), j = i + d; if (i < 0 || j < 0 || j >= feedOrden.length) return; pila[pila.length - 1].id = feedOrden[j]; lectorId = feedOrden[j]; const c = db.cards.find(x => x.id === lectorId); if (c) { c.leida = Date.now(); guardar(); } $("#lectC").scrollTop = 0; pintaLector(); }
+$("#lector").addEventListener("click", async e => {
+  const c = db.cards.find(x => x.id === lectorId); if (!c) return;
+  const l = e.target.closest("[data-l]"), cp = e.target.closest("[data-lc]"), fa = e.target.closest("[data-fa]"), sec = e.target.closest("[data-ir]");
+  if (sec) { e.preventDefault(); const s = $("#" + sec.dataset.ir); if (s) s.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  if (cp) return copiar(cp.dataset.lc);
+  if (fa) { accionFeed(c, fa.dataset.fa); return; }
+  if (!l) return; const a = l.dataset.l;
+  if (a === "cerrar") return atrasUI();
+  if (a === "sig") return pasoLector(1);
+  if (a === "ant") return pasoLector(-1);
+  if (a === "editar") return abrirEditor(c);
+  if (a === "claude") return abrirCC([c]);
+  if (a === "completar") { l.disabled = true; l.textContent = "Preparando…"; await completarInforme(c, true); return pintaLector(); }
+  if (a === "borrar") { if (await confirmar("Borrar", `<p>¿Borrar «${esc(tituloVis(c).slice(0, 70))}»?</p>`, "Borrar")) { db.cards = db.cards.filter(x => x !== c); guardar(); atrasUI(); pintar(); } }
+});
+document.addEventListener("keydown", e => { if (!lectorId || editando || $("#dcc").open || $("#dCol").open) return; if (e.key === "ArrowRight") pasoLector(1); if (e.key === "ArrowLeft") pasoLector(-1); });
 // arranque: lotes, nombres corregidos, duplicados unidos (con Deshacer) y fotos guardadas, solos
 { let cambio = 0; { const vis = new Set(); for (const c of db.cards) { if (!c.id || vis.has(c.id)) { c.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7); cambio = 1; } vis.add(c.id); } } // ids repetidos (las fichas de ejemplo venían todas con «t»)
   cambio = migraLotes() || cambio; if (db.corrV !== 1) { db.cards.forEach(corrigeCard); db.corrV = 1; cambio = 1; } if (cambio) guardar(); }
@@ -2295,7 +2634,8 @@ db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se r
 migrarCats(); pintar(); detectar(); { try { const u = deshacerVivo(); if (u) aviso("Se unieron " + u.gr.reduce((n, g) => n + g.orig.length - 1, 0) + " repetidas hace poco"); } catch (e) { } } if (db.usarSemilla) cargarSemilla(); // las fichas de ejemplo ya no se cargan solas
 if (db.cards.some(c => c.estado === "pendiente")) { const n = (db.bn || 0) + 1; db.bn = n; sesionDesde = n; db.cards.forEach(c => { if (c.estado === "pendiente") c.bloque = n; }); guardar(); pintaBloques(); aviso("Quedaban links a medias: continúo."); correr(); }
 reconciliar = true;
-if (!corriendo && db.cards.some(c => c.estado === "ok")) cambiaTab("feed"); else pintaLotesHist();
+if (!corriendo && db.cards.some(c => c.estado === "ok")) ir("feed"); else ir("pegar");
+setTimeout(() => completarPendientes(), 8000);
 if (db.unirV !== "2026-10-21") { db.unirV = "2026-10-21"; guardar(); setTimeout(() => { if (!corriendo) unirRepetidas(); }, 1200); }
 setTimeout(() => { if (!corriendo) minisAtrasadas(); }, 4000);
 pintaSync(); if (syncOn()) setTimeout(() => sincronizar(), 2500);
