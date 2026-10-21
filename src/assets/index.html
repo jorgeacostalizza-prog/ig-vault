@@ -239,6 +239,54 @@ a.li.roto{opacity:.45}
 #hojaF select{width:100%;min-height:48px;margin:2px 0;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 15px system-ui;padding:0 12px}
 @media(min-width:900px){.rw:hover .ri{background:var(--s1)}#hojaF{margin:auto;border-radius:18px}}
 @media(prefers-reduced-motion:reduce){.ri{transition:none}}
+
+/* ---- Inicio (feed tipo red social), lotes con fecha y etiquetas — 21/10/2026 ---- */
+#p-feed{max-width:640px;margin:0 auto}
+.fbar{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin:4px 0 8px;padding-bottom:2px}
+.fbar::-webkit-scrollbar{display:none}
+.fbar button,.fbar select{flex:none;min-height:42px;padding:0 14px;border-radius:21px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 13.5px system-ui;white-space:nowrap}
+.fbar button.on,.fbar select.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.fhd{display:flex;align-items:center;gap:10px;margin:22px 2px 8px;font:700 14px system-ui;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.fhd::after{content:"";flex:1;height:1px;background:var(--ln)}
+.fc{background:var(--s1);border:1px solid var(--ln);border-radius:18px;margin:0 0 16px;overflow:hidden}
+.fcab{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 14px 8px}
+.sl{font:700 11.5px/1 system-ui;padding:5px 9px;border-radius:20px;border:1px solid var(--ln);color:var(--mut);background:var(--s2)}
+.sl.ti{background:var(--ac);border-color:var(--ac);color:var(--acx)}
+.sl.gr{color:var(--ok);border-color:var(--ok)}
+.sl.ac{color:var(--ok);border-color:var(--ln)}
+.sl.vj{color:var(--bad);border-color:var(--bad)}
+.sl.pg{color:var(--warn);border-color:var(--warn)}
+.gl{position:relative;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;background:var(--s2);height:240px}
+.gl::-webkit-scrollbar{display:none}
+.gl img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center;display:block}
+.gl img.cont{object-fit:contain;background:#000}
+.gn{position:relative;margin-top:-30px;margin-left:auto;margin-right:10px;width:max-content;font:700 12px system-ui;background:#000a;color:#fff;border-radius:12px;padding:3px 9px;pointer-events:none}
+.gn:empty{display:none}
+.fcb{padding:12px 14px 4px}
+.fcb h3{margin:0 0 6px;font-size:19px;line-height:1.3}
+.fsv{margin:0 0 8px;font-weight:600;font-size:15.5px}
+.frs{margin:0 0 8px;font-size:15px;color:var(--tx);opacity:.88;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.fpq{margin:0 0 6px;font-size:13px;color:var(--warn)}
+.fc details{margin:4px 0 6px;border:1px solid var(--ln);border-radius:14px;background:var(--bg)}
+.fc details summary{position:static;min-height:46px;padding:0 14px;font-size:15px;background:none;border-radius:14px}
+.guia{margin:0;padding:2px 16px 12px 34px}.guia li{margin:10px 0;font-size:14.5px}.guia li b{display:block;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+.guia ul{margin:4px 0 0 18px;padding:0}.guia ul li{margin:3px 0}
+.fl{display:flex;flex-wrap:wrap;gap:7px;padding:4px 14px 10px}
+.fl a{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 13.5px system-ui;text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fl a svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fl a.ig{border-color:#c13584}.fl a.gh{border-color:var(--ok)}.fl a.tg{border-color:#2aabee}.fl a.bs{border-style:dashed;color:var(--mut)}
+.fa{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:4px 14px 14px}
+.fa .btn{min-height:46px;font-size:14px;padding:0 6px}
+.fa .btn.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.fvac{text-align:center;color:var(--mut);padding:40px 12px}.fvac b{display:block;color:var(--tx);font-size:18px;margin-bottom:6px}
+.lts{margin:18px 0 0}
+.lts h3{font-size:14px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin:0 2px 6px}
+.ltr{display:flex;align-items:center;gap:10px;min-height:54px;border-bottom:1px solid var(--ln);padding:4px 2px}
+.ltr div{flex:1;min-width:0}.ltr b{display:block;font-size:15px}.ltr span{font-size:13px;color:var(--mut)}
+.ltr .btn{flex:none;min-height:42px;font-size:14px}
+.det-gl{border-radius:14px;margin:8px 0;height:200px}
+.fmas{display:block;width:100%;margin:6px 0 24px}
+@media(min-width:900px){.gl{height:340px}#p-feed{max-width:680px}}
 </style>
 </head>
 <body>
@@ -260,7 +308,13 @@ a.li.roto{opacity:.45}
       <button class="btn sm" id="bParar">Pausar</button>
     </div>
     <div id="bloques"></div>
-    <div class="nota" id="notaLote" style="display:none">Puedes pegar otro lote mientras trabaja: se añade como bloque nuevo.</div>
+    <div class="nota" id="notaLote" style="display:none">Puedes pegar otro lote mientras trabaja: se añade como lote nuevo.</div>
+    <div class="lts" id="lotesHist"></div>
+  </section>
+
+  <section class="pan" id="p-feed">
+    <div class="fbar" id="fbar" role="group" aria-label="Qué ver"></div>
+    <div id="feed"></div>
   </section>
 
   <section class="pan" id="p-fichas">
@@ -301,6 +355,9 @@ a.li.roto{opacity:.45}
     <input type="password" id="kGq" autocomplete="off" placeholder="gsk_… (solo PC/web; en el móvil ya va incluida)">
     </details>
     <div class="nota">Las claves se quedan solo en este dispositivo.</div>
+    <label for="kInt">Lo que te interesa (para «Para ti»)</label>
+    <textarea id="kInt" class="hcamp" rows="3" style="min-height:84px" placeholder="claude code, skills, mcp, agentes, windows, gratis…"></textarea>
+    <div class="nota">Separado por comas. Además aprende de lo que marcas «Lo quiero» y «Descartar».</div>
     <div class="fila">
       <button class="btn pri" id="bGuardar">Guardar y probar</button>
     </div>
@@ -340,6 +397,7 @@ a.li.roto{opacity:.45}
   <div id="hojaP"><button class="btn" id="hNo">Cancelar</button><button class="btn pri" id="hSi">Guardar</button></div>
 </div>
 <nav>
+  <button data-t="feed"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Inicio</button>
   <button data-t="pegar" class="on"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Pegar</button>
   <button data-t="fichas"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>Fichas</button>
   <button data-t="ajustes"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>Ajustes</button>
@@ -607,6 +665,7 @@ async function leerFrames(urlVideo) {
   else { await srvListo; if (!SRV) return []; r = await postSrv("/api/frames", { url: urlVideo, n: 4 }); }
   return r && r.status === 200 && Array.isArray(r.frames) ? r.frames : [];
 }
+let partesFrames = []; const fotosTmp = new Map(); // fotogramas del link que se está leyendo (se guardan como miniaturas, no en las fichas)
 const PROMPT_VIDEO = "Es un fotograma de un vídeo (reel). Transcribe TODO el texto visible (títulos, listas, código, comandos, URLs, nombres de repos y herramientas) y di en una frase qué se muestra (app, web, terminal, diapositiva…). No inventes nada. Si solo hay una persona hablando sin texto, responde únicamente: persona hablando.";
 // hasta 3 imágenes del post (portada/carrusel), sin tocar la parte nativa
 async function imgsIG(base) {
@@ -646,6 +705,7 @@ async function leerImgs(imgs, prompt = PROMPT_FOTO, max = 3) {
     return null;
   }));
   const partes = await Promise.all(imgs.slice(0, max).map(una)); // las imágenes de una ficha, a la vez
+  if (prompt === PROMPT_VIDEO) partesFrames = partes; // para elegir los fotogramas que enseñan algo (no «persona hablando»)
   return partes.filter(Boolean).join(String.fromCharCode(10));
 }
 async function leerYT(url) {
@@ -759,7 +819,8 @@ async function analizar(card, textoManual) {
     soloGancho = card.tipo === "Instagram" && !texto.replace(/^Comentarios:.*$/mi, "").trim();
     if (l.imgs && l.imgs.length) card.imgs = l.imgs;
     if (l.video || (l.imgs && l.imgs.length)) paso(card, "Mirando el vídeo y las imágenes…");
-    const [vz, vi, fr] = await Promise.all([l.video ? leerVoz(l.video) : null, l.imgs && l.imgs.length ? leerImgs(l.imgs) : null, l.video ? leerFrames(l.video).then(f => f.length ? leerImgs(f, PROMPT_VIDEO, 4) : "") : null]); // a la vez: ahorra segundos
+    let [vz, vi, fr] = await Promise.all([l.video ? leerVoz(l.video) : null, l.imgs && l.imgs.length ? leerImgs(l.imgs) : null, l.video ? leerFrames(l.video).then(f => { fotosTmp.set(card.id, f); return f.length ? leerImgs(f, PROMPT_VIDEO, 4) : ""; }) : null]); // a la vez: ahorra segundos
+    if (vz) vz = corrige(vz); // la voz transcribe mal los nombres («Cloud Code» = Claude Code)
     if (l.video) card.voz = vz ? "sí" : "no";
     const vf = (fr || "").split("\n").filter(x => x.trim() && !/^persona hablando/i.test(x.trim())).join("\n");
     card.vio = { voz: !!vz, imgs: !!vi, video: !!l.video, frames: !!vf };
@@ -790,7 +851,7 @@ async function analizar(card, textoManual) {
     paso(card, "Pidiendo el resumen a la IA…");
     ai = await chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
 {"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"1 o 2 frases en español claro (MÁXIMO 220 caracteres): QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null","subtipo":"solo si categoria es Inteligencia artificial y el contenido lo deja claro: UNO de ${SUBTIPOS.join(" | ")}; si no está claro, cadena vacía","sirve":"UNA línea llana (MÁXIMO 110 caracteres) que empiece por un verbo: para qué le sirve a quien la guarda, SOLO según el contenido; si no se sabe, cadena vacía","sirve_cita":"cita corta TEXTUAL (MÁXIMO 120 caracteres, en el IDIOMA ORIGINAL de la fuente, sin traducir) copiada letra por letra del contenido, que respalde «sirve»; si no hay, cadena vacía","sirve_fuente":"de dónde copiaste la cita: pie | voz | fotogramas | repo","accion":"Instalar (si el contenido da forma de instalarlo) | Probar (si se puede probar sin instalar) | Solo guardar (si no hay base clara)"}
-Reglas (0) «sirve» y «accion» salen SOLO del pie del post, de la VOZ del vídeo, del texto leído en imágenes/fotogramas o del README (cualquiera de esas fuentes vale; no hace falta que el pie lo diga); sin base en ninguna: "sirve":"" y "accion":"Solo guardar". (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) Si no hay información útil: "resumen":"" y "categoria":"Otros".
+Reglas (0) «sirve» y «accion» salen SOLO del pie del post, de la VOZ del vídeo, del texto leído en imágenes/fotogramas o del README (cualquiera de esas fuentes vale; no hace falta que el pie lo diga); sin base en ninguna: "sirve":"" y "accion":"Solo guardar". (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) Si no hay información útil: "resumen":"" y "categoria":"Otros". (6) La voz transcrita confunde nombres: «Cloud Code» es Claude Code, «Cloud» junto a skills/plugins/MCP es Claude, «MSP» es MCP. Escribe el nombre correcto.
 CONTENIDO:
 ${ctx}`);
     if (ai && !repos.length) { // propuestas de la IA: solo valen si GitHub confirma que existen
@@ -839,6 +900,7 @@ ${ctx}`);
   else if (!ai && ctx.trim()) { card.sinIA = "No hubo resumen de la IA: " + iaTexto() + ". Ordenada con lo que había"; card.detalleTecnico = iaError.slice(0, 160); }
   if (ghAviso) card.motivo = (card.motivo ? card.motivo + " · " : "") + ghAviso;
   if (!texto.trim() && !r0) { card.estado = "revisar"; card.categoria = "Para revisar"; card.motivo = card.motivo || (soloGancho ? "Instagram no dejó leer el contenido: abre el enlace" : "No encontré texto en este link"); }
+  corrigeCard(card); card.hecha = card.hecha || Date.now();
   return card;
 }
 
@@ -899,6 +961,7 @@ async function investigar(card, repos, ai, texto) {
   if (r0 && imgs.length < 3) imgs.push("https://opengraph.githubassets.com/1/" + r0.full); // tarjeta del repo (siempre existe)
   card.imgs = [...new Set([...(card.imgs || []), ...imgs])].slice(0, 8); // primero las del post, luego repo/web: nunca se pierden
   card.links = links;
+  linksDelTexto(card, texto); // Telegram, Discord, GitHub, webs… que el propio post escribe
   // si no hay ningún link (o solo el repo), se buscan y comprueban las webs oficiales de lo que menciona
   const hb = new Set((card.links || []).map(l => l.u.replace(/\/$/, "").toLowerCase()));
   if (hb.size < 2 || (hb.size === 1 && r0)) { paso(card, "Buscando links…"); await buscarLinksOficiales(card); }
@@ -1001,7 +1064,7 @@ function candidatos(card) {
   for (const m of txt.matchAll(/\b([A-ZÁÉÍÓÚÑ]{3,12})\b/g)) push(m[1]);
   return out.filter(n => { const k = sinAcentos(n).replace(/[^a-z0-9]/g, ""); return k.length >= 4 && !BASURA.test(n) && !/^\d+$/.test(k); });
 }
-const etiquetaDe = u => { const h = (() => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } })(); if (/^github\.com$/.test(h)) return "GitHub"; if (/npmjs\.com$/.test(h)) return "npm"; if (/pypi\.org$/.test(h)) return "PyPI"; if (/\.readthedocs\.io$|docs?\./.test(h)) return "Docs"; if (/youtu\.be|youtube\.com/.test(h)) return "Vídeo"; if (/medium\.com|substack\.com|dev\.to|hashnode/.test(h)) return "Artículo"; return "Web oficial"; };
+const etiquetaDe = u => { const h = (() => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } })(); if (/^github\.com$/.test(h)) return "GitHub"; if (/^(t\.me|telegram\.me|telegram\.org)$/.test(h)) return "Telegram"; if (/discord\.(gg|com)$/.test(h)) return "Discord"; if (/huggingface\.co$/.test(h)) return "Hugging Face"; if (/npmjs\.com$/.test(h)) return "npm"; if (/pypi\.org$/.test(h)) return "PyPI"; if (/\.readthedocs\.io$|docs?\./.test(h)) return "Docs"; if (/youtu\.be|youtube\.com/.test(h)) return "Vídeo"; if (/medium\.com|substack\.com|dev\.to|hashnode/.test(h)) return "Artículo"; return "Web oficial"; };
 // Rellena card.links con los links oficiales comprobados de lo que menciona la ficha.
 async function buscarLinksOficiales(card, { forzar = false } = {}) {
   if (!card || card.estado === "pendiente") return [];
@@ -1035,14 +1098,15 @@ let editando = null, masId = null;
 const seccionDe = (g, c) => String(g || "AI").trim() + " \u0001 " + String(c || "Sin clasificar").trim();
 function secciones() {
   const m = new Map();
-  for (const c of db.cards) m.set(seccionDe(c.grupo, c.categoria), { g: c.grupo || "AI", c: c.categoria || "Sin clasificar", n: 0 });
-  for (const v of m.values()) v.n = db.cards.filter(c => seccionDe(c.grupo, c.categoria) === seccionDe(v.g, v.c)).length;
+  for (const t of TEMAS.map(x => x[0]).concat("Otros")) m.set(seccionDe("AI", t), { g: "AI", c: t, n: 0 });
+  for (const c of db.cards) if (c.estado === "ok") m.set(seccionDe(c.grupo, temaFicha(c)), { g: c.grupo || "AI", c: temaFicha(c), n: 0 });
+  for (const v of m.values()) v.n = db.cards.filter(c => c.estado === "ok" && seccionDe(c.grupo, temaFicha(c)) === seccionDe(v.g, v.c)).length;
   return [...m.values()].sort((a, b) => a.g.localeCompare(b.g, "es") || a.c.localeCompare(b.c, "es"));
 }
 function pintarDestino(sel) {
   const s = seccionDe($("#hGru").value, $("#hCat").value);
   const ls = secciones(); if (!ls.some(d => seccionDe(d.g, d.c) === s) && $("#hCat").value.trim()) ls.push({ g: $("#hGru").value.trim() || "AI", c: $("#hCat").value.trim(), n: 0 });
-  $("#hDest").innerHTML = ls.map(d => `<button data-g="${esc(d.g)}" data-c="${esc(d.c)}" class="${seccionDe(d.g, d.c) === s ? "on" : ""}">${esc(d.g)} › ${esc(d.c)} <span class="sema">${d.n}</span></button>`).join("") + `<button data-g="" data-c="">+ Nueva…</button>`;
+  $("#hDest").innerHTML = ls.map(d => `<button data-g="${esc(d.g)}" data-c="${esc(d.c)}" class="${seccionDe(d.g, d.c) === s ? "on" : ""}">${d.g !== "AI" ? esc(d.g) + " › " : ""}${esc(d.c)} <span class="sema">${d.n}</span></button>`).join("") + `<button data-g="" data-c="">+ Nueva…</button>`;
 }
 function pintarLinksHoja() {
   const l = (editando.links || []);
@@ -1053,7 +1117,7 @@ function abrirEditor(c) {
   $("#hT").textContent = "Editar ficha";
   $("#hTit").value = c.titulo === c.url ? "" : c.titulo || "";
   $("#hGru").value = c.grupo || "AI";
-  $("#hCat").value = c.categoria && c.categoria !== "Pendiente" ? c.categoria : "";
+  $("#hCat").value = c.estado === "ok" ? temaFicha(c) : "";
   $("#hRes").value = c.resumen || "";
   $("#hNota").value = c.notas || "";
   $("#hTags").value = (c.tags || []).map(t => String(t).replace(/^#/, "")).join(", ");
@@ -1074,7 +1138,7 @@ function guardarEditor() {
   const c = editando; if (!c) return;
   c.titulo = ($("#hTit").value.trim() || c.titulo || c.url).slice(0, 120);
   c.grupo = ($("#hGru").value.trim() || "AI");
-  c.categoria = ($("#hCat").value.trim() || "Sin clasificar");
+  { const t = $("#hCat").value.trim(); if (t) { c.categoria = t; if (t !== temaDe(c)) c.temaManual = t; else delete c.temaManual; } }
   c.resumen = $("#hRes").value.trim();
   c.notas = $("#hNota").value.trim();
   c.tags = normalizarTags($("#hTags").value.split(/[,\s]+/).filter(Boolean));
@@ -1085,8 +1149,8 @@ function guardarEditor() {
 function mover(c, g, cat) {
   if (!g && !cat) return;
   if (g) c.grupo = String(g).trim() || "AI";
-  if (cat) c.categoria = String(cat).trim() || "Sin clasificar";
-  c.manual = true; guardar(); pintar(); aviso("Movida a " + c.grupo + " › " + c.categoria);
+  if (cat) { c.categoria = String(cat).trim() || "Otros"; c.temaManual = c.categoria; }
+  c.manual = true; guardar(); pintar(); aviso("Movida a " + temaFicha(c));
 }
 async function pedirLinks(c, forzar = true) {
   if (!c) return;
@@ -1111,14 +1175,15 @@ const clavesDe = c => { const k = new Set([claveUrl(c.url), ...(c.extra || []).m
 const yaGuardada = u => { const k = claveUrl(u); return db.cards.find(c => clavesDe(c).has(k)); };
 const grupoActual = () => db.grupo || "AI"; // el grupo ya no se pide al pegar: se cambia desde Editar o Mover
 function encolar(links, bloque) {
-  let nuevos = 0, repes = 0;
+  let nuevos = 0, repes = 0; const dondeRepes = new Set();
   for (const u of links) {
     const ya = yaGuardada(u);
-    if (ya) { repes++; continue; }
-    db.cards.push({ bloque, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", cola: Date.now(), grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+    if (ya) { repes++; if (ya.lote) dondeRepes.add(ya.lote); continue; }
+    db.cards.push({ bloque, lote: bloque, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", cola: Date.now(), grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
     nuevos++;
   }
-  guardar(); return { nuevos, repes };
+  if (nuevos) { db.lotes = db.lotes || {}; const L = db.lotes[bloque] ||= { t: Date.now(), total: 0 }; L.total += nuevos; }
+  guardar(); return { nuevos, repes, dondeRepes: [...dondeRepes] };
 }
 const completa = c => (c.resumen || "").length + 40 * (c.links || []).length + 60 * (c.notas ? 1 : 0) + 30 * (c.imgs || []).length + (c.estado === "ok" ? 200 : 0) + (c.manual ? 100 : 0);
 function fusionar(arr) { // deja la ficha más completa y le pasa los links, imágenes y notas de las demás
@@ -1166,7 +1231,8 @@ function pintaBloques() {
   const hayCola = db.cards.some(c => c.bloque && c.bloque >= sesionDesde); $("#notaLote").style.display = hayCola ? "" : "none";
   $("#detect").style.display = hayCola || !$("#txt").value.trim() ? "none" : "";
   const bs = {}; db.cards.forEach(c => { if (c.bloque && c.bloque >= sesionDesde) { const b = bs[c.bloque] ||= { n: c.bloque, t: 0, h: 0 }; b.t++; if (c.estado !== "pendiente") b.h++; } });
-  $("#bloques").innerHTML = Object.values(bs).sort((x, y) => x.n - y.n).map(b => { const fin = b.h >= b.t, act = !fin && actual && actual.bloque === b.n; return `<div class="blq"><b>Bloque ${b.n}</b> · ${b.h}/${b.t} ${fin ? "✅ terminado" : act ? "· trabajando" : "· en cola"}<div class="barra"><i style="width:${fin || b.h ? Math.round(b.h / b.t * 100) : 4}%"></i></div>${act && atascado ? '<div class="nota" style="color:var(--warn)">Parece atascado: este link no avanza. Puedes reiniciarlo o quitar el bloque.</div>' : ""}${fin ? `<button class="btn pri" data-ver="1">Ver mis ${b.t} fichas</button>` : `<div class="fila">${act ? `<button class="btn sm" data-rb="${b.n}">Reiniciar</button>` : ""}<button class="btn sm" data-bq="${b.n}">Quitar</button></div>`}</div>`; }).join("");
+  $("#bloques").innerHTML = Object.values(bs).sort((x, y) => x.n - y.n).map(b => { const fin = b.h >= b.t, act = !fin && actual && actual.bloque === b.n; return `<div class="blq"><b>${esc(etqLote(b.n))}</b> · ${b.h}/${b.t} ${fin ? "✅ terminado" : act ? "· trabajando" : "· en cola"}<div class="barra"><i style="width:${fin || b.h ? Math.round(b.h / b.t * 100) : 4}%"></i></div>${act && atascado ? '<div class="nota" style="color:var(--warn)">Parece atascado: este link no avanza. Puedes reiniciarlo o quitar el lote.</div>' : ""}${fin ? `<button class="btn pri" data-ver="${b.n}">Ver este lote (${b.t})</button>` : `<div class="fila">${act ? `<button class="btn sm" data-rb="${b.n}">Reiniciar</button>` : ""}<button class="btn sm" data-bq="${b.n}">Quitar</button></div>`}</div>`; }).join("");
+  pintaLotesHist();
 }
 async function correr() {
   if (corriendo) return; corriendo = true; pausado = false; $("#prog").style.display = "flex"; $("#bParar").textContent = "Pausar"; muertos = {}; etqOrdenar();
@@ -1180,25 +1246,37 @@ async function correr() {
     pintaBloques();
     const suelto = new Promise(r => { soltar = r; }); let cortado = false;
     try { await Promise.race([analizar(c), suelto.then(() => { cortado = true; })]); } catch (e) { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = "No pude procesar este link. Prueba «Reintentar»"; c.detalleTecnico = String(e).slice(0, 160); }
-    if (cortado) { const i = db.cards.indexOf(c); if (i >= 0 && c.reiniciar) db.cards[i] = { ...copia, estado: "pendiente" }; actual = null; guardar(); pintar(); pintaBloques(); continue; } // reiniciado o quitado: lo que el intento viejo siga haciendo ya no cuenta
+    if (cortado) { fotosTmp.delete(c.id); const i = db.cards.indexOf(c); if (i >= 0 && c.reiniciar) db.cards[i] = { ...copia, estado: "pendiente" }; actual = null; guardar(); pintar(); pintaBloques(); continue; } // reiniciado o quitado: lo que el intento viejo siga haciendo ya no cuenta
     if (c.estado === "pendiente") { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = c.motivo || "No terminó de procesarse. Prueba «Reintentar» o ábrelo con el botón"; } // nunca se queda «En cola» tras su turno
+    if (c.estado === "ok") await guardaMinis(c); else fotosTmp.delete(c.id);
     actual = null; guardar(); respaldoYa(); pintar(); pintaBloques(); hechos++;
     if (c.tipo === "Instagram") await dormir(700);
   }
+  { const re = db.cards.filter(c => c.estado === "revisar" && !c.autoReint && c.bloque >= sesionDesde && RE_REINT.test(c.motivo || "")); // fallos de red: se reintentan solos UNA vez
+    if (re.length) { re.forEach(c => Object.assign(c, { estado: "pendiente", autoReint: 1, motivo: "", cola: Date.now() })); guardar(); corriendo = false; aviso(`Reintento solo ${re.length} que fallaron por la conexión…`); return correr(); } }
   corriendo = false; $("#prog").style.display = "none"; etqOrdenar(); pintaBloques();
   const uni = unirRepetidas();
-  const ok = db.cards.filter(c => c.estado === "ok").length, rev = db.cards.filter(c => c.estado === "revisar").length;
+  const ses = c => c.bloque && c.bloque >= sesionDesde, ok = db.cards.filter(c => ses(c) && c.estado === "ok").length, rev = db.cards.filter(c => ses(c) && c.estado === "revisar").length;
   const sin = db.cards.filter(c => c.estado === "pendiente").length; respaldoYa();
   const pb = {}; db.cards.forEach(c => { if (c.bloque && c.bloque >= sesionDesde) { const b = pb[c.bloque] ||= { n: c.bloque, t: 0, r: 0, p: 0 }; b.t++; if (c.estado === "revisar") b.r++; if (c.estado === "pendiente") b.p++; } });
   const lis = Object.values(pb).sort((x, y) => y.n - x.n); // lo último que pegó Jorge, arriba
-  aviso(`${sin ? "Parado" : "Todo listo"}: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}${sin ? `, ${sin} sin terminar` : ""}${uni ? `. Unidas ${uni} repetidas` : ""}. Toca una lista para verla.`, true);
-  if (lis.length > 1) { const a = $("#aviso"); lis.slice(0, 6).forEach((b, i) => { const x = document.createElement("button"); x.className = "btn"; x.dataset.lista = b.n; x.style.cssText = "display:block;width:100%;margin-top:6px;min-height:44px;text-align:left"; x.textContent = `${i ? "" : "🆕 "}Bloque ${b.n}${i ? "" : " (el último)"}: ${b.t} fichas${b.r ? `, ${b.r} para revisar` : ""}${b.p ? `, ${b.p} sin terminar` : ""}`; x.onclick = e => { e.stopPropagation(); bloqueSel = b.n; filtro = "todo"; a.style.display = "none"; cambiaTab("fichas"); }; a.appendChild(x); }); }
+  aviso(`${sin ? "Parado" : "Todo listo"}: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}${sin ? `, ${sin} sin terminar` : ""}${uni ? `. Unidas ${uni} repetidas` : ""}. Toca un lote para verlo.`, true);
+  if (lis.length > 1) { const a = $("#aviso"); lis.slice(0, 6).forEach((b, i) => { const x = document.createElement("button"); x.className = "btn"; x.dataset.lista = b.n; x.style.cssText = "display:block;width:100%;margin-top:6px;min-height:44px;text-align:left"; x.textContent = `${i ? "" : "🆕 "}${etqLote(b.n)}${i ? "" : " (el último)"}: ${b.t} fichas${b.r ? `, ${b.r} para revisar` : ""}${b.p ? `, ${b.p} sin terminar` : ""}`; x.onclick = e => { e.stopPropagation(); verLote(b.n); a.style.display = "none"; }; a.appendChild(x); }); }
+  else if (lis.length === 1) { const a = $("#aviso"), x = document.createElement("button"); x.className = "btn pri"; x.style.cssText = "display:block;width:100%;margin-top:8px;min-height:44px"; x.textContent = "Ver " + etqLote(lis[0].n); x.onclick = e => { e.stopPropagation(); verLote(lis[0].n); a.style.display = "none"; }; a.appendChild(x); }
 }
 
 // ---- fichas repetidas: misma identidad real (post/repo/URL normalizada) en el mismo grupo; la unida conserva todo; con «Deshacer» ----
+// 21/10: además del mismo post, se unen las fichas que hablan de LO MISMO: mismo repo (si es de lo que va el vídeo) o mismo título con nombre propio
+const GEN_TIT = new Set("herramienta herramientas gratis gratuita gratuitas gratuitos utiles util repositorio repositorios repos nuevas nuevos nueva nuevo mejores mejor tools tool free apps app trucos consejos errores recursos ideas agentes agente skills skill para con los las del una uno sin tus que como cosas".split(" "));
+function claveTitulo(t) { const w = sinAcentos(corrige(t || "")).replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter(x => (x.length >= 2 || /\d/.test(x)) && !/^(de|y|el|la|en|tu|of|the|and|for|a|o|e|un|es|al|by)$/.test(x)); return w.some(x => x.length >= 3 && !GEN_TIT.has(x) && !/^\d+$/.test(x)) && w.join("").length >= 8 ? w.join(" ") : ""; }
+const tituloHabla = (c, full) => { const t = sinAcentos(corrige(c.titulo || "")); return String(full || "").split("/")[1].toLowerCase().split(/[-_.]+/).filter(x => x.length >= 3 && !GEN_TIT.has(x)).some(x => t.includes(x)); };
+const repoId = c => { const r = (c.repos || [])[0]; if (r && r.full) return r.full.toLowerCase(); const m = String(c.url || "").match(/github\.com\/([\w.-]+)\/([\w.-]+)/i); return m ? (m[1] + "/" + m[2].replace(/\.git$/i, "")).toLowerCase() : ""; };
 function unirRepetidas() {
-  const grupos = {};
-  db.cards.forEach(c => { if (c.estado !== "ok" || !c.titulo || /^https?:/i.test(c.titulo)) return; const k = [c.grupo || "AI", claveUrl(c.url)].join("|"); (grupos[k] ||= []).push(c); });
+  const cs = db.cards.filter(c => c.estado === "ok" && c.titulo && !/^https?:/i.test(c.titulo));
+  const pad = cs.map((_, i) => i), f = i => pad[i] === i ? i : (pad[i] = f(pad[i])), idx = new Map();
+  const mete = (k, i) => { if (!k) return; if (idx.has(k)) { const a = f(i), b = f(idx.get(k)); if (a !== b) pad[a] = b; } else idx.set(k, i); };
+  cs.forEach((c, i) => { mete("u:" + claveUrl(c.url), i); (c.extra || []).forEach(u => mete("u:" + claveUrl(u), i)); const r = c.repos || []; if (r.length === 1 && tituloHabla(c, r[0].full)) mete("gh:" + r[0].full.toLowerCase(), i); const t = claveTitulo(c.titulo); if (t) mete("t:" + t + "|" + repoId(c), i); }); // mismo título con distinto repo = cosas distintas
+  const grupos = {}; cs.forEach((c, i) => (grupos[f(i)] ||= []).push(c));
   const peso = c => ["resumen", "detalle", "notas", "imgs", "links", "puntos", "skills", "repos", "tags"].reduce((n, k) => n + (c[k] ? String(JSON.stringify(c[k])).length : 0), 0) + (c.fav ? 1 : 0);
   const uniq = (a, f) => { const v = new Set(); return a.filter(x => { const k = f(x); if (!k || v.has(k)) return false; v.add(k); return true; }); };
   let n = 0, quitar = new Set(); const snap = { t: Date.now(), gr: [], sel: {} };
@@ -1213,6 +1291,7 @@ function unirRepetidas() {
       k.puntos = uniq([...(k.puntos || []), ...(o.puntos || [])], x => x);
       k.skills = uniq([...(k.skills || []), ...(o.skills || [])], x => x);
       k.extra = uniq([...(k.extra || []), ...(o.extra || []), o.url], x => x).filter(u => claveUrl(u) !== claveUrl(k.url));
+      k.minisDe = uniq([...(k.minisDe || []), ...(o.minis ? [o.id] : []), ...(o.minisDe || [])], x => x);
       if (o.notas && o.notas !== k.notas) k.notas = k.notas ? k.notas + "\n" + o.notas : o.notas;
       if (!k.resumen && o.resumen) k.resumen = o.resumen; if (!k.detalle && o.detalle) k.detalle = o.detalle;
       if (!k.sirve && o.sirve) { k.sirve = o.sirve; k.accion = o.accion; } else if (!k.accion && o.accion) k.accion = o.accion;
@@ -1247,13 +1326,13 @@ function aviso(t, fijo, undo) { const a = $("#aviso"); a.textContent = t; a.styl
   if (undo) { const b = document.createElement("button"); b.className = "btn"; b.id = "avDeshacer"; b.textContent = "Deshacer"; b.style.cssText = "margin-left:10px;min-height:44px;flex:none"; b.onclick = e => { e.stopPropagation(); a.style.display = "none"; clearTimeout(aviso.t); undo(); }; a.appendChild(b); aviso.t = setTimeout(() => a.style.display = "none", 9000); return; }
   if (des) aviso.t = setTimeout(() => a.style.display = "none", 30000); else if (!fijo) aviso.t = setTimeout(() => a.style.display = "none", 4500); } // fijo = no se quita solo: se cierra tocándolo
 $("#aviso").addEventListener("click", () => { $("#aviso").style.display = "none"; });
-function cambiaTab(t) { $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + t)); if (t !== "fichas" && detId) cerrarDet(); if (t === "fichas") pintar(); $("main").scrollTop = 0; }
+function cambiaTab(t) { $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === t)); $$(".pan").forEach(p => p.classList.toggle("on", p.id === "p-" + t)); if (t !== "fichas" && detId) cerrarDet(); if (t === "fichas") pintar(); if (t === "feed") pintaFeed(); if (t === "pegar") pintaLotesHist(); $("main").scrollTop = 0; }
 const miles = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k" : String(n);
 const ordenCat = (a, b) => ((a === "Para revisar") - (b === "Para revisar")) || (a === "Sin clasificar") - (b === "Sin clasificar") || a.localeCompare(b, "es");
 let filtro = "nuevo", bloqueSel = null; const vistas = new Set(); // bloqueSel: ver solo una lista (se toca en el aviso final)
 const FILTROS = [["nuevo", "Nuevo"], ["quiero", "Lo quiero"], ["hecho", "Hecho"], ["todo", "Todo"]], FILTROS_MAS = [["rev", "Para revisar"], ["repo", "Con GitHub"], ["descartada", "Descartadas"]];
 function pasaFiltro(c, f = filtro) {
-  if (bloqueSel && c.bloque !== bloqueSel) return false;
+  if (bloqueSel && loteDe(c) !== bloqueSel) return false;
   if (f === "descartada") return uso(c) === "descartada";
   if (uso(c) === "descartada") return false;
   if (f === "nuevo" || f === "quiero" || f === "hecho") return uso(c) === f;
@@ -1270,11 +1349,11 @@ function pintar() {
   pintaAvisoIA(); $("#pasos").style.display = db.cards.length ? "none" : "block";
   $("#cuenta").textContent = db.cards.length ? db.cards.length + " fichas" : "";
   { const enMas = FILTROS_MAS.find(x => x[0] === filtro), n = k => db.cards.filter(c => pasaFiltro(c, k)).length;
-    $("#filtros").innerHTML = (bloqueSel ? `<button data-qb="1" class="on">Bloque ${bloqueSel} ✕</button>` : "") + FILTROS.map(([k, t]) => `<button data-f="${k}" class="${filtro === k ? "on" : ""}">${t}${k === "todo" ? "" : ` (${n(k)})`}</button>`).join("") + `<button data-mas="1" aria-haspopup="dialog" class="${enMas ? "on" : ""}">${enMas ? enMas[1] + " (" + n(filtro) + ")" : "Más"}</button>`;
+    $("#filtros").innerHTML = (bloqueSel ? `<button data-qb="1" class="on">${esc(etqLote(bloqueSel))} ✕</button>` : "") + FILTROS.map(([k, t]) => `<button data-f="${k}" class="${filtro === k ? "on" : ""}">${t}${k === "todo" ? "" : ` (${n(k)})`}</button>`).join("") + `<button data-mas="1" aria-haspopup="dialog" class="${enMas ? "on" : ""}">${enMas ? enMas[1] + " (" + n(filtro) + ")" : "Más"}</button>`;
     $("#nRev").textContent = n("rev"); $("#nRepo").textContent = n("repo"); $("#nDesc").textContent = n("descartada");
     $$("#hojaF [data-f]").forEach(b => b.classList.toggle("on", b.dataset.f === filtro)); }
   if (!db.cards.length) { $("#lista").innerHTML = '<div class="vacio"><b>Todavía no hay fichas</b>Ve a «Pegar», mete tus links y pulsa «Ordenar».</div>'; return marca(); }
-  const gg = {}; cards.forEach(c => ((gg[c.grupo || "AI"] ||= {})[c.categoria || "Otros"] ||= []).push(c)); // grupo principal > categoría
+  const gg = {}; cards.forEach(c => ((gg[c.grupo || "AI"] ||= {})[c.estado === "revisar" ? "Para revisar" : c.estado === "pendiente" ? "En cola" : temaFicha(c)] ||= []).push(c)); // grupo principal > tema (lo que de verdad es)
   const cerradas = new Set($$("#lista details:not([open])").map(d => d.dataset.k)); // lo nuevo nace abierto; solo recuerdo lo que cerraste
   const ordC = g => (x, y) => ((x === "Para revisar") - (y === "Para revisar")) || ((x === "Otros" || x === "Sin clasificar") - (y === "Otros" || y === "Sin clasificar")) || (g[y].length - g[x].length) || x.localeCompare(y, "es");
   const filtrando = !!q || !["todo", "nuevo"].includes(filtro); // con búsqueda o filtro se abre todo lo que tenga resultados
@@ -1296,6 +1375,7 @@ function pintar() {
   $("#catSel").innerHTML = '<option value="">Ir a categoría…</option>' + opts; etqPlegar();
   pintaDet();
   marca();
+  if ($("#p-feed").classList.contains("on")) pintaFeed(true);
 }
 const lista = (t, a, ord) => a && a.length ? `<div class="bl"><b>${t}</b><${ord ? "ol" : "ul"}>${a.map(x => `<li>${esc(x)}</li>`).join("")}</${ord ? "ol" : "ul"}></div>` : "";
 const SV = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
@@ -1312,7 +1392,7 @@ function listaLinks(c) { // SIEMPRE se ve el link del post original y el del rep
   if (c.tipo !== "Foto") add("ig", c.tipo === "Instagram" ? "Post de Instagram" : "Link original (" + c.tipo + ")", c.url);
   for (const r of (c.repos || []).slice(0, 2)) add("gh", "GitHub " + r.full + (r.stars && r.stars !== "?" ? " ★" + miles(r.stars) : ""), r.url);
   for (const l of (c.links || [])) add("", l.t, l.u);
-  for (const u of (c.extra || []).slice(0, 3)) add("", "Otro link", u);
+  for (const u of (c.extra || []).slice(0, 4)) add(tipoDe(u) === "Instagram" ? "ig" : "", tipoDe(u) === "Instagram" ? "Otro post sobre esto" : "Otro link", u);
   return out;
 }
 const aHtml = (l, cls, txt) => `<a class="${cls} ${l.cls}${l.roto ? " roto" : ""}" data-a="ext" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer" title="${esc(l.t)}"${txt ? "" : ` aria-label="${esc(l.t)}"`}>${l.ic}${txt ? esc(l.t) : ""}</a>`;
@@ -1355,8 +1435,8 @@ function detalleHtml(c) {
   const leido = [vio.voz ? "voz del vídeo" : c.voz === "no" ? "sin voz" : "", vio.imgs ? "texto de las imágenes" : "", vio.frames ? "fotogramas del vídeo" : "", c.repos && c.repos.length ? "README" : ""].filter(Boolean).join(" · ");
   const sel = db.sel && db.sel[c.id];
   return `<div class="dh"><button class="btn sm" data-a="cerrar" aria-label="Volver a la lista">${IC.back}</button><span>Ficha</span></div><div id="detC"${rev ? ' class="fall"' : ""}><h2>${esc(rev ? (/^https?:\/\//i.test(String(c.titulo || "")) ? "No se pudo leer" : c.titulo) : tituloVis(c))}</h2>${rev ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo || "Hay que revisarla")}</div><div class="acs" style="margin:8px 0"><button class="btn pri" data-a="reint">Reintentar</button></div>` : ""}
-<div class="meta"><span class="chip">${esc(c.categoria || "Otros")}</span>${c.fav ? '<span class="rel r5">Favorita</span>' : ""}${c.accion && c.estado === "ok" ? `<span class="chip${c.accion === "Instalar" ? " ok" : ""}">${esc(c.accion)}</span>` : ""}<span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${repoCh}${(c.rotos || []).length ? `<span class="chip bad">${c.rotos.length} enlace(s) roto(s)</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${c.estado === "pendiente" ? '<span class="chip">en cola</span>' : rev ? '<span class="chip warn">revisar</span>' : ""}</div>
-${imgs.length ? `<img class="mini" src="${esc(imgs[0])}" data-r="${esc(JSON.stringify(imgs.slice(1, 6)))}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="sigImg(this)">` : ""}
+<div class="meta"><span class="chip">${esc(c.estado === "ok" ? temaFicha(c) : c.categoria || "Otros")}</span>${loteDe(c) ? `<span class="chip">${esc(etqLote(loteDe(c)))}</span>` : ""}${c.estado === "ok" ? sellosHtml(c) : ""}${c.fav ? '<span class="rel r5">Favorita</span>' : ""}${c.accion && c.estado === "ok" ? `<span class="chip${c.accion === "Instalar" ? " ok" : ""}">${esc(c.accion)}</span>` : ""}<span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${repoCh}${(c.rotos || []).length ? `<span class="chip bad">${c.rotos.length} enlace(s) roto(s)</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${c.estado === "pendiente" ? '<span class="chip">en cola</span>' : rev ? '<span class="chip warn">revisar</span>' : ""}</div>
+${galeriaHtml(c, "det-gl")}
 ${c.sinIA ? `<div class="nota" style="color:var(--warn)">${esc(c.sinIA)}</div>` : ""}
 <div class="usos" role="group" aria-label="Estado de la ficha">${USOS.map(([k, t]) => `<button class="btn${uso(c) === k ? " on" : ""}" data-a="uso" data-u="${k}" aria-pressed="${uso(c) === k}">${k === "descartada" && uso(c) === "descartada" ? "Descartada" : t}</button>`).join("")}</div>
 ${c.sirve ? `<div class="bl"><b>Sirve para…</b>${esc(c.sirve)}${c.sirveDe ? ` <span class="nota sirvede">· ${esc(({ voz: "según la voz del vídeo", imagenes: "según el texto leído en el vídeo o las imágenes", repo: "según el repo", post: "según el texto del post" })[c.sirveDe] || "")}${c.fuente ? " (" + esc(c.fuente) + ")" : ""}</span>` : ""}</div>` : ""}${c.resumen ? `<p class="res">${esc(c.resumen)}</p>` : '<p class="nota">Sin resumen todavía.</p>'}${c.detalle && c.detalle !== c.resumen ? (verMasId === c.id ? `<p class="res">${esc(c.detalle)}</p><button class="btn sm" data-a="vermas">Ver menos</button>` : '<button class="btn sm" data-a="vermas">Ver más</button>') : ""}
@@ -1373,6 +1453,7 @@ function pintaDet(nuevo) {
   if (detId && !c) { detId = null; d.classList.remove("on"); document.body.style.overflow = ""; }
   const y = !nuevo && $("#detC") ? $("#detC").scrollTop : 0;
   d.innerHTML = c ? detalleHtml(c) : '<div class="vacioDet">Elige una ficha de la lista para ver el detalle.</div>';
+  if (c) rellenaGalerias(d);
   if ($("#detC")) $("#detC").scrollTop = y;
 }
 function abrirDet(c) {
@@ -1507,14 +1588,15 @@ $("#bOrdenar").onclick = () => {
   const { links } = sacarLinks($("#txt").value);
   if (!links.length) { if (db.cards.some(c => c.estado === "pendiente") && !corriendo) { correr(); return; } return aviso("No veo ningún link. Pega algunos primero."); }
   const n = (db.bn || 0) + 1, r = encolar(links, n);
-  if (!r.nuevos) { $("#txt").value = ""; detectar(); return aviso("Esos links ya estaban todos guardados."); }
+  const donde = r.dondeRepes && r.dondeRepes.length ? " (ya estaban en " + r.dondeRepes.slice(0, 3).map(etqLote).join(", ") + ")" : "";
+  if (!r.nuevos) { $("#txt").value = ""; detectar(); return aviso("Esos links ya estaban todos guardados" + donde + "."); }
   db.bn = n; guardar(); $("#txt").value = ""; detectar(); pintaBloques();
-  aviso(`Bloque ${n} en marcha: ${r.nuevos} links${r.repes ? `, ${r.repes} repetidos quitados` : ""}. Puedes pegar otro bloque ya.`);
+  aviso(`${etqLote(n)} en marcha: ${r.nuevos} links${r.repes ? `, ${r.repes} repetidos quitados${donde}` : ""}. Puedes pegar otro lote ya.`);
   correr();
 };
 $("#bParar").onclick = () => { pausado = !pausado; $("#bParar").textContent = pausado ? "Reanudar" : "Pausar"; };
 $("#bloques").addEventListener("click", e => {
-  if (e.target.closest("[data-ver]")) return cambiaTab("fichas");
+  { const v = e.target.closest("[data-ver]"); if (v) return verLote(Number(v.dataset.ver)); }
   const rb = e.target.closest("[data-rb]"), qb = e.target.closest("[data-bq]");
   if (rb) { // Reiniciar: el link que está trabajando vuelve a empezar de cero; lo ya hecho no se toca
     if (!actual || actual.bloque !== Number(rb.dataset.rb)) return;
@@ -1597,7 +1679,7 @@ $("#hojaF").addEventListener("change", e => { if (e.target.id !== "catSel" || !e
 $("#bDup").onclick = quitarDuplicados;
 $("#bComprobar").onclick = comprobarTodo;
 $("#bGuardar").onclick = async () => {
-  db.cfg = { nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim(), groq: $("#kGq").value.trim() }; guardar(); muertos = {}; pintar();
+  db.cfg = { nvidia: $("#kNv").value.trim(), openrouter: $("#kOr").value.trim(), github: $("#kGh").value.trim(), groq: $("#kGq").value.trim(), intereses: $("#kInt").value.trim() }; guardar(); muertos = {}; pintar();
   $("#kEstado").textContent = "Probando…";
   const out = [];
   if (db.cfg.nvidia || db.cfg.openrouter) { const t = await chat("Responde solo: ok", 20); out.push(t ? "IA lista" : "La IA no está lista: " + iaTexto()); } else out.push("Sin clave de IA: funciono en modo básico");
@@ -1637,7 +1719,8 @@ window.__chat = (t, fs) => {
   cambiaTab("pegar");
   $("#txt").value = (fs.length ? `📎 ${fs.length} fotos recibidas\n\n` : "") + t.slice(0, 30000); try { detectar(); } catch (e) { } // se ve lo recibido: da calma
   const bn = (db.bn || 0) + 1, r = encolar(sacarLinks(t).links, bn), st = Date.now().toString(36);
-  for (const n of fs) db.cards.push({ bloque: bn, id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", cola: Date.now(), titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+  if (fs.length) { db.lotes = db.lotes || {}; const L = db.lotes[bn] ||= { t: Date.now(), total: 0 }; L.total += fs.length; }
+  for (const n of fs) db.cards.push({ bloque: bn, lote: bn, id: st + n, url: "foto:" + n + "@" + st, foto: n, tipo: "Foto", estado: "pendiente", cola: Date.now(), titulo: "Foto " + n, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
   if (r.nuevos || fs.length) db.bn = bn;
   guardar(); pintaBloques();
   if (!r.nuevos && !fs.length) return aviso(r.repes ? "Esos links ya estaban guardados." : "No encontré links ni fotos.");
@@ -1671,10 +1754,238 @@ async function cargarSemilla() {
     db.semilla = ver; migrarCats(); guardar(); pintar(); unirRepetidas();
   } catch (e) { }
 }
+// ============ 21/10/2026: lotes con fecha, temas, «Para ti», fotos reales, Telegram, nombres bien escritos, Inicio tipo red social ============
+const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+function fechaCorta(t) {
+  if (!t) return ""; const d = new Date(t), h = new Date(), dia = x => Math.floor(new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime() / 864e5), n = dia(h) - dia(d);
+  if (n === 0) return "hoy"; if (n === 1) return "ayer"; if (n > 1 && n < 7) return "hace " + n + " días";
+  return d.getDate() + " " + MESES[d.getMonth()] + (d.getFullYear() !== h.getFullYear() ? " " + d.getFullYear() : "");
+}
+const loteDe = c => Number(c.lote ?? c.bloque ?? 0) || 0;
+const tsId = id => { const v = parseInt(String(id || "").slice(0, 8), 36); return v > 1.7e12 && v < 2.2e12 ? v : 0; };
+function migraLotes() { // las fichas viejas reciben su lote (el bloque en que se pegaron) y cada lote su fecha
+  db.lotes = db.lotes || {}; let n = 0;
+  for (const c of db.cards) if (c.lote == null && c.bloque != null) { c.lote = c.bloque; n++; }
+  for (const c of db.cards) { const k = loteDe(c); if (!k) continue; const L = db.lotes[k] ||= { t: 0, mig: 1 }; const t = tsId(c.id) || c.hecha || 0; if (L.mig && t && (!L.t || t < L.t)) { L.t = t; n++; } }
+  return n;
+}
+function etqLote(n) { n = Number(n) || 0; if (!n) return "Fichas antiguas"; const L = (db.lotes || {})[n]; return "Lote " + n + (L && L.t ? " · " + fechaCorta(L.t) : ""); }
+function lotesLista() { const m = {}; for (const c of db.cards) { const n = loteDe(c), l = m[n] ||= { n, k: 0, ok: 0, rev: 0, pen: 0 }; l.k++; if (c.estado === "ok") l.ok++; else if (c.estado === "revisar") l.rev++; else l.pen++; } return Object.values(m).sort((a, b) => b.n - a.n); }
+function pintaLotesHist() {
+  const e = $("#lotesHist"); if (!e) return; const ls = lotesLista(); if (!ls.length) { e.innerHTML = ""; return; }
+  e.innerHTML = "<h3>Tus lotes</h3>" + ls.slice(0, 12).map(l => `<div class="ltr"><div><b>${esc(etqLote(l.n))}</b><span>${l.k} ficha${l.k === 1 ? "" : "s"}${l.rev ? ` · ${l.rev} para revisar` : ""}${l.pen ? ` · ${l.pen} en cola` : ""}</span></div><button class="btn" data-vl="${l.n}">Ver</button></div>`).join("");
+}
+function verLote(n) {
+  n = Number(n) || 0;
+  if (!db.cards.some(c => loteDe(c) === n && c.estado === "ok")) { bloqueSel = n || null; filtro = "todo"; return cambiaTab("fichas"); } // solo fallidas o en cola: se ven en Fichas
+  feedLote = n; feedModo = "ultimo"; feedTema = ""; feedN = 20; cambiaTab("feed");
+}
+$("#lotesHist").addEventListener("click", e => { const b = e.target.closest("[data-vl]"); if (b) verLote(b.dataset.vl); });
+
+// ---- la voz transcribe mal los nombres: se arreglan antes de la IA y al mostrar ----
+const CORRIGE = [
+  [/(?<!google\s)\b(?:cloud|clot|cloth|claud|clod)[\s-]?code\b/gi, "Claude Code"],
+  [/\b(?:cloud|claude)[\s-]?mem\b/gi, "claude-mem"],
+  [/\bcloud(?=[\s-]+(?:skills?|desktop|opus|sonnet|haiku|cowork|plugins?|agents?|agentes?|ai)\b)/gi, "Claude"],
+  [/\b(servidor(?:es)?|servers?)\s+MSP\b/gi, "$1 MCP"], [/\bMSP\s+(servers?|servidor(?:es)?)\b/gi, "MCP $1"],
+  [/\bantr[oó]pic\b/gi, "Anthropic"]
+];
+function corrige(t) { if (typeof t !== "string" || !t || /^https?:\/\//i.test(t)) return t; let s = t; for (const [r, v] of CORRIGE) s = s.replace(r, v); return s; }
+function corrigeCard(c) { for (const k of ["titulo", "resumen", "detalle", "sirve", "limites"]) if (typeof c[k] === "string") c[k] = corrige(c[k]); for (const k of ["puntos", "skills", "como"]) if (Array.isArray(c[k])) c[k] = c[k].map(corrige); }
+
+// ---- temas: de qué va de verdad cada ficha (las categorías viejas metían casi todo en «IA») ----
+const TEMAS = [
+  ["Claude Code y skills", /claude[\s-]?code|\bskills?\b|subagent|\bhooks?\b|cowork|\/plugin|\bcodex\b|\bcursor\b|vibe[\s-]?cod|plugins? (?:para|de|for) claude/],
+  ["MCP y conectores", /\bmcp\b|conector|model context protocol/],
+  ["Agentes de IA", /\bagentes?\b|\bagents?\b|jarvis|asistente|autonom|orquest/],
+  ["Ahorrar tokens y memoria", /\btokens?\b|memoria|\bmemory\b|contexto|\bcontext\b|compres|ilimitad|openrouter|proveedores/],
+  ["Seguridad", /seguridad|security|vulnerab|parche|privacidad|contrasen/],
+  ["Vídeo, audio e imagen", /\bvideos?\b|\baudio\b|\bvoz\b|\bvoice\b|\bimagen(?:es)?\b|\bimages?\b|\bfotos?\b|animaci|\bmusica?\b|\bmusic\b|cancion|\bstems?\b|whisper|grabaci|edicion/],
+  ["Diseño y webs", /disen|design|\bui\b|\bux\b|landing|figma|\biconos?\b|\bicons?\b|tipograf|\bcss\b|frontend|pagina web|sitio web/],
+  ["Apps y programas", /\bapps?\b|aplicacion|\bprograma\b|escritorio|desktop|windows|linux|android|extension|terminal|\bcli\b|wayland/],
+  ["Ideas y negocio", /negocio|dinero|ventas|marketing|\bclientes?\b|emprend|redes sociales|monetiz/],
+  ["Aprender", /\bcursos?\b|tutorial|aprende|\bguia\b|errores|consejos|\btips?\b|\breglas\b/]
+];
+const blobDe = c => sinAcentos([c.titulo, c.sirve, c.resumen, (c.puntos || []).join(" "), (c.skills || []).join(" "), (c.tags || []).join(" "), ...(c.repos || []).map(r => r.full + " " + (r.desc || ""))].join(" \n "));
+const _temaC = new WeakMap();
+function temaDe(c) {
+  const k = (c.titulo || "") + "|" + (c.resumen || "") + "|" + (c.sirve || ""), h = _temaC.get(c); if (h && h.k === k) return h.v;
+  const tt = sinAcentos(c.titulo || ""), b = blobDe(c); let best = "Otros", n = 0;
+  for (const [nom, r] of TEMAS) { const g = new RegExp(r.source, "g"), sc = (tt.match(g) || []).length * 3 + Math.min(4, (b.match(g) || []).length); if (sc > n) { n = sc; best = nom; } }
+  _temaC.set(c, { k, v: best }); return best;
+}
+const temaFicha = c => c.temaManual || temaDe(c);
+
+// ---- etiquetas: gratis, de pago, activo/viejo, instalable ----
+const RE_GRATIS = /gratis|gratuit|\bfree\b|open[\s-]?source|codigo abierto|sin coste|sin costo|\bmit\b|apache[\s-]?2/;
+const RE_PAGO = /de pago|\bpago\b|suscripcion|premium|\bpaid\b|\$\s?\d|\d+\s?(?:€|eur\b|usd\b|dolares)/;
+function sellos(c) {
+  const b = blobDe(c) + " " + sinAcentos(c.limites || ""), out = [], rep = (c.repos || [])[0], e = rep && estadoRepo(rep);
+  if (RE_GRATIS.test(b)) out.push(["gr", "Gratis"]); else if (RE_PAGO.test(b)) out.push(["pg", "De pago"]); else if (rep) out.push(["gr", "Código abierto"]);
+  if (e) out.push(e.cls === "ok" ? ["ac", "Activo"] : e.cls === "bad" ? ["vj", rep.archived ? "Abandonado" : "Viejo"] : ["pg", "Poco activo"]);
+  if (c.accion === "Instalar") out.push(["", "Instalable"]);
+  return out;
+}
+const sellosHtml = c => sellos(c).map(([k, t]) => `<span class="sl ${k}">${esc(t)}</span>`).join("");
+
+// ---- «Para ti»: tu perfil + lo que marcas «Lo quiero» / «Descartar» ----
+const PERFIL_DEF = "claude code, skills, plugins, mcp, agentes, windows, gratis, open source, ahorrar tokens, memoria, automatizar, github";
+const kwPerfil = () => String(db.cfg.intereses || PERFIL_DEF).split(/[,;\n]+/).map(x => sinAcentos(x).trim()).filter(x => x.length >= 2);
+function aprendizaje() { const pos = {}, neg = {}; for (const c of db.cards) { const u = uso(c); if (u === "nuevo" || c.estado !== "ok") continue; const w = u === "descartada" ? neg : pos; for (const k of [temaFicha(c), ...(c.tags || [])]) w[k] = (w[k] || 0) + 1; } return { pos, neg }; }
+function paraTi(c, A) {
+  const b = blobDe(c), raz = []; let s = 0;
+  for (const k of kwPerfil()) { const re = new RegExp("(^|[^a-z0-9])" + k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "[\\s-]?")); if (re.test(b)) { s += 3; if (raz.length < 3) raz.push("habla de " + k); } }
+  const sl = sellos(c).map(x => x[1]);
+  if (sl.includes("Gratis") || sl.includes("Código abierto")) s += 2; if (sl.includes("Activo")) s += 2;
+  if (sl.includes("Viejo") || sl.includes("Abandonado")) s -= 5; if (sl.includes("De pago")) s -= 2;
+  if (c.accion === "Instalar") s += 1; if (c.fav) s += 4; if (!c.resumen) s -= 3;
+  const t = temaFicha(c), p = A.pos[t] || 0, n = A.neg[t] || 0;
+  if (p > n) { s += Math.min(4, p - n); raz.push("marcaste cosas parecidas"); } else if (n > p) s -= Math.min(4, n - p);
+  for (const tg of c.tags || []) s += Math.min(1, A.pos[tg] || 0) - Math.min(1, A.neg[tg] || 0);
+  return { s, raz };
+}
+
+// ---- fotos reales: primero las del post y los fotogramas del vídeo; nunca el mismo banner en varias fichas ----
+const RE_FOTO_POST = /cdninstagram|fbcdn|tikwm|twimg|ytimg|scontent/i;
+const RE_FOTO_GEN = /opengraph\.githubassets|thum\.io|\/og[\/.-]|og-image|og\.png|social|banner/i;
+function usoImgs() { const m = new Map(); for (const c of db.cards) for (const u of new Set(c.imgs || [])) m.set(u, (m.get(u) || 0) + 1); return m; }
+function fotosDe(c, usoImg) {
+  const v = [...new Set((c.imgs || []).filter(Boolean))], rep = u => usoImg && usoImg.get(u) > 1;
+  let o = v.map((u, i) => [u, (RE_FOTO_POST.test(u) ? 0 : 2) + (rep(u) ? 3 : 0) + (RE_FOTO_GEN.test(u) ? 1 : 0), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
+  const propias = o.filter(u => !rep(u)); if (propias.length) o = propias; // una foto que sale en varias fichas solo se usa si no hay otra
+  return o.slice(0, 4);
+}
+function galeriaHtml(c, cls = "") { const f = fotosDe(c, usoImgs()); return `<div class="gl ${cls}" data-gid="${esc(c.id)}"${f.length ? "" : ' style="display:none"'}>${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="${i ? "lazy" : "eager"}" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`; }
+function cuentaGal(g) { const n = g.querySelectorAll("img").length; g.style.display = n ? "" : "none"; const gn = g.nextElementSibling; if (gn && gn.classList.contains("gn")) gn.textContent = n > 1 ? `${Math.min(n, Math.round(g.scrollLeft / Math.max(1, g.clientWidth)) + 1)}/${n}` : ""; }
+window.fotoMala = el => { const g = el.parentNode; el.remove(); if (g) cuentaGal(g); };
+document.addEventListener("scroll", e => { const g = e.target; if (g && g.classList && g.classList.contains("gl")) cuentaGal(g); }, true);
+const MINI = (() => { // miniaturas guardadas en el propio dispositivo: las fotos de Instagram caducan a los pocos días
+  let dbp = null;
+  const abrir = () => dbp || (dbp = new Promise(res => { try { const r = indexedDB.open("igx-minis", 1); r.onupgradeneeded = () => r.result.createObjectStore("m"); r.onsuccess = () => res(r.result); r.onerror = () => res(null); } catch (e) { res(null); } }));
+  const tx = async (modo, f) => { const d = await abrir(); if (!d) return null; return new Promise(res => { try { const q = f(d.transaction("m", modo).objectStore("m")); q.onsuccess = () => res(q.result ?? null); q.onerror = () => res(null); } catch (e) { res(null); } }); };
+  return { get: id => tx("readonly", s => s.get(id)), put: (id, v) => tx("readwrite", s => s.put(v, id)) };
+})();
+function reducir(src, w = 560) {
+  return new Promise(res => {
+    const im = new Image(); let fin = false; const ok = v => { if (!fin) { fin = true; res(v); } }; setTimeout(() => ok(""), 9000);
+    if (!/^data:/.test(src)) im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer";
+    im.onload = () => { try { const k = Math.min(1, w / (im.naturalWidth || w)), cv = document.createElement("canvas"); cv.width = Math.round((im.naturalWidth || w) * k); cv.height = Math.round((im.naturalHeight || w) * k); cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height); ok(cv.toDataURL("image/jpeg", .72)); } catch (e) { ok(""); } };
+    im.onerror = () => ok(""); im.src = src;
+  });
+}
+const enseña = t => !!t && !/^persona hablando/i.test(String(t).trim());
+async function guardaMinis(c) {
+  try {
+    const fr = fotosTmp.get(c.id) || [], partes = partesFrames || []; fotosTmp.delete(c.id); partesFrames = [];
+    const utiles = fr.map((f, i) => [f, partes[i]]).sort((a, b) => enseña(b[1]) - enseña(a[1])).map(x => x[0]); // los fotogramas con algo que leer, primero
+    const out = [];
+    for (const u of (c.imgs || []).filter(u => RE_FOTO_POST.test(u)).slice(0, 2)) { const d = await reducir(u); if (d) out.push({ u, d }); }
+    for (const f of utiles.slice(0, 3)) { const d = await reducir(f); if (d) out.push({ u: "frame", d }); }
+    if (out.length) { await MINI.put(c.id, out.slice(0, 4)); c.minis = Math.min(4, out.length); }
+  } catch (e) { }
+}
+function rellenaGalerias(root) {
+  root.querySelectorAll(".gl[data-gid]").forEach(g => {
+    cuentaGal(g); const c = db.cards.find(x => x.id === g.dataset.gid); if (!c || (!c.minis && !(c.minisDe || []).length)) return;
+    Promise.all([c.id, ...(c.minisDe || [])].map(id => MINI.get(id))).then(rs => {
+      const ms = rs.filter(Array.isArray).flat(); if (!ms.length || !g.isConnected) return;
+      const ya = new Set(ms.map(m => m.u)); g.querySelectorAll("img").forEach(im => { if (ya.has(im.getAttribute("src"))) im.remove(); });
+      g.prepend(...ms.slice(0, 4).map(m => { const im = document.createElement("img"); im.src = m.d; im.alt = ""; return im; }));
+      while (g.querySelectorAll("img").length > 5) g.lastElementChild.remove(); cuentaGal(g);
+    });
+  });
+}
+async function minisAtrasadas() { // fichas que aún no tienen sus fotos guardadas: se intenta una vez, sin molestar
+  const cs = db.cards.filter(c => c.estado === "ok" && !c.minis && !c.minisProb && (c.imgs || []).some(u => RE_FOTO_POST.test(u))).slice(0, 25);
+  for (const c of cs) { if (corriendo) break; c.minisProb = 1; const out = []; for (const u of (c.imgs || []).filter(u => RE_FOTO_POST.test(u)).slice(0, 2)) { const d = await reducir(u); if (d) out.push({ u, d }); } if (out.length) { await MINI.put(c.id, out); c.minis = out.length; } await dormir(600); }
+  if (cs.length) { guardar(); if ($("#p-feed").classList.contains("on")) pintaFeed(true); }
+}
+
+// ---- links que el propio post escribe (Telegram, Discord, GitHub, webs) ----
+function linksDelTexto(card, texto) {
+  card.links = card.links || []; const ya = new Set(card.links.map(l => claveUrl(l.u)));
+  const urls = [...String(texto || "").matchAll(/(?:https?:\/\/)?(?:www\.)?(?:t\.me|telegram\.me|discord\.gg|github\.com|huggingface\.co|npmjs\.com)\/[^\s)"'<>«»]+|https?:\/\/[^\s)"'<>«»]+/gi)].map(m => m[0].replace(/[.,;:!?)\]*_]+$/, ""));
+  for (let u of urls) {
+    if (!/^https?:/i.test(u)) u = "https://" + u; let h = ""; try { h = new URL(u).hostname.replace(/^www\./, ""); } catch (e) { continue; }
+    if (/instagram\.com|tiktok\.com|youtube\.com|youtu\.be|facebook\.com|linktr\.ee|wa\.me|whatsapp|fbcdn|cdninstagram/i.test(h) || claveUrl(u) === claveUrl(card.url)) continue;
+    const k = claveUrl(u); if (ya.has(k)) continue; ya.add(k); card.links.push({ t: etiquetaDe(u), u }); if (card.links.length >= 8) break;
+  }
+}
+IC.tg = SV('<path d="M21 3L3 10.5l7 2.5 2.5 7z"/><path d="M10 13L21 3"/>');
+IC.lupa = SV('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>');
+function linksFeed(c) {
+  const ls = listaLinks(c).map(l => /(^|\/\/)(t\.me|telegram\.me)\//i.test(l.u) ? { ...l, cls: "tg", ic: IC.tg, t: "Telegram" } : l);
+  const r = (c.repos || [])[0], nombre = tituloVis(c).replace(/[:|–—].*$/, "").trim();
+  if (!r && nombre && c.tipo !== "GitHub") ls.push({ cls: "bs", ic: IC.lupa, t: "Buscar en GitHub", u: "https://github.com/search?q=" + encodeURIComponent(nombre) + "&type=repositories" });
+  return ls.map(l => aHtml(l, "", true)).join("");
+}
+
+// ---- Inicio: tus fichas como una red social ----
+let feedModo = "ti", feedLote = null, feedTema = "", feedN = 20;
+const FMODOS = [["ti", "Para ti"], ["ultimo", "Lo último"], ["gratis", "Gratis"], ["quiero", "Lo quiero"], ["hecho", "Hecho"]];
+function feedCards() {
+  const A = aprendizaje(); let cs = db.cards.filter(c => c.estado === "ok" && uso(c) !== "descartada");
+  if (feedLote != null) cs = cs.filter(c => loteDe(c) === feedLote);
+  if (feedTema) cs = cs.filter(c => temaFicha(c) === feedTema);
+  if (feedModo === "quiero" || feedModo === "hecho") cs = cs.filter(c => uso(c) === feedModo); else cs = cs.filter(c => uso(c) !== "hecho");
+  if (feedModo === "gratis") cs = cs.filter(c => sellos(c).some(x => x[0] === "gr"));
+  const sc = new Map(cs.map(c => [c, paraTi(c, A)])), cuando = c => c.hecha || tsId(c.id) || 0;
+  if (feedModo === "ultimo") cs.sort((a, b) => loteDe(b) - loteDe(a) || cuando(b) - cuando(a)); else cs.sort((a, b) => sc.get(b).s - sc.get(a).s || loteDe(b) - loteDe(a));
+  return { cs, sc };
+}
+function guiaHtml(c) {
+  const cm = comandos(c), r = (c.repos || [])[0], li = (t, h) => `<li><b>${t}</b>${h}</li>`, ul = a => `<ul>${a.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`, p = [];
+  p.push(li("Qué es", esc(c.detalle || c.resumen || "El vídeo no lo explica bien: ábrelo con el botón de Instagram.")));
+  if ((c.puntos || []).length) p.push(li("Lo que cuenta el vídeo", ul(c.puntos)));
+  if ((c.skills || []).length) p.push(li("Skills o plugins que propone", ul(c.skills)));
+  p.push(li("Cómo empezar", cm.length ? cm.map(x => `<code class="cmd">${esc(x)}</code>`).join("") : r ? `Abre el GitHub (${esc(r.full)}) y sigue su README.` : (c.links || []).length ? "Abre su web (abajo) y mira cómo se instala." : "El vídeo no dice cómo instalarlo: abre el post y mira los comentarios."));
+  if (c.limites) p.push(li("Ojo con", esc(c.limites)));
+  p.push(li("Para pasárselo a Claude Code", "Marca «Lo quiero». Luego, en Fichas, «Exportar .txt»."));
+  return `<details><summary>${IC.chev}<span class="cn">Explícamelo paso a paso</span></summary><ol class="guia">${p.join("")}</ol></details>`;
+}
+function fichaFeed(c, p, top) {
+  const u = uso(c), sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim();
+  const chips = `<span class="sl">${esc(etqLote(loteDe(c)))}</span>${top ? '<span class="sl ti">★ Para ti</span>' : ""}${sellosHtml(c)}<span class="sl">${esc(temaFicha(c))}</span>`;
+  const bt = (k, t) => `<button class="btn${u === k ? " on" : ""}" data-fa="${k}" aria-pressed="${u === k}">${u === k ? "✓ " : ""}${t}</button>`;
+  return `<article class="fc" data-id="${esc(c.id)}"><div class="fcab">${chips}</div>${galeriaHtml(c)}<div class="fcb"><h3>${esc(tituloVis(c))}</h3>${sv ? `<p class="fsv">Sirve para: ${esc(sv)}</p>` : ""}${c.resumen && c.resumen !== c.sirve ? `<p class="frs">${esc(c.resumen)}</p>` : ""}${top && p.raz.length ? `<p class="fpq">Para ti porque ${esc(p.raz.join(" · "))}</p>` : ""}${guiaHtml(c)}</div><div class="fl">${linksFeed(c)}</div><div class="fa">${bt("quiero", "Lo quiero")}${bt("hecho", "Hecho")}${bt("descartada", "Descartar")}</div></article>`;
+}
+function pintaFeed(suave) {
+  const y = $("main").scrollTop, ok = db.cards.filter(c => c.estado === "ok");
+  const temas = [...new Set(ok.map(temaFicha))].sort((a, b) => a.localeCompare(b, "es")), lotes = lotesLista().filter(l => l.ok);
+  $("#fbar").innerHTML = FMODOS.map(([k, t]) => `<button data-fm="${k}" class="${feedModo === k ? "on" : ""}">${t}</button>`).join("")
+    + `<select id="fLote" aria-label="Lote" class="${feedLote != null ? "on" : ""}"><option value="">Todos los lotes</option>${lotes.map(l => `<option value="${l.n}"${feedLote === l.n ? " selected" : ""}>${esc(etqLote(l.n))} (${l.ok})</option>`).join("")}</select>`
+    + `<select id="fTema" aria-label="Tema" class="${feedTema ? "on" : ""}"><option value="">Todos los temas</option>${temas.map(t => `<option${feedTema === t ? " selected" : ""}>${esc(t)}</option>`).join("")}</select>`;
+  const { cs, sc } = feedCards();
+  if (!cs.length) { $("#feed").innerHTML = ok.length ? '<div class="fvac"><b>Nada por aquí</b>Prueba otro filtro.<br><br><button class="btn" data-fq="1">Ver todo</button></div>' : '<div class="fvac"><b>Tu Inicio está vacío</b>Pega tus links en «Pegar» y aquí verás cada cosa explicada, con fotos y sus links.<br><br><button class="btn pri" data-fp="1">Ir a Pegar</button></div>'; return; }
+  const orden = cs.slice().sort((a, b) => sc.get(b).s - sc.get(a).s), top = new Set(orden.slice(0, Math.max(3, Math.ceil(cs.length * .25))).filter(c => sc.get(c).s >= 6));
+  let html = "", ult = null;
+  for (const c of cs.slice(0, feedN)) { if (feedModo === "ultimo" && loteDe(c) !== ult) { ult = loteDe(c); html += `<div class="fhd">${esc(etqLote(ult))}</div>`; } html += fichaFeed(c, sc.get(c), top.has(c)); }
+  if (cs.length > feedN) html += `<button class="btn fmas" data-fmas="1">Ver ${Math.min(20, cs.length - feedN)} más (quedan ${cs.length - feedN})</button>`;
+  const ab = new Set($$("#feed .fc details[open]").map(d => d.closest(".fc").dataset.id));
+  $("#feed").innerHTML = html; $$("#feed .fc").forEach(f => { if (ab.has(f.dataset.id)) { const d = f.querySelector("details"); if (d) d.open = true; } });
+  rellenaGalerias($("#feed")); if (suave) $("main").scrollTop = y;
+}
+$("#fbar").addEventListener("click", e => { const b = e.target.closest("[data-fm]"); if (!b) return; feedModo = b.dataset.fm; feedN = 20; pintaFeed(); $("main").scrollTop = 0; });
+$("#fbar").addEventListener("change", e => { if (e.target.id === "fLote") feedLote = e.target.value === "" ? null : Number(e.target.value); if (e.target.id === "fTema") feedTema = e.target.value; feedN = 20; pintaFeed(); $("main").scrollTop = 0; });
+$("#feed").addEventListener("click", e => {
+  if (e.target.closest("[data-fq]")) { feedModo = "ti"; feedLote = null; feedTema = ""; return pintaFeed(); }
+  if (e.target.closest("[data-fp]")) return cambiaTab("pegar");
+  if (e.target.closest("[data-fmas]")) { feedN += 20; return pintaFeed(true); }
+  const b = e.target.closest("[data-fa]"); if (!b) return; const c = db.cards.find(x => x.id === b.closest(".fc").dataset.id); if (!c) return;
+  ponUso(c, uso(c) === b.dataset.fa ? "nuevo" : b.dataset.fa);
+});
+$("#kInt").addEventListener("change", () => { db.cfg.intereses = $("#kInt").value.trim(); guardar(); });
+const RE_REINT = /conexi|tiempo|m[aá]s tarde|a medias|tard[oó]|no respondi|no termin|no pude procesar|no pude abrir/i;
+// arranque: lotes, nombres corregidos, duplicados unidos (con Deshacer) y fotos guardadas, solos
+{ let cambio = migraLotes(); if (db.corrV !== 1) { db.cards.forEach(corrigeCard); db.corrV = 1; cambio = 1; } if (cambio) guardar(); }
+$("#kInt").value = db.cfg.intereses || PERFIL_DEF;
 db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se reanuda */ } });
 migrarCats(); pintar(); detectar(); { try { const u = deshacerVivo(); if (u) aviso("Se unieron " + u.gr.reduce((n, g) => n + g.orig.length - 1, 0) + " repetidas hace poco"); } catch (e) { } } if (db.usarSemilla) cargarSemilla(); // las fichas de ejemplo ya no se cargan solas
 if (db.cards.some(c => c.estado === "pendiente")) { const n = (db.bn || 0) + 1; db.bn = n; sesionDesde = n; db.cards.forEach(c => { if (c.estado === "pendiente") c.bloque = n; }); guardar(); pintaBloques(); aviso("Quedaban links a medias: continúo."); correr(); }
 reconciliar = true;
+if (!corriendo && db.cards.some(c => c.estado === "ok")) cambiaTab("feed"); else pintaLotesHist();
+if (db.unirV !== "2026-10-21") { db.unirV = "2026-10-21"; guardar(); setTimeout(() => { if (!corriendo) unirRepetidas(); }, 1200); }
+setTimeout(() => { if (!corriendo) minisAtrasadas(); }, 4000);
 </script>
 </body>
 </html>
