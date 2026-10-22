@@ -6,7 +6,7 @@ AQUI = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
 SRC, BUILD = AQUI + "/src", AQUI + "/build"
 SDK = os.path.join(os.environ["LOCALAPPDATA"], "Android", "Sdk").replace("\\", "/")
 BT, JAR = SDK + "/build-tools/36.1.0", SDK + "/platforms/android-36.1/android.jar"
-VERSION_CODE, VERSION_NAME = 2, "1.1"
+VERSION_CODE, VERSION_NAME = 3, "1.2"
 DESTINO = r"C:\Users\PC\DeskBox\Apps\Mis Android Apps\IG Extractor.apk"
 KSDIR = os.path.expanduser("~/.igvault-movil")
 

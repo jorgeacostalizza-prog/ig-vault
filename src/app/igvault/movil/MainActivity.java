@@ -53,6 +53,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
+        // Android 13+ (y obligatorio con target 36): onBackPressed ya no se llama, hay que registrar el gesto de atrás
+        if (android.os.Build.VERSION.SDK_INT >= 33) getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::onBackPressed);
         web = new WebView(this);
         web.setBackgroundColor(Color.parseColor("#0F1115"));
         WebSettings s = web.getSettings();
