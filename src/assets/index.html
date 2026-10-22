@@ -352,7 +352,7 @@ a.li.roto{opacity:.45}
 .xc{position:relative;background:var(--s1);border:1px solid var(--ln);border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;min-width:0}
 .xc:hover{border-color:var(--mut)}
 .xim{height:150px;flex:none}
-.xim .port span{font-size:34px}.xim .port b{font-size:14px}
+.xim .port span{font-size:34px}.xim .port b{display:none}
 .xq{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:50%;border:0;background:#000a;color:#fff;display:grid;place-items:center}
 .xq svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2}
 .xq.on svg{fill:#e5405e;stroke:#e5405e}
@@ -417,7 +417,7 @@ a.li.roto{opacity:.45}
 .ipie{margin-top:26px;border-top:1px solid var(--ln);padding-top:10px}.ipie p{font-size:13.5px!important;color:var(--mut)}
 @media(min-width:560px){.drs{grid-template-columns:repeat(4,minmax(0,1fr))}.pc{grid-template-columns:1fr 1fr}}
 @media(min-width:900px){
-  .xtop{flex-direction:row;align-items:center}.xtop input{flex:1}.xsel{flex:none}.xsel select{min-width:170px}#xMasF,#xFecha{display:none}
+  .xtop{flex-direction:row;align-items:center}.xtop input{flex:1}.xtop .fbar{flex:1.4;min-width:0}
   .xcols{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:start}
   .xpanel{display:block;position:sticky;top:0;max-height:calc(100dvh - 40px);overflow-y:auto;padding-right:6px}
   .xres{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.xim{height:170px}
@@ -433,13 +433,39 @@ a.li.roto{opacity:.45}
 
 .fmas{display:block;width:100%;margin:6px 0 24px}
 @media(min-width:900px){.gl{height:340px}#p-feed{max-width:680px}}
+/* ---- 22/10/2026 interfaz: foto de respaldo, deslizar entre fichas, chips + «Orden» iguales en Inicio y Explorar ---- */
+.gl .port{position:absolute;inset:0;height:auto;flex:none;z-index:0;color:#fff;background:linear-gradient(140deg,hsl(var(--h,210) 42% 40%),hsl(var(--h,210) 45% 24%))}
+.gl img{position:relative;z-index:1}
+.port span{display:grid;place-items:center;width:1.9em;height:1.9em;border-radius:50%;background:#ffffff2e;font-weight:800;line-height:1}
+.port b{overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.xim{overflow:hidden}
+.xres .fvac,.xres .nota{grid-column:1/-1}
+.fbar{align-items:center;gap:8px;overflow:visible}
+.fbar .fchips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;padding:1px 0}
+.fbar .fchips::-webkit-scrollbar{display:none}
+.fbar .fchp,.fbar .ordbtn{flex:none;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 13.5px system-ui;white-space:nowrap}
+.fbar .fchp.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.fbar .ordbtn{display:inline-flex;align-items:center;gap:6px;border-color:var(--mut)}
+.fbar .ordbtn b{font-weight:700}
+.fbar .ordbtn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#xBar{margin:2px 0 4px}
+#dOrd,#dFilI{margin:auto auto 0;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;border-radius:18px 18px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+#dOrd .hb{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:56px;padding:8px 14px;margin:4px 0;border-radius:12px;border:1px solid var(--ln);background:var(--s2);color:var(--tx);font:600 15.5px system-ui;text-align:left}
+#dOrd .hb small{font:500 12.5px system-ui;color:var(--mut)}
+#dOrd .hb.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}#dOrd .hb.on small{color:inherit;opacity:.85}
+.lh .btn{min-height:46px;min-width:46px;font-size:15px}
+#lAnt{font-size:26px;line-height:1;padding:0 14px}
+#lSig{padding:0 14px}
+#lectC{touch-action:pan-y pinch-zoom}
+#lectC .gl,#lectC .inav{touch-action:pan-x pan-y pinch-zoom}
+@media(min-width:900px){.xmasc{display:none!important}}
 </style>
 </head>
 <body>
 <div class="cuerpo">
 <header><h1>IG Extractor</h1><span id="cuenta"></span></header>
 <main>
-  <section class="pan on" id="p-pegar">
+  <section class="pan" id="p-pegar">
     <div class="vacio" id="pasos"><b>Así de fácil</b>1. Copia tus links (Instagram, YouTube, GitHub…)<br>2. Pégalos aquí abajo<br>3. Pulsa «Ordenar mis links»</div>
     <textarea id="txt" placeholder="Pega aquí todos tus links de golpe (Instagram, YouTube, GitHub…), uno por línea o mezclados con texto. Yo saco los links solo." spellcheck="false"></textarea>
     <div class="nota avIA" style="display:none;color:var(--warn)"></div>
@@ -458,7 +484,7 @@ a.li.roto{opacity:.45}
     <div class="lts" id="lotesHist"></div>
   </section>
 
-  <section class="pan" id="p-feed">
+  <section class="pan on" id="p-feed">
     <div class="hist" id="hist" role="group" aria-label="Tus lotes"></div>
     <div class="fbar" id="fbar" role="group" aria-label="Qué ver"></div>
     <div id="feed"></div>
@@ -466,7 +492,7 @@ a.li.roto{opacity:.45}
 
   <section class="pan" id="p-explorar">
     <div class="xtop"><input type="search" id="xQ" placeholder="Buscar en tus posts…" aria-label="Buscar en tus posts">
-      <div class="xsel"><select id="xFecha" aria-label="Fecha"></select><select id="xOrden" aria-label="Ordenar"></select><button class="btn" id="xMasF">Filtros</button></div></div>
+      <div class="fbar" id="xBar" role="group" aria-label="Filtros y orden"></div></div>
     <div class="xact" id="xAct"></div>
     <div class="xcols"><aside class="xpanel" id="xPanel" aria-label="Filtros"></aside>
       <div class="xmain"><div class="xn" id="xN"></div><div class="xres" id="xRes"></div></div></div>
@@ -537,10 +563,12 @@ a.li.roto{opacity:.45}
 </div>
 <div id="aviso"></div>
 <div id="lector" role="dialog" aria-modal="true" aria-label="Leer la ficha entera">
-  <div class="lh"><button class="btn sm" data-l="cerrar" aria-label="Atrás">‹ Atrás</button><span id="lTit"></span><button class="btn sm" data-l="ant" id="lAnt" aria-label="Anterior">‹</button><button class="btn sm" data-l="sig" id="lSig">Siguiente ›</button></div>
+  <div class="lh"><button class="btn sm" data-l="cerrar" aria-label="Atrás">‹ Atrás</button><span id="lTit"></span><button class="btn sm" data-l="ant" id="lAnt" aria-label="Ficha anterior" title="Anterior (o desliza hacia la derecha)">‹</button><button class="btn sm" data-l="sig" id="lSig">Siguiente ›</button></div>
   <div id="lectC"></div>
   <div class="lbar fbt"></div>
 </div>
+<dialog id="dOrd" aria-label="Orden"><h2>Ordenar por</h2><div id="dOrdC"></div></dialog>
+<dialog id="dFilI" aria-label="Más filtros"><h2>Más filtros</h2><div id="dFilIC"></div><div class="fila"><button class="btn pri" id="dFilIOk">Ver resultados</button></div></dialog>
 <dialog id="dFil" aria-label="Filtros"><h2>Filtros</h2><div id="dFilC"></div><div class="fila"><button class="btn pri" id="dFilOk">Ver resultados</button></div></dialog>
 <dialog id="dCol" aria-label="Guardar en una colección"><h2>Guardar en…</h2><div id="colL"></div>
   <div class="fila" style="flex-wrap:nowrap"><input type="text" id="colN" placeholder="Nueva colección (p. ej. Para instalar)" maxlength="40"><button class="btn sm" id="colAdd">Crear</button></div>
@@ -566,8 +594,8 @@ a.li.roto{opacity:.45}
   <div id="hojaP"><button class="btn" id="hNo">Cancelar</button><button class="btn pri" id="hSi">Guardar</button></div>
 </div>
 <nav>
-  <button data-t="feed"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Inicio</button>
-  <button data-t="pegar" class="on"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Añadir</button>
+  <button data-t="feed" class="on"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Inicio</button>
+  <button data-t="pegar"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Añadir</button>
   <button data-t="explorar"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span>Explorar</button>
   <button data-t="lista"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg></span>Mi lista</button>
   <button data-t="ajustes"><span class="i"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></span>Ajustes</button>
@@ -677,8 +705,8 @@ async function ghReadme(full) {
 const repoInfo = g => ({ pushed: g.pushed_at || "", archived: !!g.archived, full: g.full_name, desc: g.description || "", stars: g.stargazers_count, topics: g.topics || [], url: g.html_url, lang: g.language || "", home: g.homepage || "" });
 
 // ============ IA en la nube ============
-const MOD_NV = ["nvidia/nemotron-3-super-120b-a12b", "z-ai/glm-5.3-flash", "nvidia/nemotron-3.5-lightning-30b-a3b"];
-const MOD_OR = ["nvidia/nemotron-3-super-120b-a12b:free", "google/gemma-4-31b-it:free"];
+const MOD_NV = ["nvidia/nemotron-3-super-120b-a12b", "z-ai/glm-5.3-flash", "nvidia/nemotron-3.5-lightning-30b-a3b", "meta/llama-3.3-70b-instruct"];
+const MOD_OR = ["nvidia/nemotron-3-super-120b-a12b:free", "google/gemma-4-31b-it:free", "openai/gpt-oss-120b:free", "meta-llama/llama-3.3-70b-instruct:free"]; // 22/10: más modelos de respaldo (si uno no existe da 404 y se salta solo)
 let muertos = {}, iaError = "";
 const hayIA = () => !!(db.cfg.nvidia || db.cfg.openrouter);
 const ACCIONES = ["Instalar", "Probar", "Solo guardar"];
@@ -773,21 +801,22 @@ const MURO = /(log in|sign up|inicia sesi|iniciar sesi|crear cuenta|create an ac
 const _embedC = new Map();
 const embedIG = base => { if (!_embedC.has(base)) _embedC.set(base, http(base + "embed/captioned/")); return _embedC.get(base); };
 async function leerIG(url) {
-  const base = url.replace(/\/$/, "") + "/";
+  const mi = String(url).match(RE_IG); // 22/10: el ?stkn=… de los enlaces de la app rompía la URL (…/?stkn=x/embed/) y Instagram servía otra página
+  const base = mi ? `https://www.instagram.com/${mi[1] === "reels" ? "reel" : mi[1]}/${mi[2]}/` : String(url).replace(/[?#].*$/, "").replace(/\/$/, "") + "/";
   try { return await leerIG0(url, base); } finally { _embedC.delete(base); }
 }
 async function leerIG0(url, base) {
   const g = await gbIG(base);
   let r = await pagina(base + "embed/captioned/");
   let t = (r.cap || "").trim() || g.cap;
-  if (!t) t = capDeOg(r.og);
+  if (!t) t = capDeOg(r.og) || capDeOg(g.og);
   if (!t) { r = await pagina(base); t = capDeOg(r.og) || ""; if (!t && r.og && !MURO.test(r.og) && r.og.length > 40) t = r.og; }
   if (!t) { const h = await http(base); if (h.status === 200) t = capDeOg(metaDe(h.body, "og:description")); }
   t = t.replace(/\s+\n/g, "\n").trim();
   if (g.comments != null && g.comments > 0) t = (t ? t + "\n" : "") + "Comentarios: " + g.comments;
   const imgs = (g.imgs && g.imgs.length > 1) ? g.imgs : await imgsIG(base);
   if (!imgs.length && g.img) imgs.push(g.img);
-  if (!imgs.length && !g.video && (!t || (t.length < 25 && MURO.test(t)))) return { error: "Instagram no dejó leer este post; ábrelo con el botón" };
+  if (!imgs.length && !g.video && (!t || (t.length < 25 && MURO.test(t)))) return { error: "Instagram no deja leer este post sin iniciar sesión (puede ser privado, borrado o pedir login). Pulsa «Reintentar», o pega el texto del post a mano aquí abajo" };
   if (t.length < 25 && MURO.test(t)) t = "";
   return { texto: t, imgs, video: g.video || await videoIG(base) };
 }
@@ -801,11 +830,18 @@ async function gbIG(base) {
     // R7: la página trae también el pie de OTROS posts del perfil; solo vale el pie que va pegado al código de ESTE post
     const cod = (base.match(/\/(?:p|reel|reels|tv)\/([\w-]+)/) || [])[1] || "";
     if (cod) { const c = r.body.match(new RegExp('"caption":\\{"text":"((?:[^"\\\\]|\\\\.)*)"\\},"code":"' + cod + '"')); if (c) o.cap = dec(c[1]).trim(); }
-    const v = r.body.match(/"video_versions":\[\{[^\]]*?"url":"((?:[^"\\]|\\.)*)"/); if (v) o.video = dec(v[1]);
+    // 22/10: la página trae también vídeos e imágenes de OTROS posts del perfil (así se mezclaban voz y fotos de otro reel): solo vale lo que va tras el código de ESTE post
+    let seg = r.body;
+    if (cod) {
+      const marca = '"code":"' + cod + '"'; const k0 = r.body.lastIndexOf(marca);
+      if (k0 < 0) seg = ""; else { const sig = r.body.slice(k0 + marca.length).search(/"code":"[\w-]{8,14}"/); seg = r.body.slice(k0, sig < 0 ? k0 + 300000 : k0 + marca.length + sig); }
+    }
+    o.og = metaDe(r.body, "og:description"); // pie en «123 likes - user: "texto"» (Instagram lo sirve sin login)
+    const v = seg.match(/"video_versions":\[\{[^\]]*?"url":"((?:[^"\\]|\\.)*)"/); if (v) o.video = dec(v[1]);
     const i = r.body.match(/property="og:image" content="([^"]+)"/); if (i) o.img = i[1].replace(/&amp;/g, "&");
     const cm = r.body.match(/"edge_media_to_comment":\{"count":(\d+)\}/); if (cm) o.comments = parseInt(cm[1], 10);
-    o.imgs = []; const k = r.body.indexOf('"carousel_media":['); // carrusel: portada de las primeras diapositivas de ESTE post
-    if (k > 0) for (const m of r.body.slice(k, k + 400000).matchAll(/"image_versions2":\{"candidates":\[\{"url":"((?:[^"\\]|\\.)*)"/g)) { const u = dec(m[1]); if (u && !o.imgs.includes(u)) o.imgs.push(u); if (o.imgs.length >= 8) break; }
+    o.imgs = []; const k = seg.indexOf('"carousel_media":['); // carrusel: portada de las primeras diapositivas de ESTE post
+    if (k > 0) for (const m of seg.slice(k, k + 400000).matchAll(/"image_versions2":\{"candidates":\[\{"url":"((?:[^"\\]|\\.)*)"/g)) { const u = dec(m[1]); if (u && !o.imgs.includes(u)) o.imgs.push(u); if (o.imgs.length >= 8) break; }
   } catch (e) { }
   return o;
 }
@@ -896,7 +932,11 @@ async function leerX(url) {
   catch (e) { return { error: "No pude leer este tuit" }; }
 }
 async function leerWeb(url) {
-  const r = await http(url);
+  let r = await http(url);
+  if (r.status === 403 || r.status === 401 || r.status === 429) { // 22/10: reintento con cabeceras de navegador normal (sin login ni cookies)
+    const r2 = await http(url, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36", Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", "Accept-Language": "es-ES,es;q=0.9,en;q=0.8", Referer: "https://www.google.com/" } });
+    if (r2.status === 200) r = r2;
+  }
   if (r.status !== 200) return { error: r.status === 404 ? "Esta web ya no existe (no encuentro la página)" : r.status === 403 || r.status === 401 ? "Esta web no deja leerla sin iniciar sesión" : r.status === 0 ? "No pude abrir esta web: parece que no hay conexión" : "No pude abrir esta web ahora. Prueba más tarde" };
   const h = r.body; const tit = decodeHtml((h.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [, ""])[1]).trim();
   const d = metaDe(h, "og:description") || metaDe(h, "description");
@@ -949,6 +989,23 @@ function fundado(salida, fuente) {
   const w = [...raices(salida)]; if (w.length < 5) return true;
   const f = raices(fuente); return w.filter(x => f.has(x)).length / w.length >= 0.22;
 }
+// <coherencia>
+// 22/10: CERTEZA. Título, resumen y repos tienen que salir de lo que de verdad dice el post (pie, voz, texto en imágenes).
+function coherencia(titulo, resumen, f) { // f = { pie, voz, vis, repo }; devuelve "" si todo cuadra, o el motivo en palabras sencillas
+  if (/^\s*\[/.test(String(titulo || ""))) return "El título es un trozo interno, no un título real"; // 23/10: «[VOZ DEL VÍDEO…]», «[LO QUE SE VE…]»
+  const P = raices(f.pie), T = [...raices(titulo)], R = [...raices(resumen)];
+  // el resumen contra las fuentes ya lo vigila «fundado» (aguanta posts en inglés); aquí van las comprobaciones que no dependen del idioma
+  if (T.length && R.length >= 6 && !T.some(x => R.includes(x))) return "El título y el resumen hablan de cosas distintas";
+  const es = (String(f.pie).toLowerCase().match(/(?:^|\s)(?:el|la|los|de|que|para|con|una|un|en|y)(?=\s)/g) || []).length >= 4; // solo si el pie está en español (como el resumen)
+  if (es && P.size >= 8 && R.length >= 6 && R.filter(x => P.has(x)).length / R.length < 0.15) return "El resumen no coincide con el texto escrito del post (puede venir de otro vídeo o de una web)";
+  return "";
+}
+function repoCitado(full, texto) { // un repo solo vale si su nombre aparece escrito/dicho en el post (o es un enlace del post)
+  const nom = String(full).split("/")[1] || ""; if (nom.length < 3) return false;
+  const pat = sinAcentos(nom).split(/[-_.]+/).filter(Boolean).map(x => x.replace(/[^a-z0-9]/g, "")).join("[-_. ]?");
+  return !!pat && new RegExp("(^|[^a-z0-9])" + pat + "([^a-z0-9]|$)").test(sinAcentos(texto));
+}
+// </coherencia>
 const hashtags = t => (t.match(/#[\p{L}\d_]+/gu) || []);
 // tags consistentes: minúsculas, sin acentos/plural simple, sinónimos unificados, sin genéricas, máx 5
 const TAG_SIN = { ai: "ia", "inteligencia-artificial": "ia", "artificial-intelligence": "ia", claudecode: "claude-code", opensource: "open-source", "codigo-abierto": "open-source", gratis: "free", ghub: "github" };
@@ -979,10 +1036,11 @@ async function analizar(card, textoManual) {
     if (v.error) { Object.assign(card, { estado: "revisar", motivo: v.error, categoria: "Para revisar" }); return card; }
     textoManual = v.texto; const cu = v.texto.match(/Cuenta:\s*(@[\w.]+)/i); if (cu) card.cuenta = cu[1];
   }
+  if (!textoManual && card.manual) textoManual = card.manual; // texto del post pegado a mano por Finn
   let texto = textoManual || "", titulo = "", soloGancho = false;
   const src = { pie: "", voz: "", vis: "" }; // M1: de dónde sale cada cosa (pie del post / voz del vídeo / texto leído en imágenes y fotogramas)
   if (!texto) {
-    paso(card, "Leyendo " + card.tipo + "…");
+    paso(card, "Leyendo el post…");
     const l = card.tipo === "Instagram" ? await leerIG(card.url) : card.tipo === "YouTube" ? await leerYT(card.url) : card.tipo === "TikTok" ? await leerTikTok(card.url) : card.tipo === "X" ? await leerX(card.url) : card.tipo === "GitHub" ? { texto: "" } : await leerWeb(card.url);
     if (l.error) { Object.assign(card, { estado: "revisar", motivo: l.error, categoria: "Para revisar" }); if (card.tipo !== "GitHub") return card; }
     texto = l.texto || ""; titulo = l.titulo || "";
@@ -997,7 +1055,7 @@ async function analizar(card, textoManual) {
     card.vio = { voz: !!vz, imgs: !!vi, video: !!l.video, frames: !!vf };
     { // R7: si el pie del post y lo que se oye/ve en el vídeo no comparten NI UNA palabra, no afirmo nada: Para revisar
       const pie = raices(texto.replace(/^Comentarios:.*$/mi, "")), med = raices([vz, vi, vf].filter(Boolean).join(" "));
-      if (pie.size >= 6 && med.size >= 15 && ![...pie].some(x => med.has(x))) { Object.assign(card, { estado: "revisar", categoria: "Para revisar", motivo: "El texto del post y el vídeo no coinciden", texto: texto.slice(0, 1500) }); return card; }
+      if (pie.size >= 6 && med.size >= 15 && ([...pie].filter(x => med.has(x)).length / pie.size < (pie.size >= 8 ? 0.15 : 0.01))) { Object.assign(card, { estado: "revisar", categoria: "Para revisar", motivo: "El texto del post y el vídeo no coinciden", texto: texto.slice(0, 1500) }); return card; }
     }
     if (soloGancho && (vz || vi || vf)) soloGancho = false;
     if (soloGancho) texto = ""; // solo traía «comenta X»: no hay contenido real
@@ -1012,14 +1070,14 @@ async function analizar(card, textoManual) {
   for (const m of (card.tipo === "GitHub" ? card.url + " " + texto : texto).matchAll(/github\.com\/([\w.-]+)\/([\w.-]+)/gi)) cands.add(m[1] + "/" + m[2].replace(/\.git$/, ""));
   if (card.tipo === "Foto" || /github|repo|open.?source/i.test(texto)) for (const m of texto.matchAll(/(?<![\w/.@#-])([A-Za-z][\w-]{1,38}\/[A-Za-z][\w.-]{1,60})(?![\w/])/g)) if (!/^(https?|www)/i.test(m[1]) && !/\.(com|org|io|net|app)\b/i.test(m[1]) && !PAR_COMUN.test(m[1])) { cands.add(m[1]); suelto.add(m[1]); }
   const repos = []; if (cands.size) paso(card, "Comprobando en GitHub…");
-  for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g && !(suelto.has(c) && Number(g.stargazers_count) < 10)) repos.push(repoInfo(g)); }
+  for (const c of [...cands].slice(0, 4)) { const g = await ghRepo(c); if (g && !(suelto.has(c) && Number(g.stargazers_count) < 10) && repoCitado(g.full_name, texto + " " + card.url)) repos.push(repoInfo(g)); }
   if (!src.pie && !src.voz && !src.vis) src.pie = texto;
   let ctx = texto.slice(0, 2600);
   if (src.voz || src.vis) ctx = (src.pie.slice(0, 900) + (src.voz ? "\n[VOZ DEL VÍDEO, transcrita]\n" + src.voz.slice(0, 1100) : "") + (src.vis ? "\n[TEXTO LEÍDO EN IMÁGENES/FOTOGRAMAS]\n" + src.vis.slice(0, 900) : "")).slice(0, 3000); // M1: la voz y los fotogramas siempre entran en lo que ve la IA, aunque el pie sea largo
   for (const r of repos.slice(0, 2)) { const rd = await ghReadme(r.full); r.readme = rd; ctx += `\n[REPO VERIFICADO ${r.full} — ${r.desc} — README: ${rd.slice(0, 900)}]`; }
   let ai = null;
   if (hayIA() && ctx.trim() && !soloGancho) {
-    paso(card, "Pidiendo el resumen a la IA…");
+    paso(card, "Resumiendo…");
     ai = await chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
 {"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"1 o 2 frases en español claro (MÁXIMO 220 caracteres): QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null","subtipo":"solo si categoria es Inteligencia artificial y el contenido lo deja claro: UNO de ${SUBTIPOS.join(" | ")}; si no está claro, cadena vacía","sirve":"UNA línea llana (MÁXIMO 110 caracteres) que empiece por un verbo: para qué le sirve a quien la guarda, SOLO según el contenido; si no se sabe, cadena vacía","sirve_cita":"cita corta TEXTUAL (MÁXIMO 120 caracteres, en el IDIOMA ORIGINAL de la fuente, sin traducir) copiada letra por letra del contenido, que respalde «sirve»; si no hay, cadena vacía","sirve_fuente":"de dónde copiaste la cita: pie | voz | fotogramas | repo","accion":"Instalar (si el contenido da forma de instalarlo) | Probar (si se puede probar sin instalar) | Solo guardar (si no hay base clara)"}
 Reglas (0) «sirve» y «accion» salen SOLO del pie del post, de la VOZ del vídeo, del texto leído en imágenes/fotogramas o del README (cualquiera de esas fuentes vale; no hace falta que el pie lo diga); sin base en ninguna: "sirve":"" y "accion":"Solo guardar". (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) Si no hay información útil: "resumen":"" y "categoria":"Otros". (6) La voz transcrita confunde nombres: «Cloud Code» es Claude Code, «Cloud» junto a skills/plugins/MCP es Claude, «MSP» es MCP. Escribe el nombre correcto.
@@ -1029,7 +1087,7 @@ ${ctx}`);
       for (const p of (ai.proyectos || []).slice(0, 2)) {
         let g = p.repo && /^[\w.-]+\/[\w.-]+$/.test(p.repo) ? await ghRepo(p.repo) : null;
         if (!g && p.nombre) { g = await ghBuscar(p.nombre); if (g && (g.stargazers_count || 0) < 20) g = null; } // por nombre solo vale un repo con tracción
-        if (g) repos.push(repoInfo(g));
+        if (g && repoCitado(g.full_name, texto + " " + card.url)) repos.push(repoInfo(g)); // 22/10: solo si el nombre sale en el post
       }
     }
   }
@@ -1066,6 +1124,8 @@ ${ctx}`);
   card.fuente = ai ? (r0 ? "verificado" : "resumen IA") : (r0 ? "verificado" : "deducido");
   try { await investigar(card, repos, ai, texto); } catch (e) { card.detalleTecnico = "investigar: " + String(e).slice(0, 120); }
   card.estado = "ok"; if (!/descart/.test(card.motivo || "")) card.motivo = "";
+  { const mc = card.tipo === "Foto" || card.tipo === "GitHub" ? "" : coherencia(card.titulo, card.resumen, { pie: src.pie, voz: src.voz, vis: src.vis, repo: repos.map(r => r.desc).join(" ") });
+    if (mc) { card.resumenDudoso = card.resumen; card.estado = "revisar"; card.categoria = "Para revisar"; card.motivo = mc + ". Pulsa «Reintentar» o pega el texto del post a mano."; } }
   card.sinIA = "";
   if (!hayIA()) card.sinIA = AVISO_SIN_IA;
   else if (!ai && ctx.trim()) { card.sinIA = "No hubo resumen de la IA: " + iaTexto() + ". Ordenada con lo que había"; card.detalleTecnico = iaError.slice(0, 160); }
@@ -1339,7 +1399,7 @@ const claveUrl = u => { // misma publicación aunque cambie la forma del link (u
   u = String(u || "").trim(); const ig = u.match(RE_IG); if (ig) return "ig:" + ig[2]; const yt = u.match(RE_YT); if (yt) return "yt:" + yt[1];
   const gh = u.match(/github\.com\/([\w.-]+)\/([\w.-]+)/i); if (gh) return "gh:" + (gh[1] + "/" + gh[2].replace(/\.git$/i, "")).toLowerCase();
   const [pth, q = ""] = u.toLowerCase().replace(/^https?:\/\/(www\.|m\.)?/, "").replace(/#.*$/, "").split("?");
-  const keep = q.split("&").filter(x => x && !/^(utm_|igsh|igshid|fbclid|gclid|si=|feature=|ref=|s=|t=)/.test(x)).sort().join("&");
+  const keep = q.split("&").filter(x => x && !/^(utm_|igsh|igshid|fbclid|gclid|si=|feature=|ref=|s=|t=|stkn=|xtok=|exln=)/.test(x)).sort().join("&");
   return pth.replace(/\/+$/, "") + (keep ? "?" + keep : "");
 };
 const clavesDe = c => { const k = new Set([claveUrl(c.url), ...(c.extra || []).map(claveUrl)]); const r = c.repos && c.repos[0]; if (r) k.add("gh:" + r.full.toLowerCase()); return k; };
@@ -1439,7 +1499,7 @@ async function correr() {
 // ---- fichas repetidas: misma identidad real (post/repo/URL normalizada) en el mismo grupo; la unida conserva todo; con «Deshacer» ----
 // 21/10: además del mismo post, se unen las fichas que hablan de LO MISMO: mismo repo (si es de lo que va el vídeo) o mismo título con nombre propio
 const GEN_TIT = new Set("herramienta herramientas gratis gratuita gratuitas gratuitos utiles util repositorio repositorios repos nuevas nuevos nueva nuevo mejores mejor tools tool free apps app trucos consejos errores recursos ideas agentes agente skills skill para con los las del una uno sin tus que como cosas".split(" "));
-const GEN_MARCA = new Set("claude code chatgpt openai gemini google anthropic codex cursor instagram github ia ai gpt llm n8n mcp windows mac linux android ios python".split(" "));
+const GEN_MARCA = new Set("obsidian notion claude code chatgpt openai gemini google anthropic codex cursor instagram github ia ai gpt llm n8n mcp windows mac linux android ios python".split(" "));
 function cabeza(t) { const p = String(t || "").split(/\s*[:|–—]\s*|\s+-\s+/)[0]; if (!p || p.length === String(t).length) return ""; const w = sinAcentos(corrige(p)).replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter(Boolean); return w.some(x => x.length >= 3 && !GEN_TIT.has(x) && !GEN_MARCA.has(x) && !/^\d+$/.test(x)) ? w.join(" ") : ""; } // «Orchestrator.inc: Gestión…» -> «orchestrator inc»
 const HOST_CONOCIDOS = new Set(Object.values(CONOCIDOS).map(u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } }));
 function webPropia(c) { const l = (c.links || []).find(x => /web oficial/i.test(x.t || "")); if (!l) return ""; try { const h = new URL(l.u).hostname.replace(/^www\./, ""); if (HOST_CONOCIDOS.has(h) || esGenerico(l.u) || /github|npmjs|pypi|huggingface|t\.me|discord/.test(h)) return ""; } catch (e) { return ""; } return claveUrl(l.u); }
@@ -1451,7 +1511,7 @@ function unirRepetidas() {
   const pad = cs.map((_, i) => i), f = i => pad[i] === i ? i : (pad[i] = f(pad[i])), idx = new Map();
   const rep = cs.map(repoId); // dos fichas con repos distintos nunca se unen por el nombre
   const mete = (k, i, mirar) => { if (!k) return; if (!idx.has(k)) { idx.set(k, i); return; } const a = f(i), b = f(idx.get(k)); if (a === b) return; if (mirar && rep[a] && rep[b] && rep[a] !== rep[b]) return; pad[a] = b; if (!rep[b]) rep[b] = rep[a]; };
-  cs.forEach((c, i) => { mete("u:" + claveUrl(c.url), i); (c.extra || []).forEach(u => mete("u:" + claveUrl(u), i)); const r = c.repos || []; if (r.length === 1 && tituloHabla(c, r[0].full)) mete("gh:" + r[0].full.toLowerCase(), i); const t = claveTitulo(c.titulo); if (t) mete("t:" + t, i, true); const h = cabeza(c.titulo); if (h) mete("h:" + h, i, true); const w = webPropia(c); if (w) mete("w:" + w, i, true); }); // mismo título, mismo nombre principal o misma web oficial = lo mismo
+  cs.forEach((c, i) => { mete("u:" + claveUrl(c.url), i); (c.extra || []).forEach(u => mete("u:" + claveUrl(u), i)); const r = c.repos || []; if (r.length === 1 && !GEN_MARCA.has(String(r[0].full).split("/")[1].toLowerCase()) && tituloHabla(c, r[0].full)) mete("gh:" + r[0].full.toLowerCase(), i); const t = claveTitulo(c.titulo); if (t) mete("t:" + t, i, true); const h = cabeza(c.titulo); if (h) mete("h:" + h, i, true); const w = webPropia(c); if (w) mete("w:" + w, i, true); }); // mismo título, mismo nombre principal o misma web oficial = lo mismo
   const grupos = {}; cs.forEach((c, i) => (grupos[f(i)] ||= []).push(c));
   const peso = c => ["resumen", "detalle", "notas", "imgs", "links", "puntos", "skills", "repos", "tags"].reduce((n, k) => n + (c[k] ? String(JSON.stringify(c[k])).length : 0), 0) + (c.fav ? 1 : 0);
   const uniq = (a, f) => { const v = new Set(); return a.filter(x => { const k = f(x); if (!k || v.has(k)) return false; v.add(k); return true; }); };
@@ -1612,7 +1672,7 @@ function detalleHtml(c) {
   const repoCh = (c.repos || []).slice(0, 2).map((r, _, A) => { const e = estadoRepo(r); return e ? `<span class="chip ${e.cls}">${A.length > 1 ? esc(r.full.split("/")[1]) + ": " : ""}${e.t}</span>` : ""; }).join("");
   const leido = [vio.voz ? "voz del vídeo" : c.voz === "no" ? "sin voz" : "", vio.imgs ? "texto de las imágenes" : "", vio.frames ? "fotogramas del vídeo" : "", c.repos && c.repos.length ? "README" : ""].filter(Boolean).join(" · ");
   const sel = db.sel && db.sel[c.id];
-  return `<div class="dh"><button class="btn sm" data-a="cerrar" aria-label="Volver a la lista">${IC.back}</button><span>Ficha</span></div><div id="detC"${rev ? ' class="fall"' : ""}><h2>${esc(rev ? (/^https?:\/\//i.test(String(c.titulo || "")) ? "No se pudo leer" : c.titulo) : tituloVis(c))}</h2>${rev ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo || "Hay que revisarla")}</div><div class="acs" style="margin:8px 0"><button class="btn pri" data-a="reint">Reintentar</button></div>` : ""}
+  return `<div class="dh"><button class="btn sm" data-a="cerrar" aria-label="Volver a la lista">${IC.back}</button><span>Ficha</span></div><div id="detC"${rev ? ' class="fall"' : ""}><h2>${esc(rev ? (/^https?:\/\//i.test(String(c.titulo || "")) ? "No se pudo leer" : c.titulo) : tituloVis(c))}</h2>${rev ? `<div class="nota" style="color:var(--warn)">${esc(c.motivo || "Hay que revisarla")}</div><div class="acs" style="margin:8px 0"><button class="btn pri" data-a="reint">Reintentar</button></div><label class="nota" for="manualTxt">¿Sigue sin leerse? Pega aquí el texto del post y pulsa «Analizar este texto»</label><textarea id="manualTxt" rows="4" style="width:100%;margin:6px 0">${esc(c.manual || "")}</textarea><div class="acs"><button class="btn sm" data-a="manual">Analizar este texto</button></div>` : ""}
 <div class="meta"><span class="chip">${esc(c.estado === "ok" ? temaFicha(c) : c.categoria || "Otros")}</span>${loteDe(c) ? `<span class="chip">${esc(etqLote(loteDe(c)))}</span>` : ""}${c.estado === "ok" ? sellosHtml(c) : ""}${c.fav ? '<span class="rel r5">Favorita</span>' : ""}${c.accion && c.estado === "ok" ? `<span class="chip${c.accion === "Instalar" ? " ok" : ""}">${esc(c.accion)}</span>` : ""}<span class="chip">${esc(c.tipo)}</span>${c.cuenta ? `<span class="chip">${esc(c.cuenta)}</span>` : ""}${repoCh}${(c.rotos || []).length ? `<span class="chip bad">${c.rotos.length} enlace(s) roto(s)</span>` : ""}${c.fuente ? `<span class="chip ${c.fuente === "verificado" || c.fuente === "investigado" ? "ok" : ""}">${esc(c.fuente)}</span>` : ""}${c.estado === "pendiente" ? '<span class="chip">en cola</span>' : rev ? '<span class="chip warn">revisar</span>' : ""}</div>
 ${galeriaHtml(c, "det-gl")}
 ${c.sinIA ? `<div class="nota" style="color:var(--warn)">${esc(c.sinIA)}</div>` : ""}
@@ -1839,6 +1899,7 @@ $("#det").addEventListener("click", async e => {
   if (a === "cerrar") return cerrarDet();
   const c = db.cards.find(x => x.id === detId); if (!c) return;
   if (a === "reint") { const n = (db.bn || 0) + 1; db.bn = n; Object.assign(c, { estado: "pendiente", bloque: n, motivo: "", cola: Date.now() }); guardar(); pintar(); pintaDet(); pintaBloques(); aviso("Reintentando…"); return correr(); }
+  if (a === "manual") { const t = ($("#manualTxt") || {}).value || ""; if (t.trim().length < 15) return aviso("Pega el texto del post (muy corto)"); const n = (db.bn || 0) + 1; db.bn = n; Object.assign(c, { manual: t.trim().slice(0, 4000), estado: "pendiente", bloque: n, motivo: "", cola: Date.now() }); guardar(); pintar(); pintaDet(); pintaBloques(); aviso("Analizando el texto…"); return correr(); }
   if (a === "vermas") { verMasId = verMasId === c.id ? null : c.id; return pintaDet(); }
   if (a === "editar") return abrirEditor(c);
   if (a === "mas") { masId = masId === c.id ? null : c.id; return pintaDet(); }
@@ -1909,7 +1970,7 @@ window.__chat = (t, fs) => {
 };
 try { const k = N && N.claves ? JSON.parse(N.claves()) : {}; if (!db.cfg.nvidia && k.nvidia) db.cfg.nvidia = k.nvidia; if (!db.cfg.openrouter && k.openrouter) db.cfg.openrouter = k.openrouter; } catch (e) { }
 $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGh").value = db.cfg.github; $("#kGq").value = db.cfg.groq || "";
-srvListo.then(async () => { if (!SRV) { clavesListas = true; pintaAvisoIA(); return; } try { { const r = await (await fetch("/api/respaldo")).json(); if (r.cards && r.cards.length) { r.cards.forEach(c => { if (c.estado === "pendiente") Object.assign(c, { estado: "revisar", categoria: "Para revisar", motivo: c.motivo || "Se quedó a medias al cerrar la app. Pulsa «Reintentar»" }); }); const tiene = new Set(db.cards.map(c => c.url)); const antes = db.cards.length; r.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); if (db.cards.length > antes) { db.sel = db.sel && db.sel.length ? db.sel : (r.sel || []); guardar(); pintar(); aviso("Recuperé " + (db.cards.length - antes) + " fichas de la copia"); unirRepetidas(); } } } const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } clavesListas = true; pintaAvisoIA(); });
+srvListo.then(async () => { if (!SRV) { clavesListas = true; pintaAvisoIA(); return; } try { { const r = await (await fetch("/api/respaldo")).json(); if (r.cards && r.cards.length) { r.cards.forEach(c => { if (c.estado === "pendiente") Object.assign(c, { estado: "revisar", categoria: "Para revisar", motivo: c.motivo || "Se quedó a medias al cerrar la app. Pulsa «Reintentar»" }); }); const tiene = new Set(db.cards.map(c => c.url)); const antes = db.cards.length; r.cards.forEach(c => { if (!tiene.has(c.url)) db.cards.push(c); }); if (db.cards.length > antes) { db.sel = db.sel && db.sel.length ? db.sel : (r.sel || []); guardar(); pintar(); trasRestaurar(); aviso("Recuperé " + (db.cards.length - antes) + " fichas de la copia"); unirRepetidas(); } } } const k = await (await fetch("/api/claves")).json(); for (const n of ["nvidia", "openrouter", "groq"]) if (!db.cfg[n] && k[n]) db.cfg[n] = k[n]; guardar(); $("#kNv").value = db.cfg.nvidia; $("#kOr").value = db.cfg.openrouter; $("#kGq").value = db.cfg.groq || ""; } catch (e) { } clavesListas = true; pintaAvisoIA(); });
 srvListo.then(async () => { if (!SRV) return; try { const v = await (await fetch("/api/version")).json(); if (v && v.version) $("#verInfo").textContent = "Versión " + v.version + (v.actualizado ? " · actualizada " + String(v.actualizado).slice(0, 10) : ""); } catch (e) { } });
 // semilla: investigación precargada. Llega por autoactualización, cifrada (el repo es público); la clave sale de la que ya lleva la APK
 async function cargarSemilla() {
@@ -1972,7 +2033,7 @@ function pintaLotesHist() {
 function verLote(n) {
   n = Number(n) || 0;
   if (!db.cards.some(c => loteDe(c) === n && c.estado === "ok")) { FIL = { ...FIL0(), lote: String(n), marca: ["revisar"] }; return ir("explorar"); } // solo fallidas: se ven en Explorar
-  feedLote = n; feedModo = "ultimo"; feedTema = ""; feedCol = ""; feedN = 20; cambiaTab("feed");
+  feedLote = n; feedModo = ""; feedOrd = "nuevo"; feedTema = ""; feedCol = ""; feedN = 20; cambiaTab("feed");
 }
 $("#lotesHist").addEventListener("click", e => { const b = e.target.closest("[data-vl]"); if (b) verLote(b.dataset.vl); });
 
@@ -2055,7 +2116,7 @@ function fotosDe(c, usoImg) {
   return o.slice(0, 4);
 }
 function galeriaHtml(c, cls = "") { const f = fotosDe(c, usoImgs()); return `<div class="gl ${cls}" data-gid="${esc(c.id)}"${f.length ? "" : ' style="display:none"'}>${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="${i ? "lazy" : "eager"}" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`; }
-function cuentaGal(g) { const n = g.querySelectorAll("img").length, po = g.querySelector(".port"); if (n && po) po.remove(); g.style.display = n || (po && !n) ? "" : "none"; const gn = g.nextElementSibling; if (gn && gn.classList.contains("gn")) gn.textContent = n > 1 ? `${Math.min(n, Math.round(g.scrollLeft / Math.max(1, g.clientWidth)) + 1)}/${n}` : ""; }
+function cuentaGal(g) { const n = g.querySelectorAll("img").length, po = g.querySelector(".port"); g.style.display = n || po ? "" : "none"; /* 22/10: el respaldo (.port) nunca se quita: queda detrás de las fotos */ const gn = g.nextElementSibling; if (gn && gn.classList.contains("gn")) gn.textContent = n > 1 ? `${Math.min(n, Math.round(g.scrollLeft / Math.max(1, g.clientWidth)) + 1)}/${n}` : ""; }
 window.fotoMala = el => { const g = el.parentNode; el.remove(); if (g) cuentaGal(g); };
 document.addEventListener("scroll", e => { const g = e.target; if (g && g.classList && g.classList.contains("gl")) cuentaGal(g); }, true);
 const MINI = (() => { // miniaturas guardadas en el propio dispositivo: las fotos de Instagram caducan a los pocos días
@@ -2094,9 +2155,28 @@ async function minisDeCard(id) { // del aparato; si no están y la sincronizaci�
   const v = await MINI.get(id); if (Array.isArray(v) && v.length) return v;
   const n = await bajaMinisNube(id); if (n && n.length) { await MINI.put(id, n); return n; } return [];
 }
+// 22/10: las fotos «no deben caducar»: en cuanto se pinta una ficha se guarda su miniatura en el aparato (antes esperaba a los 4 s)
+const _minTry = new Set(), _minCola = []; let _minBusy = false;
+function guardaMiniYa(c) {
+  if (!c || c.estado !== "ok" || c.minis || c.minisNube || _minTry.has(c.id) || imgSinSoporte || !(c.imgs || []).some(u => RE_FOTO_POST.test(u))) return;
+  _minTry.add(c.id); _minCola.push(c.id); if (!_minBusy) bombeaMinis();
+}
+async function bombeaMinis() {
+  _minBusy = true; await srvListo;
+  try {
+    while (_minCola.length) {
+      const id = _minCola.shift(), c = db.cards.find(x => x.id === id); if (!c || c.minis) continue;
+      if (corriendo) { _minTry.delete(id); continue; } // con un lote en marcha no se molesta: se reintenta al repintar
+      const out = []; for (const u of (c.imgs || []).filter(u => RE_FOTO_POST.test(u)).slice(0, 2)) { const d = await miniDe(u); if (imgSinSoporte) break; if (d) out.push({ u, d }); }
+      if (out.length) { await MINI.put(c.id, out); c.minis = out.length; guardar(); subeMinis(c.id, out); $$(`.gl[data-gid="${CSS.escape(c.id)}"]`).forEach(g => g.parentNode && rellenaGalerias(g.parentNode)); }
+    }
+  } catch (e) { }
+  _minBusy = false;
+}
 function rellenaGalerias(root) {
   root.querySelectorAll(".gl[data-gid]").forEach(g => {
     cuentaGal(g); const c = db.cards.find(x => x.id === g.dataset.gid); if (!c) return;
+    guardaMiniYa(c);
     if (!c.minis && !c.minisNube && !(c.minisDe || []).length) return;
     const ids = [...(c.minis || c.minisNube ? [c.id] : []), ...(c.minisDe || [])];
     Promise.all(ids.map(minisDeCard)).then(rs => {
@@ -2109,7 +2189,7 @@ function rellenaGalerias(root) {
 }
 async function minisAtrasadas() { // fichas que aún no tienen sus fotos guardadas (también las que llegan del otro aparato): una vez, sin molestar
   await srvListo;
-  const cs = db.cards.filter(c => c.estado === "ok" && !c.minis && !c.minisNube && !(c.minisProb >= (SRV ? 2 : 1)) && (c.imgs || []).some(u => RE_FOTO_POST.test(u))).slice(0, 30);
+  const cs = db.cards.filter(c => c.estado === "ok" && !c.minis && !c.minisNube && !_minTry.has(c.id) && !(c.minisProb >= (SRV ? 2 : 1)) && (c.imgs || []).some(u => RE_FOTO_POST.test(u))).slice(0, 30);
   for (const c of cs) { if (corriendo || imgSinSoporte) break; const out = []; for (const u of (c.imgs || []).filter(u => RE_FOTO_POST.test(u)).slice(0, 2)) { const d = await miniDe(u); if (d) out.push({ u, d }); } if (imgSinSoporte) break; c.minisProb = SRV ? 2 : 1; if (out.length) { await MINI.put(c.id, out); c.minis = out.length; subeMinis(c.id, out); } await dormir(500); }
   if (cs.length) { guardar(); if ($("#p-feed").classList.contains("on")) pintaFeed(true); }
 }
@@ -2134,8 +2214,8 @@ function linksFeed(c) {
 }
 
 // ---- Inicio: tus fichas como una red social (tarjeta limpia + leer todo a pantalla completa) ----
-let feedModo = "ti", feedLote = null, feedTema = "", feedCol = "", feedN = 20, feedOrden = null;
-const FMODOS = [["ti", "Para ti"], ["ultimo", "Lo último"], ["fav", "Favoritas"], ["quiero", "Lo quiero"], ["gratis", "Gratis"], ["hecho", "Hecho"]];
+let feedModo = "", feedOrd = "ti", feedLote = null, feedTema = "", feedCol = "", feedN = 20, feedOrden = null;
+const FMODOS = [["fav", "★ Favoritas"], ["quiero", "♥ Lo quiero"], ["gratis", "Gratis"], ["hecho", "✓ Hecho"]]; // 22/10: chips rápidos (el orden va aparte, en el botón «Orden»)
 const SVI = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
 const ICF = {
   cor: SVI('<path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3.4 5 7 5c2 0 3.3 1 5 3 1.7-2 3-3 5-3 3.6 0 5.8 3.6 4.5 6.8C19.5 16.4 12 21 12 21z"/>'),
@@ -2156,20 +2236,29 @@ function feedCards() {
   if (feedModo === "fav") cs = cs.filter(c => c.fav);
   if (feedModo === "gratis") cs = cs.filter(c => sellos(c).some(x => x[0] === "gr"));
   const sc = new Map(cs.map(c => [c, paraTi(c, A)])), cuando = c => c.hecha || tsId(c.id) || 0;
-  if (feedModo === "ultimo") cs.sort((a, b) => fechaLote(loteDe(b)) - fechaLote(loteDe(a)) || cuando(b) - cuando(a)); else cs.sort((a, b) => sc.get(b).s - sc.get(a).s || fechaLote(loteDe(b)) - fechaLote(loteDe(a)));
+  const st = c => Math.max(0, ...(c.repos || []).map(r => Number(r.stars) || 0));
+  if (feedOrd === "nuevo") cs.sort((a, b) => fechaLote(loteDe(b)) - fechaLote(loteDe(a)) || cuando(b) - cuando(a));
+  else if (feedOrd === "viejo") cs.sort((a, b) => (añadida(a) || 9e15) - (añadida(b) || 9e15));
+  else if (feedOrd === "az") cs.sort((a, b) => tituloVis(a).localeCompare(tituloVis(b), "es"));
+  else if (feedOrd === "estrellas") cs.sort((a, b) => st(b) - st(a));
+  else cs.sort((a, b) => sc.get(b).s - sc.get(a).s || fechaLote(loteDe(b)) - fechaLote(loteDe(a)));
   if (feedOrden) { const pos = new Map(feedOrden.map((id, i) => [id, i])), nuevos = cs.filter(c => !pos.has(c.id)), viejos = cs.filter(c => pos.has(c.id)).sort((a, b) => pos.get(a.id) - pos.get(b.id)); cs = [...nuevos, ...viejos]; } // el orden no salta mientras lo miras
   feedOrden = cs.map(c => c.id);
   return { cs, sc };
 }
 const resetOrden = () => { feedOrden = null; feedN = 20; };
-function portadaHtml(c) { return `<div class="port"><span>${ICO_TEMA[temaFicha(c)] || "📌"}</span><b>${esc(tituloVis(c))}</b></div>`; }
+function matizTema(t) { let h = 0; for (const ch of String(t || "Otros")) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; } // un color fijo por categoría
+function portadaHtml(c) { // respaldo cuando la foto falta o falla: inicial grande + color de su categoría (va SIEMPRE detrás de las fotos)
+  const tt = tituloVis(c), t = temaFicha(c), ini = (String(tt).match(/[\p{L}\p{N}]/u) || [ICO_TEMA[t] || "📌"])[0].toUpperCase();
+  return `<div class="port" style="--h:${matizTema(t)}" role="img" aria-label="Sin foto: ${esc(t)}"><span>${esc(ini)}</span><b>${esc(tt)}</b></div>`;
+}
 function botonesHtml(c, grande) {
   const u = uso(c), b = (k, ic, t, on) => `<button class="fb${on ? " on" : ""}" data-fa="${k}" aria-pressed="${!!on}" title="${t}" aria-label="${t}">${ic}${grande ? `<span>${t}</span>` : ""}</button>`;
   return b("quiero", ICF.cor, "Lo quiero", u === "quiero") + b("fav", ICF.est, "Favorita", c.fav) + b("col", ICF.col, (c.cols || []).length ? "En " + (c.cols.length === 1 ? nomCol(c.cols[0]) || "colección" : c.cols.length + " colecciones") : "Guardar", (c.cols || []).length) + b("hecho", ICF.ok, "Hecho", u === "hecho") + b("descartada", ICF.no, "Descartar", false);
 }
 function fichaFeed(c, p, top) {
   const sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim(), f = fotosDe(c, usoImgs());
-  const gal = `<div class="gl" data-gid="${esc(c.id)}">${f.length ? "" : portadaHtml(c)}${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="${i ? "lazy" : "eager"}" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`;
+  const gal = `<div class="gl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="${i ? "lazy" : "eager"}" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`;
   return `<article class="fc" data-id="${esc(c.id)}"><div class="fph" title="Doble toque: Lo quiero · Un toque: leer todo">${gal}<div class="fov"><span class="sl">${esc(etqAñadida(c))}</span>${top ? '<span class="sl ti">★ Para ti</span>' : ""}</div><div class="corz" aria-hidden="true">${ICF.cor}</div></div>
 <div class="fcb"><div class="fsl">${sellosHtml(c)}<span class="sl">${esc(temaFicha(c))}</span>${(c.cols || []).map(id => nomCol(id) ? `<span class="sl">🔖 ${esc(nomCol(id))}</span>` : "").join("")}</div>
 <h3 data-fa="leer">${esc(tituloVis(c))}</h3>${sv ? `<p class="fsv">Sirve para: ${esc(sv)}</p>` : ""}${c.resumen && c.resumen !== c.sirve ? `<p class="frs">${esc(c.resumen)}</p>` : ""}${top && p.raz.length ? `<p class="fpq">Para ti porque ${esc(p.raz.join(" · "))}</p>` : ""}</div>
@@ -2179,15 +2268,15 @@ function pintaFeed(suave) {
   $("#hist").innerHTML = historiasHtml();
   const y = $("main").scrollTop, ok = db.cards.filter(c => c.estado === "ok");
   const temas = [...new Set(ok.map(temaFicha))].sort((a, b) => a.localeCompare(b, "es")), lotes = lotesLista().filter(l => l.ok), cols = (db.cols || []).filter(x => ok.some(c => (c.cols || []).includes(x.id)));
-  $("#fbar").innerHTML = FMODOS.map(([k, t]) => `<button data-fm="${k}" class="${feedModo === k ? "on" : ""}">${t}</button>`).join("")
-    + (cols.length ? `<select id="fCol" aria-label="Colección" class="${feedCol ? "on" : ""}"><option value="">Colecciones</option>${cols.map(x => `<option value="${esc(x.id)}"${feedCol === x.id ? " selected" : ""}>🔖 ${esc(x.n)}</option>`).join("")}</select>` : "")
-    + `<select id="fLote" aria-label="Lote" class="${feedLote != null ? "on" : ""}"><option value="">Todos los lotes</option>${lotes.map(l => `<option value="${l.n}"${feedLote === l.n ? " selected" : ""}>${esc(etqLote(l.n))} (${l.ok})</option>`).join("")}</select>`
-    + `<select id="fTema" aria-label="Tema" class="${feedTema ? "on" : ""}"><option value="">Todos los temas</option>${temas.map(t => `<option${feedTema === t ? " selected" : ""}>${esc(t)}</option>`).join("")}</select>`;
+  const nF = (feedLote != null ? 1 : 0) + (feedTema ? 1 : 0) + (feedCol ? 1 : 0);
+  $("#fbar").innerHTML = ok.length ? barraHtml(ordNombre(feedOrd), FMODOS.map(([k, t]) => chipHtml(`data-fm="${k}"`, t, feedModo === k)).join("")
+    + (feedLote != null ? chipHtml('data-fq2="lote"', esc(etqLote(feedLote)) + " ✕", true) : "") + (feedTema ? chipHtml('data-fq2="tema"', esc(feedTema) + " ✕", true) : "") + (feedCol ? chipHtml('data-fq2="col"', "🔖 " + esc(nomCol(feedCol)) + " ✕", true) : "")
+    + chipHtml('data-fmasf="1"', "Más filtros" + (nF ? ` (${nF})` : ""), nF > 0)) : "";
   const { cs, sc } = feedCards();
-  if (!cs.length) { $("#feed").innerHTML = ok.length ? '<div class="fvac"><b>Nada por aquí</b>Prueba otro filtro.<br><br><button class="btn" data-fq="1">Ver todo</button></div>' : '<div class="fvac"><b>Tu Inicio está vacío</b>Pega tus links en «Pegar» y aquí verás cada cosa explicada, con fotos y sus links.<br><br><button class="btn pri" data-fp="1">Ir a Pegar</button></div>'; return; }
+  if (!cs.length) { $("#feed").innerHTML = ok.length ? '<div class="fvac"><b>Nada por aquí</b>Prueba otro filtro.<br><br><button class="btn" data-fq="1">Ver todo</button></div>' : (corriendo || db.cards.some(c => c.estado === "pendiente")) ? '<div class="fvac"><b>Estoy leyendo tus links</b>Cuando acabe, cada cosa aparecerá aquí explicada, con foto y sus links.<br><br><button class="btn" data-fp="1">Ver el avance</button></div>' : '<div class="fvac"><b>Aún no tienes posts</b>Añade tus links y aquí verás cada cosa explicada, con foto y sus links.<br><br><button class="btn pri" data-fp="1">Añadir links</button></div>'; return; }
   const orden = cs.slice().sort((a, b) => sc.get(b).s - sc.get(a).s), top = new Set(orden.slice(0, Math.max(3, Math.ceil(cs.length * .25))).filter(c => sc.get(c).s >= 6));
   let html = "", ult = null;
-  for (const c of cs.slice(0, feedN)) { if (feedModo === "ultimo" && loteDe(c) !== ult) { ult = loteDe(c); html += `<div class="fhd">${esc(etqLote(ult))}</div>`; } html += fichaFeed(c, sc.get(c), top.has(c)); }
+  for (const c of cs.slice(0, feedN)) { if (feedOrd === "nuevo" && loteDe(c) !== ult) { ult = loteDe(c); html += `<div class="fhd">${esc(etqLote(ult))}</div>`; } html += fichaFeed(c, sc.get(c), top.has(c)); }
   if (cs.length > feedN) html += `<button class="btn fmas" data-fmas="1">Ver ${Math.min(20, cs.length - feedN)} más (quedan ${cs.length - feedN})</button>`;
   $("#feed").innerHTML = html; rellenaGalerias($("#feed")); if (suave) $("main").scrollTop = y;
   if (lectorId) pintaLector();
@@ -2210,10 +2299,25 @@ function meGusta(id, ph) {
   const z = ph && ph.querySelector(".corz"); if (z) { z.classList.remove("on"); void z.offsetWidth; z.classList.add("on"); }
   if (uso(c) !== "quiero") { const antes = uso(c); c.estadoUso = "quiero"; guardar(); refrescaTarjeta(c); aviso("♥ Lo quiero", false, () => { c.estadoUso = antes; guardar(); refrescaTarjeta(c); }); }
 }
-$("#fbar").addEventListener("click", e => { const b = e.target.closest("[data-fm]"); if (!b) return; feedModo = b.dataset.fm; resetOrden(); pintaFeed(); $("main").scrollTop = 0; });
-$("#fbar").addEventListener("change", e => { if (e.target.id === "fLote") feedLote = e.target.value === "" ? null : Number(e.target.value); if (e.target.id === "fTema") feedTema = e.target.value; if (e.target.id === "fCol") feedCol = e.target.value; resetOrden(); pintaFeed(); $("main").scrollTop = 0; });
+$("#fbar").addEventListener("click", e => {
+  if (e.target.closest("[data-ord]")) return abreOrden("feed");
+  if (e.target.closest("[data-fmasf]")) return abreFiltrosInicio();
+  const q = e.target.closest("[data-fq2]"); if (q) { if (q.dataset.fq2 === "lote") feedLote = null; if (q.dataset.fq2 === "tema") feedTema = ""; if (q.dataset.fq2 === "col") feedCol = ""; resetOrden(); pintaFeed(); return; }
+  const b = e.target.closest("[data-fm]"); if (!b) return; feedModo = feedModo === b.dataset.fm ? "" : b.dataset.fm; resetOrden(); pintaFeed(); $("main").scrollTop = 0;
+});
+function abreFiltrosInicio() { // lote, tema y colección: los filtros menos usados, en una hoja (como «Más filtros» de Explorar)
+  const ok = db.cards.filter(c => c.estado === "ok"), temas = [...new Set(ok.map(temaFicha))].sort((a, b) => a.localeCompare(b, "es")), lotes = lotesLista().filter(l => l.ok), cols = (db.cols || []).filter(x => ok.some(c => (c.cols || []).includes(x.id)));
+  $("#dFilIC").innerHTML = `<div class="fgr"><h4>Lote</h4><select id="fLote" aria-label="Lote"><option value="">Todos los lotes</option>${lotes.map(l => `<option value="${l.n}"${feedLote === l.n ? " selected" : ""}>${esc(etqLote(l.n))} (${l.ok})</option>`).join("")}</select></div>
+<div class="fgr"><h4>Tema</h4><select id="fTema" aria-label="Tema"><option value="">Todos los temas</option>${temas.map(t => `<option${feedTema === t ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></div>
+${cols.length ? `<div class="fgr"><h4>Colección</h4><select id="fCol" aria-label="Colección"><option value="">Todas</option>${cols.map(x => `<option value="${esc(x.id)}"${feedCol === x.id ? " selected" : ""}>🔖 ${esc(x.n)}</option>`).join("")}</select></div>` : ""}
+<button class="btn" data-fq3="1">Quitar estos filtros</button>`;
+  $("#dFilI").showModal();
+}
+$("#dFilI").addEventListener("change", e => { if (e.target.id === "fLote") feedLote = e.target.value === "" ? null : Number(e.target.value); if (e.target.id === "fTema") feedTema = e.target.value; if (e.target.id === "fCol") feedCol = e.target.value; resetOrden(); pintaFeed(); });
+$("#dFilI").addEventListener("click", e => { if (e.target.closest("[data-fq3]")) { feedLote = null; feedTema = ""; feedCol = ""; resetOrden(); pintaFeed(); $("#dFilI").close(); } });
+$("#dFilIOk").onclick = () => { $("#dFilI").close(); $("main").scrollTop = 0; };
 $("#feed").addEventListener("click", e => {
-  if (e.target.closest("[data-fq]")) { feedModo = "ti"; feedLote = null; feedTema = ""; feedCol = ""; resetOrden(); return pintaFeed(); }
+  if (e.target.closest("[data-fq]")) { feedModo = ""; feedOrd = "ti"; feedLote = null; feedTema = ""; feedCol = ""; resetOrden(); return pintaFeed(); }
   if (e.target.closest("[data-fp]")) return cambiaTab("pegar");
   if (e.target.closest("[data-fmas]")) { feedN += 20; return pintaFeed(true); }
   const b = e.target.closest("[data-fa]"); if (!b) return; const art = b.closest(".fc"), c = art && db.cards.find(x => x.id === art.dataset.id); if (!c) return;
@@ -2357,9 +2461,9 @@ async function activarSync() {
 }
 // ============ N3 (21/10/2026): app reorganizada — Inicio (red social), Explorar (filtros como una tienda), Informe (como una web), Mi lista, Atrás de verdad ============
 // ---- cuándo se añadió cada ficha (solo fechas reales; las fichas viejas sin fecha lo dicen) ----
-function añadida(c) { if (c.añadida) return c.añadida; const L = c.lote && (db.lotes || {})[c.lote]; if (L && L.t) return L.t; if (c.bloque) return tsId(c.id) || 0; return 0; }
+function añadida(c) { if (c.añadida) return c.añadida; const L = c.lote && (db.lotes || {})[c.lote]; if (L && L.t) return L.t; return tsId(c.id) || 0; }
 const DIA = 864e5, hoy0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); };
-function etqAñadida(c) { const t = añadida(c); return t ? "Añadido " + fechaCorta(t, true) : "Sin fecha (de antes)"; }
+function etqAñadida(c) { const t = añadida(c); return t ? "Añadido " + fechaCorta(t, true) : "Sin fecha"; }
 const FECHAS = [["hoy", "Hoy", t => t >= hoy0()], ["ayer", "Ayer", t => t >= hoy0() - DIA && t < hoy0()], ["7d", "Últimos 7 días", t => t >= hoy0() - 6 * DIA], ["30d", "Último mes", t => t >= hoy0() - 29 * DIA], ["viejo", "Hace más de un mes", t => t && t < hoy0() - 29 * DIA], ["sin", "Sin fecha", t => !t]];
 // ---- navegación: «atrás» vuelve a la pantalla anterior; desde Inicio pide pulsar otra vez para salir ----
 const TABS = ["feed", "explorar", "lista", "pegar", "ajustes"];
@@ -2370,6 +2474,9 @@ function muestra(e) {
   if (v === "informe") { lectorId = e.id; pintaLector(); $("#lector").classList.add("on"); document.body.style.overflow = "hidden"; }
   else { if ($("#lector").classList.contains("on")) { $("#lector").classList.remove("on"); document.body.style.overflow = ""; } lectorId = null;
     if (tab === "feed") pintaFeed(true); if (tab === "explorar") pintaExplorar(); if (tab === "lista") pintaLista(); if (tab === "pegar") pintaLotesHist(); }
+}
+function trasRestaurar() { // 22/10: al llegar las fichas de la copia del PC se repinta lo que se ve; si se estaba en «Añadir» solo por estar vacío, vuelve a Inicio
+  try { if ($("#p-feed").classList.contains("on")) pintaFeed(true); else if ($("#p-explorar").classList.contains("on")) pintaExplorar(); else if ($("#p-pegar").classList.contains("on") && !corriendo && !$("#txt").value.trim() && db.cards.some(c => c.estado === "ok")) ir("feed"); } catch (e) { }
 }
 function ir(v, p = {}) {
   const e = { v, ...p }, top = pila[pila.length - 1];
@@ -2385,7 +2492,7 @@ function volver() { if (pila.length <= 1) return false; pila.pop(); muestra(pila
 function atrasUI() { if (!N && pila.length > 1) { try { history.back(); return; } catch (x) { } } volver(); } // botones «‹ Atrás» de la app
 addEventListener("popstate", () => { if (detHist) return; if (cierraCapas()) { try { history.pushState({ n: pila.length }, ""); } catch (x) { } return; } volver(); });
 function cierraCapas() { // lo que está encima (diálogos, editor) se cierra antes que la pantalla
-  for (const id of ["#dCol", "#dFil", "#dcc", "#dlg", "#hojaF"]) { const d = $(id); if (d && d.open) { d.close(); return true; } }
+  for (const id of ["#dCol", "#dFil", "#dFilI", "#dOrd", "#dcc", "#dlg", "#hojaF"]) { const d = $(id); if (d && d.open) { d.close(); return true; } }
   if ($("#menuMas").classList.contains("on")) { $("#menuMas").classList.remove("on"); return true; }
   if (editando) { cerrarEditor(); return true; }
   return false;
@@ -2408,6 +2515,23 @@ const guardaFil = () => { try { localStorage.setItem("igv-filtros", JSON.stringi
 const MARCAS = [["quiero", "♥ Lo quiero", c => uso(c) === "quiero"], ["fav", "★ Favoritas", c => !!c.fav], ["col", "🔖 En una colección", c => (c.cols || []).length > 0], ["hecho", "✓ Hecho", c => uso(c) === "hecho"], ["nuevo", "Sin marcar", c => uso(c) === "nuevo" && !c.fav && !(c.cols || []).length], ["descartada", "🗑️ Papelera", c => uso(c) === "descartada"], ["revisar", "⚠ No se pudo leer", c => c.estado === "revisar"]];
 const PRECIOS = [["gratis", "Gratis o código abierto", c => sellos(c).some(x => x[0] === "gr")], ["pago", "De pago", c => sellos(c).some(x => x[1] === "De pago")], ["instalar", "Se puede instalar", c => c.accion === "Instalar" || comandos(c).length > 0], ["activo", "Repo activo", c => sellos(c).some(x => x[1] === "Activo")]];
 const ORDENES = [["nuevo", "Más nuevo"], ["viejo", "Más antiguo"], ["ti", "Para ti"], ["az", "A-Z"], ["estrellas", "Más estrellas en GitHub"]];
+const ORD_AYUDA = { nuevo: "Lo último que añadiste, arriba", viejo: "Lo más antiguo, arriba", ti: "Lo que más encaja con tus intereses", az: "Por orden alfabético", estrellas: "Los más populares de GitHub" };
+const ordNombre = k => (ORDENES.find(x => x[0] === k) || [0, k])[1];
+const chipHtml = (attrs, t, on) => `<button class="fchp${on ? " on" : ""}" ${attrs}${on ? ' aria-pressed="true"' : ""}>${t}</button>`;
+function barraHtml(ord, chips) { // la misma barra en Inicio y Explorar: botón «Orden» siempre a la vista + chips que se deslizan
+  return `<button class="ordbtn" data-ord="1" aria-haspopup="dialog" aria-label="Orden: ${esc(ord)}. Toca para cambiarlo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/></svg><span>Orden: <b>${esc(ord)}</b></span></button><div class="fchips">${chips}</div>`;
+}
+let ordCtx = "feed";
+function abreOrden(ctx) {
+  ordCtx = ctx; const act = ctx === "feed" ? feedOrd : FIL.orden, lista = ctx === "feed" ? [ORDENES.find(x => x[0] === "ti"), ...ORDENES.filter(x => x[0] !== "ti")] : ORDENES;
+  $("#dOrdC").innerHTML = lista.map(([k, t]) => `<button class="hb${act === k ? " on" : ""}" data-o="${k}" aria-pressed="${act === k}">${t}<small>${ORD_AYUDA[k] || ""}</small></button>`).join("");
+  $("#dOrd").showModal();
+}
+$("#dOrd").addEventListener("click", e => {
+  const b = e.target.closest("[data-o]"); if (!b) { if (e.target === $("#dOrd")) $("#dOrd").close(); return; }
+  if (ordCtx === "feed") { feedOrd = b.dataset.o; resetOrden(); pintaFeed(); $("main").scrollTop = 0; } else { FIL.orden = b.dataset.o; guardaFil(); pintaExplorar(); }
+  $("#dOrd").close();
+});
 const textoBusca = c => sinAcentos([c.titulo, c.sirve, c.resumen, c.detalle, (c.puntos || []).join(" "), (c.tags || []).join(" "), ...(c.repos || []).map(r => r.full), (c.links || []).map(l => l.u).join(" "), c.notas, c.url].join(" "));
 function pasaFil(c, sin) { // sin = el grupo de filtros que no se aplica (para contar cuántos saldrían en cada opción)
   if (c.estado === "pendiente") return false;
@@ -2441,15 +2565,23 @@ function panelFiltros() {
 <div class="fgr"><h4>Tema</h4>${temas.map(([t, n]) => ck("temas", t, esc(t), n, FIL.temas.includes(t))).join("")}</div>
 <button class="btn" data-fx="limpiar">Quitar todos los filtros</button>`;
 }
+const XRAP_M = ["fav", "quiero", "hecho"], XRAP_F = ["7d", "30d"]; // chips rápidos de Explorar (los mismos que en Inicio, más dos fechas)
+function barraExplorar() {
+  const nAct = (FIL.fecha ? 1 : 0) + (FIL.desde ? 1 : 0) + (FIL.hasta ? 1 : 0) + (FIL.lote !== "" ? 1 : 0) + FIL.marca.length + FIL.precio.length + FIL.temas.length, nRap = FIL.marca.filter(k => XRAP_M.includes(k)).length + (FIL.precio.includes("gratis") ? 1 : 0) + (XRAP_F.includes(FIL.fecha) ? 1 : 0), nMas = nAct - nRap;
+  const m = (k, t) => chipHtml(`data-xq="marca:${k}"`, t, FIL.marca.includes(k));
+  return barraHtml(ordNombre(FIL.orden), m("fav", "★ Favoritas") + m("quiero", "♥ Lo quiero") + chipHtml('data-xq="precio:gratis"', "Gratis", FIL.precio.includes("gratis")) + m("hecho", "✓ Hecho")
+    + chipHtml('data-xq="fecha:7d"', "Últimos 7 días", FIL.fecha === "7d") + chipHtml('data-xq="fecha:30d"', "Último mes", FIL.fecha === "30d")
+    + `<button class="fchp xmasc${nMas ? " on" : ""}" id="xMasF">Más filtros${nMas ? ` (${nMas})` : ""}</button>`);
+}
 function chipsActivos() {
   const out = [], x = (k, t) => out.push(`<button class="fchip" data-quita="${esc(k)}">${esc(t)} ✕</button>`);
-  if (FIL.fecha) x("fecha", FECHAS.find(f => f[0] === FIL.fecha)[1]); if (FIL.desde) x("desde", "Desde " + FIL.desde); if (FIL.hasta) x("hasta", "Hasta " + FIL.hasta);
-  if (FIL.lote !== "") x("lote", etqLote(FIL.lote)); FIL.marca.forEach(k => x("marca:" + k, MARCAS.find(m => m[0] === k)[1])); FIL.precio.forEach(k => x("precio:" + k, PRECIOS.find(m => m[0] === k)[1])); FIL.temas.forEach(k => x("temas:" + k, k));
+  if (FIL.fecha && !XRAP_F.includes(FIL.fecha)) x("fecha", FECHAS.find(f => f[0] === FIL.fecha)[1]); if (FIL.desde) x("desde", "Desde " + FIL.desde); if (FIL.hasta) x("hasta", "Hasta " + FIL.hasta);
+  if (FIL.lote !== "") x("lote", etqLote(FIL.lote)); FIL.marca.filter(k => !XRAP_M.includes(k)).forEach(k => x("marca:" + k, MARCAS.find(m => m[0] === k)[1])); FIL.precio.filter(k => k !== "gratis").forEach(k => x("precio:" + k, PRECIOS.find(m => m[0] === k)[1])); FIL.temas.forEach(k => x("temas:" + k, k));
   return out.join("");
 }
 function tarjetaX(c) {
   const f = fotosDe(c, usoImgs()), sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim() || primeraFrase(c.resumen), u = uso(c), rev = c.estado === "revisar";
-  return `<article class="xc${rev ? " rev" : ""}" data-id="${esc(c.id)}"><div class="xim gl" data-gid="${esc(c.id)}">${f.length ? "" : portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
+  return `<article class="xc${rev ? " rev" : ""}" data-id="${esc(c.id)}"><div class="xim gl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
 <button class="xq${u === "quiero" ? " on" : ""}" data-fa="quiero" aria-pressed="${u === "quiero"}" aria-label="Lo quiero">${ICF.cor}</button>
 <div class="xb"><div class="xf">${esc(etqAñadida(c))}</div><h3>${esc(rev ? "No se pudo leer" : tituloVis(c))}</h3><p>${esc(rev ? c.motivo || "" : sv)}</p><div class="fsl">${rev ? '<button class="btn sm" data-fa="reint">Reintentar</button>' : sellosHtml(c) + `<span class="sl">${esc(temaFicha(c))}</span>`}${c.fav ? '<span class="sl pg">★</span>' : ""}</div></div></article>`;
 }
@@ -2457,12 +2589,9 @@ let expN = 30;
 function pintaExplorar() {
   const cs = resultados(), act = chipsActivos();
   $("#xPanel").innerHTML = panelFiltros(); $("#xQ").value !== FIL.q && ($("#xQ").value = FIL.q);
-  $("#xOrden").innerHTML = ORDENES.map(([k, t]) => `<option value="${k}"${FIL.orden === k ? " selected" : ""}>${t}</option>`).join("");
-  $("#xFecha").innerHTML = `<option value="">Cualquier fecha</option>` + FECHAS.map(([k, t]) => `<option value="${k}"${FIL.fecha === k ? " selected" : ""}>${t}</option>`).join("");
-  const nAct = (FIL.fecha ? 1 : 0) + (FIL.desde ? 1 : 0) + (FIL.hasta ? 1 : 0) + (FIL.lote !== "" ? 1 : 0) + FIL.marca.length + FIL.precio.length + FIL.temas.length;
-  $("#xMasF").textContent = nAct ? `Filtros (${nAct})` : "Filtros"; $("#xMasF").classList.toggle("on", nAct > 0);
+  $("#xBar").innerHTML = barraExplorar();
   $("#xAct").innerHTML = act; $("#xN").textContent = cs.length + (cs.length === 1 ? " resultado" : " resultados");
-  $("#xRes").innerHTML = cs.length ? cs.slice(0, expN).map(tarjetaX).join("") + (cs.length > expN ? `<button class="btn fmas" data-xmas="1">Ver más (quedan ${cs.length - expN})</button>` : "") : `<div class="fvac"><b>Nada con estos filtros</b><button class="btn" data-fx="limpiar">Quitar filtros</button></div>`;
+  $("#xRes").innerHTML = cs.length ? cs.slice(0, expN).map(tarjetaX).join("") + (cs.length > expN ? `<button class="btn fmas" data-xmas="1">Ver más (quedan ${cs.length - expN})</button>` : "") : (db.cards.some(c => c.estado !== "pendiente") ? `<div class="fvac"><b>Nada con estos filtros</b><button class="btn" data-fx="limpiar">Quitar filtros</button></div>` : `<div class="fvac"><b>Aún no tienes posts</b>Añade tus links y aquí podrás buscarlos y filtrarlos.<br><br><button class="btn pri" data-fp="1">Añadir links</button></div>`);
   if (FIL.marca.length === 1 && FIL.marca[0] === "descartada" && cs.length) $("#xRes").insertAdjacentHTML("afterbegin", `<div class="nota" style="grid-column:1/-1;display:flex;gap:10px;align-items:center;justify-content:space-between;margin:0 0 10px"><span>Aquí están las fichas que descartaste. Ábrelas y pulsa «Lo quiero» para recuperarlas.</span><button class="btn" data-vaciar="1" style="color:var(--bad);border-color:var(--bad);flex:none">Vaciar papelera</button></div>`);
   rellenaGalerias($("#xRes"));
 }
@@ -2483,13 +2612,18 @@ $("#xPanel").addEventListener("change", cambiaFil); $("#dFilC").addEventListener
 const limpiarFil = () => { FIL = { ...FIL0(), orden: FIL.orden }; $("#xQ").value = ""; expN = 30; guardaFil(); pintaExplorar(); if ($("#dFil").open) $("#dFilC").innerHTML = panelFiltros(); };
 document.addEventListener("click", e => { if (e.target.closest("[data-fx=limpiar]")) limpiarFil(); });
 $("#xQ").addEventListener("input", () => { FIL.q = $("#xQ").value.trim(); expN = 30; pintaExplorar(); });
-$("#xOrden").addEventListener("change", () => { FIL.orden = $("#xOrden").value; guardaFil(); pintaExplorar(); });
-$("#xFecha").addEventListener("change", () => { FIL.fecha = $("#xFecha").value; guardaFil(); pintaExplorar(); });
-$("#xMasF").onclick = () => { $("#dFilC").innerHTML = panelFiltros(); $("#dFil").showModal(); };
+$("#xBar").addEventListener("click", e => {
+  if (e.target.closest("[data-ord]")) return abreOrden("explorar");
+  if (e.target.closest("#xMasF")) { $("#dFilC").innerHTML = panelFiltros(); return $("#dFil").showModal(); }
+  const b = e.target.closest("[data-xq]"); if (!b) return; const [g, v] = b.dataset.xq.split(":");
+  if (g === "fecha") FIL.fecha = FIL.fecha === v ? "" : v; else { const a = new Set(FIL[g]); a.has(v) ? a.delete(v) : a.add(v); FIL[g] = [...a]; }
+  expN = 30; guardaFil(); pintaExplorar();
+});
 $("#dFilOk").onclick = () => $("#dFil").close();
 $("#xAct").addEventListener("click", e => { const b = e.target.closest("[data-quita]"); if (!b) return; const [g, v] = b.dataset.quita.split(":");
   if (v !== undefined) FIL[g] = FIL[g].filter(x => x !== v); else if (g === "lote") FIL.lote = ""; else FIL[g] = ""; guardaFil(); pintaExplorar(); });
 $("#xRes").addEventListener("click", e => {
+  if (e.target.closest("[data-fp]")) return ir("pegar");
   if (e.target.closest("[data-xmas]")) { expN += 30; return pintaExplorar(); }
   const art = e.target.closest(".xc"); if (!art) return; const c = db.cards.find(x => x.id === art.dataset.id); if (!c) return;
   const b = e.target.closest("[data-fa]");
@@ -2503,7 +2637,7 @@ $("#xRes").addEventListener("click", e => {
 function filaLista(c) {
   const cm = comandos(c), hecho = uso(c) === "hecho", f = fotosDe(c, usoImgs());
   return `<div class="lr${hecho ? " hecho" : ""}" data-id="${esc(c.id)}"><button class="lchk" data-li="hecho" aria-pressed="${hecho}" aria-label="${hecho ? "Hecho" : "Marcar como hecho"}">${hecho ? ICF.ok : ""}</button>
-<div class="lmi gl" data-gid="${esc(c.id)}">${f.length ? "" : portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
+<div class="lmi gl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
 <button class="ltx" data-li="abrir"><b>${esc(tituloVis(c))}</b><span>${esc(String(c.sirve || "").replace(/^sirve para:?\s*/i, "") || primeraFrase(c.resumen))}</span>${cm.length ? `<code>${esc(cm[0])}</code>` : ""}<i>${esc(etqAñadida(c))} · ${esc(temaFicha(c))}</i></button>
 <div class="lac">${c.fav ? '<span class="sl pg">★</span>' : ""}<button class="btn sm" data-li="quitar" title="Quitar de mi lista">Quitar</button></div></div>`;
 }
@@ -2535,7 +2669,7 @@ function historiasHtml() {
   const img = n => { const c = db.cards.find(c => loteDe(c) === n && c.estado === "ok" && (c.imgs || []).length); return c ? fotosDe(c, usoImgs())[0] : ""; };
   return bola("", "Todo", "Todos", feedLote == null, "") + ls.map(l => { const L = (db.lotes || {})[l.n], t = L && L.t; return bola(l.n, String(l.ok), t ? fechaCorta(t, true) : "Sin fecha", feedLote === l.n, img(l.n)); }).join("");
 }
-$("#hist").addEventListener("click", e => { const b = e.target.closest("[data-hl]"); if (!b) return; feedLote = b.dataset.hl === "" ? null : Number(b.dataset.hl); feedModo = feedLote == null ? "ti" : "ultimo"; resetOrden(); pintaFeed(); $("main").scrollTop = 0; });
+$("#hist").addEventListener("click", e => { const b = e.target.closest("[data-hl]"); if (!b) return; feedLote = b.dataset.hl === "" ? null : Number(b.dataset.hl); feedModo = ""; feedOrd = feedLote == null ? "ti" : "nuevo"; resetOrden(); pintaFeed(); $("main").scrollTop = 0; });
 
 // ---- el informe se completa solo con la IA: pros y contras, dificultad, traducción del texto original ----
 let completando = false;
@@ -2583,7 +2717,7 @@ function lectorHtml(c) {
   const secc = [["que", "Qué es"], ["video", "Lo que dice el post"], ["como", "Cómo empezar"], ["pros", "Pros y contras"], ["links", "Links"]];
   const links = listaLinks(c).map(l => /(^|\/\/)(t\.me|telegram\.me)\//i.test(l.u) ? { ...l, cls: "tg", ic: IC.tg, t: "Telegram" } : l);
   if (!r && c.tipo !== "GitHub") links.push({ cls: "bs", ic: IC.lupa, t: "Buscar «" + tituloVis(c).replace(/[:|–—].*$/, "").trim() + "» en GitHub", u: "https://github.com/search?q=" + encodeURIComponent(tituloVis(c).replace(/[:|–—].*$/, "").trim()) + "&type=repositories" });
-  return `<div class="ihero"><div class="igal"><div class="gl lgl" data-gid="${esc(c.id)}">${f.length ? "" : portadaHtml(c)}${f.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div></div>
+  return `<div class="ihero"><div class="igal"><div class="gl lgl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div></div>
 <div class="ihead"><div class="fsl">${sl.map(([k, t]) => `<span class="sl ${k}">${esc(t)}</span>`).join("")}<span class="sl">${esc(temaFicha(c))}</span></div>
 <h1>${esc(tituloVis(c))}</h1>${sv ? `<p class="lsv">${esc(mayus(sv))}</p>` : ""}
 <div class="ver v-${ve.k}"><b>¿Te interesa? ${ve.t}</b>${ve.por.length ? `<span>${esc(mayus(ve.por.join(", ")))}.</span>` : ""}${c.paraQuien ? `<span>${esc(c.paraQuien)}</span>` : ""}</div>
@@ -2609,7 +2743,7 @@ function pintaLector() {
   const i = (feedOrden || []).indexOf(c.id); $("#lSig").disabled = !(feedOrden && i >= 0 && i < feedOrden.length - 1); $("#lAnt").disabled = !(feedOrden && i > 0);
   if (!c.informeV && !c.informeProb && hayIA()) { c.informeProb = 1; completarInforme(c).then(ok => { if (ok && lectorId === c.id) pintaLector(); }); }
 }
-function pasoLector(d) { const i = (feedOrden || []).indexOf(lectorId), j = i + d; if (i < 0 || j < 0 || j >= feedOrden.length) return; pila[pila.length - 1].id = feedOrden[j]; lectorId = feedOrden[j]; const c = db.cards.find(x => x.id === lectorId); if (c) { c.leida = Date.now(); guardar(); } $("#lectC").scrollTop = 0; pintaLector(); }
+function pasoLector(d, anim) { const i = (feedOrden || []).indexOf(lectorId), j = i + d; if (i < 0 || j < 0 || j >= feedOrden.length) return; pila[pila.length - 1].id = feedOrden[j]; lectorId = feedOrden[j]; const c = db.cards.find(x => x.id === lectorId); if (c) { c.leida = Date.now(); guardar(); } $("#lectC").scrollTop = 0; pintaLector(); if (anim && !matchMedia("(prefers-reduced-motion:reduce)").matches) { try { $("#lectC").animate([{ transform: `translateX(${anim * 36}px)`, opacity: .35 }, { transform: "none", opacity: 1 }], { duration: 180, easing: "ease-out" }); } catch (e) { } } }
 $("#lector").addEventListener("click", async e => {
   const c = db.cards.find(x => x.id === lectorId); if (!c) return;
   const l = e.target.closest("[data-l]"), cp = e.target.closest("[data-lc]"), fa = e.target.closest("[data-fa]"), sec = e.target.closest("[data-ir]");
@@ -2625,6 +2759,14 @@ $("#lector").addEventListener("click", async e => {
   if (a === "completar") { l.disabled = true; l.textContent = "Preparando…"; await completarInforme(c, true); return pintaLector(); }
   if (a === "borrar") { if (await confirmar("Borrar", `<p>¿Borrar «${esc(tituloVis(c).slice(0, 70))}»?</p>`, "Borrar")) { db.cards = db.cards.filter(x => x !== c); guardar(); atrasUI(); pintar(); } }
 });
+{ // 22/10: deslizar con el dedo a izquierda/derecha = ficha siguiente/anterior (no estorba al scroll vertical, al zoom ni a la galería de fotos)
+  const C = $("#lectC"); let ini = null;
+  C.addEventListener("pointerdown", e => { if (e.pointerType === "mouse" || !e.isPrimary) { ini = null; return; } const g = e.target.closest(".gl"), nav = e.target.closest(".inav, pre, code, input, textarea, select, details[open] .orig"); ini = nav || (g && g.scrollWidth > g.clientWidth + 4) ? null : { x: e.clientX, y: e.clientY, t: Date.now(), id: e.pointerId }; });
+  const fin = e => { const a = ini; ini = null; if (!a || e.pointerId !== a.id || !lectorId) return; const dx = e.clientX - a.x, dy = e.clientY - a.y;
+    if (Math.abs(dx) < 70 || Math.abs(dx) < 1.8 * Math.abs(dy) || Date.now() - a.t > 900) return; pasoLector(dx < 0 ? 1 : -1, dx < 0 ? 1 : -1); };
+  C.addEventListener("pointerup", fin); C.addEventListener("pointercancel", () => { ini = null; });
+  document.addEventListener("pointerdown", e => { if (!e.isPrimary) ini = null; }, true); // un segundo dedo (zoom) cancela el gesto
+}
 document.addEventListener("keydown", e => { if (!lectorId || editando || $("#dcc").open || $("#dCol").open) return; if (e.key === "ArrowRight") pasoLector(1); if (e.key === "ArrowLeft") pasoLector(-1); });
 // arranque: lotes, nombres corregidos, duplicados unidos (con Deshacer) y fotos guardadas, solos
 { let cambio = 0; { const vis = new Set(); for (const c of db.cards) { if (!c.id || vis.has(c.id)) { c.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7); cambio = 1; } vis.add(c.id); } } // ids repetidos (las fichas de ejemplo venían todas con «t»)
@@ -2634,8 +2776,9 @@ db.cards.forEach(c => { if (c.estado === "pendiente") { /* quedó a medias: se r
 migrarCats(); pintar(); detectar(); { try { const u = deshacerVivo(); if (u) aviso("Se unieron " + u.gr.reduce((n, g) => n + g.orig.length - 1, 0) + " repetidas hace poco"); } catch (e) { } } if (db.usarSemilla) cargarSemilla(); // las fichas de ejemplo ya no se cargan solas
 if (db.cards.some(c => c.estado === "pendiente")) { const n = (db.bn || 0) + 1; db.bn = n; sesionDesde = n; db.cards.forEach(c => { if (c.estado === "pendiente") c.bloque = n; }); guardar(); pintaBloques(); aviso("Quedaban links a medias: continúo."); correr(); }
 reconciliar = true;
-if (!corriendo && db.cards.some(c => c.estado === "ok")) ir("feed"); else ir("pegar");
+ir("feed"); // 22/10: la app SIEMPRE arranca en Inicio (si no hay fichas, Inicio muestra un estado vacío que invita a añadir)
 setTimeout(() => completarPendientes(), 8000);
+if (db.motV !== "2026-10-23") { db.motV = "2026-10-23"; let m = 0; db.cards.forEach(c => { if (c.estado === "revisar" && /iniciar sesi/i.test(c.motivo || "") && !/reintentar|pega el texto/i.test(c.motivo || "")) { c.motivo = String(c.motivo).replace(/[.\s]+$/, "") + " (puede ser privado, borrado o pedir login). Pulsa «Reintentar» o pega el texto del post a mano."; c.reintentar = true; m++; } }); if (m) guardar(); } // 23/10: texto viejo -> motivo claro
 if (db.unirV !== "2026-10-21") { db.unirV = "2026-10-21"; guardar(); setTimeout(() => { if (!corriendo) unirRepetidas(); }, 1200); }
 setTimeout(() => { if (!corriendo) minisAtrasadas(); }, 4000);
 pintaSync(); if (syncOn()) setTimeout(() => sincronizar(), 2500);

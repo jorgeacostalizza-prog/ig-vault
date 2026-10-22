@@ -48,7 +48,7 @@ def pagina(pw, ancho, alto=900, nativo=True):
     if nativo: pg.add_init_script(INIT)
     pg.route("https://img.test/**", lambda r: r.abort())
     pg.goto(HTML); pg.wait_for_timeout(600)
-    pg.evaluate("db.cards=[];db.bn=0;db.cfg={};guardar();pintar()")
+    pg.evaluate("db.cards=[];db.bn=0;db.cfg={};guardar();pintar();cambiaTab('pegar')")  # 22/10: la app arranca en Inicio; estas pruebas trabajan en «Añadir»
     return br, pg
 
 def fin():
