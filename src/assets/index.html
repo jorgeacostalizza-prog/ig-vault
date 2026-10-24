@@ -1875,7 +1875,15 @@ async function añadirImagenes(lista) {
 window.__imagen = (...dataUrls) => añadirImagenes(dataUrls); // móvil: el cambio nativo (intent-filter SEND image/*) llama aquí con la imagen compartida como data:image/…;base64,…
 $("#bImagen").onclick = () => $("#fImagen").click();
 $("#fImagen").onchange = e => { const l = [...e.target.files]; e.target.value = ""; añadirImagenes(l); };
-document.addEventListener("paste", e => { const fs = [...((e.clipboardData || {}).files || [])].filter(f => /^image\//.test(f.type)); if (fs.length) { e.preventDefault(); añadirImagenes(fs); } });
+document.addEventListener("paste", e => {
+  const fs = [...((e.clipboardData || {}).files || [])].filter(f => /^image\//.test(f.type));
+  if (fs.length) { e.preventDefault(); añadirImagenes(fs); return; }
+  const campo = e.target && e.target.closest && e.target.closest("input,textarea,select,[contenteditable='true']");
+  if (campo || $("#dlg").open) return; // dentro de un campo se pega normal
+  const t = ((e.clipboardData || {}).getData && e.clipboardData.getData("text")) || "";
+  if (!sacarLinks(t).links.length) return;
+  e.preventDefault(); cambiaTab("pegar"); $("#txt").value += ($("#txt").value ? "\n" : "") + t; detectar(); $("#bOrdenar").click(); // links pegados en cualquier pantalla: a la cola
+});
 ["dragover", "drop"].forEach(ev => document.addEventListener(ev, e => { if (![...((e.dataTransfer || {}).types || [])].includes("Files")) return; e.preventDefault(); if (ev === "drop") añadirImagenes([...e.dataTransfer.files]); }));
 $("#bParar").onclick = () => { pausado = !pausado; $("#bParar").textContent = pausado ? "Reanudar" : "Pausar"; };
 $("#bloques").addEventListener("click", e => {
