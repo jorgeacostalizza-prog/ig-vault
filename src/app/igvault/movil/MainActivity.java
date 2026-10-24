@@ -48,6 +48,8 @@ public class MainActivity extends Activity {
     static final String WEB = BASE + "src/assets/index.html";
     static final int MAX_FOTOS = 40;
     String compartido, fotos;
+    JSONArray imagenes; // imagenes sueltas compartidas (data:image/jpeg;base64) -> window.__imagen
+    static final int MAX_IMG_LADO = 1600, MAX_IMG_B64 = 2500000, MAX_IMGS = 6;
     boolean cargada;
 
     @Override
@@ -108,6 +110,7 @@ public class MainActivity extends Activity {
     void procesar(Intent i) {
         compartido = null;
         fotos = null;
+        imagenes = null;
         if (i == null) return;
         String a = i.getAction();
         if (!Intent.ACTION_SEND.equals(a) && !Intent.ACTION_SEND_MULTIPLE.equals(a)) return;
@@ -119,6 +122,7 @@ public class MainActivity extends Activity {
         new Thread(() -> {
             StringBuilder txt = new StringBuilder(previo == null ? "" : previo + "\n");
             JSONArray fs = new JSONArray();
+            JSONArray ims = new JSONArray();
             File dir = new File(getCacheDir(), "chat");
             File[] viejos = dir.listFiles();
             if (viejos != null) for (File f : viejos) f.delete();
@@ -140,15 +144,48 @@ public class MainActivity extends Activity {
                             else if (fs.length() < MAX_FOTOS && n.matches(".*\\.(jpe?g|png|webp)$")) guardarFoto(z, dir, fs);
                         }
                     } else if (tipo != null && tipo.startsWith("image/")) {
-                        if (fs.length() < MAX_FOTOS) guardarFoto(in, dir, fs);
+                        if (ims.length() < MAX_IMGS) { String d = aDataUrl(in); if (d != null) ims.put(d); }
                     } else txt.append(new String(leer(in, 5000000), "UTF-8")).append("\n");
                     in.close();
                 } catch (Exception e) { }
             }
-            compartido = txt.toString();
-            fotos = fs.toString();
+            String t = txt.toString();
+            boolean hayTxt = t.trim().length() > 0 || fs.length() > 0;
+            compartido = hayTxt ? t : null;
+            fotos = hayTxt ? fs.toString() : null;
+            imagenes = ims.length() > 0 ? ims : null;
             ui.post(this::enviarCompartido);
         }).start();
+    }
+
+    /** Reduce la imagen (lado max 1600, JPEG 85) y la devuelve como dataURL; null si no se puede leer o pesa demasiado. */
+    String aDataUrl(InputStream in) {
+        try {
+            byte[] raw = leer(in, 25000000);
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(raw, 0, raw.length, o);
+            if (o.outWidth <= 0 || o.outHeight <= 0) return null;
+            int m = Math.max(o.outWidth, o.outHeight), k = 1;
+            while (m / (k * 2) >= MAX_IMG_LADO) k *= 2;
+            o = new BitmapFactory.Options();
+            o.inSampleSize = k;
+            Bitmap bm = BitmapFactory.decodeByteArray(raw, 0, raw.length, o);
+            if (bm == null) return null;
+            float sc = (float) MAX_IMG_LADO / Math.max(bm.getWidth(), bm.getHeight());
+            android.graphics.Matrix mx = new android.graphics.Matrix();
+            if (sc < 1f) mx.postScale(sc, sc);
+            try {
+                int ori = new android.media.ExifInterface(new java.io.ByteArrayInputStream(raw)).getAttributeInt(android.media.ExifInterface.TAG_ORIENTATION, 1);
+                if (ori == 6) mx.postRotate(90); else if (ori == 3) mx.postRotate(180); else if (ori == 8) mx.postRotate(270);
+            } catch (Exception e) { }
+            Bitmap fin = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), mx, true);
+            ByteArrayOutputStream bo = new ByteArrayOutputStream();
+            fin.compress(Bitmap.CompressFormat.JPEG, 85, bo);
+            String b64 = Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP);
+            if (b64.length() > MAX_IMG_B64) return null;
+            return "data:image/jpeg;base64," + b64;
+        } catch (Throwable e) { return null; }
     }
 
     void guardarFoto(InputStream in, File dir, JSONArray fs) throws Exception {
@@ -160,10 +197,16 @@ public class MainActivity extends Activity {
     }
 
     void enviarCompartido() {
-        if (!cargada || (compartido == null && fotos == null)) return;
-        web.evaluateJavascript("window.__chat&&window.__chat(" + JSONObject.quote(compartido == null ? "" : compartido) + "," + (fotos == null ? "[]" : fotos) + ")", null);
+        if (!cargada || (compartido == null && fotos == null && imagenes == null)) return;
+        if (compartido != null || fotos != null) web.evaluateJavascript("window.__chat&&window.__chat(" + JSONObject.quote(compartido == null ? "" : compartido) + "," + (fotos == null ? "[]" : fotos) + ")", null);
+        if (imagenes != null) { // una sola llamada con todas las imagenes (un unico aviso de privacidad)
+            StringBuilder args = new StringBuilder();
+            for (int j = 0; j < imagenes.length(); j++) args.append(j > 0 ? "," : "").append(JSONObject.quote(imagenes.optString(j)));
+            web.evaluateJavascript("window.__imagen&&window.__imagen(" + args + ")", null);
+        }
         compartido = null;
         fotos = null;
+        imagenes = null;
     }
 
     @Override

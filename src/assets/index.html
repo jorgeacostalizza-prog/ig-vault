@@ -472,6 +472,8 @@ a.li.roto{opacity:.45}
     <div class="nota" id="detect">Aún no hay links.</div>
     <div class="fila">
       <button class="btn" id="bPegar">Pegar del portapapeles</button>
+      <button class="btn" id="bImagen">Añadir imagen</button>
+      <input type="file" id="fImagen" accept="image/*" multiple hidden>
       <button class="btn pri" id="bOrdenar">Ordenar mis links</button>
     </div>
     <div class="prog" id="prog" style="display:none">
@@ -1031,6 +1033,7 @@ const quitaGancho = t => t.split(/(?<=[.!?\n])\s+/).filter(f => !GANCHO.test(f))
 const PAR_COMUN = /^(and|or|y|o|input|output|client|server|front|back|frontend|backend|read|write|on|off|yes|no|true|false|ci|cd|ui|ux|ai|ia|pc|mac|win|windows|linux|ios|android|before|after|start|stop|open|close|dev|prod|test|build|run)\//i; // pares de palabras corrientes, no repos
 async function analizar(card, textoManual) {
   ghAviso = ""; iaError = "";
+  if (card.tipo === "Foto" && card.textoImg && !textoManual) textoManual = card.textoImg; // 23/10: imagen añadida a mano: ya se leyó al subirla
   if (card.tipo === "Foto" && !textoManual) {
     const v = await verFoto(card.foto);
     if (v.error) { Object.assign(card, { estado: "revisar", motivo: v.error, categoria: "Para revisar" }); return card; }
@@ -1832,6 +1835,48 @@ $("#bOrdenar").onclick = () => {
   aviso(`${etqLote(lt)} en marcha: ${r.nuevos} links${r.repes ? `, ${r.repes} repetidos quitados${donde}` : ""}. Puedes pegar otro lote ya.`);
   correr();
 };
+// ============ imágenes y capturas (23/10): botón, Ctrl+V, arrastrar y «Compartir» del móvil ============
+const AVISO_IMG = "La imagen se envía a un modelo gratis en línea; no subas capturas privadas.";
+const MAX_IMG = 1200; // la imagen guardada con la ficha: lado máximo y calidad JPEG
+let imgCola = [], imgBusy = false;
+const aDataUrl = src => typeof src === "string" ? Promise.resolve(src) : new Promise(res => { const r = new FileReader(); r.onload = () => res(String(r.result || "")); r.onerror = () => res(""); r.readAsDataURL(src); });
+async function leerImagenTexto(d) { return (await leerImgs([d], PROMPT_FOTO, 1) || "").trim(); } // misma IA de visión de los fotogramas (NVIDIA + OpenRouter :free)
+function entiendeImagen(t) { return String(t || "").replace(/^\s*(Cuenta:\s*@[\w.]+|Imagen:)\s*/gim, "").trim().length >= 12; }
+async function procesaImagenes() {
+  imgBusy = true; const total = imgCola.length; let i = 0, bn = 0, lt = 0, links = 0, fichas = 0, nada = 0;
+  while (imgCola.length) {
+    const src = imgCola.shift(); i++; aviso(`Leyendo imagen ${i}/${total}…`, true);
+    const d = await reducir(await aDataUrl(src), MAX_IMG, .8);
+    if (!d) { nada++; continue; }
+    const t = await leerImagenTexto(d);
+    if (!entiendeImagen(t)) { nada++; continue; } // nada de fichas inventadas
+    if (!bn) { bn = (db.bn || 0) + 1; lt = nuevoLote(); }
+    const ls = sacarLinks(t).links, r = ls.length ? encolar(ls, bn, lt) : null;
+    if (r) { links += r.nuevos; if (!r.nuevos && !r.repes) nada++; continue; }
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    db.cards.push({ bloque: bn, lote: lt, añadida: Date.now(), id, url: "foto:img-" + id, tipo: "Foto", imgLocal: true, textoImg: t.slice(0, 3500), estado: "pendiente", cola: Date.now(), grupo: grupoActual(), titulo: "Imagen " + i, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+    await MINI.put(id, [{ u: "imagen", d }]); db.cards[db.cards.length - 1].minis = 1; fichas++;
+  }
+  imgBusy = false;
+  if (links || fichas) { db.bn = bn; guardar(); pintaBloques(); }
+  const par = [links ? `${links} links` : "", fichas ? `${fichas} imagen${fichas > 1 ? "es" : ""} como ficha` : ""].filter(Boolean).join(" y ");
+  aviso((par ? `Sacado de las imágenes: ${par}. Ordenando…` : "") + (nada ? `${par ? " " : ""}No entendí ${nada} imagen${nada > 1 ? "es" : ""} (sin texto legible, o la IA no respondió).` : ""), !par);
+  if (links || fichas) correr();
+}
+async function añadirImagenes(lista) {
+  const fs = [...(lista || [])].filter(f => typeof f === "string" ? /^data:image\//.test(f) : f && /^image\//.test(f.type || ""));
+  if (!fs.length) return aviso("Eso no es una imagen.");
+  if (!hayIA()) return aviso(AVISO_SIN_IA + ".");
+  if ($("#dlg").open) return aviso("Termina primero lo que tienes abierto.");
+  cambiaTab("pegar");
+  if (!await confirmar("Enviar " + (fs.length > 1 ? fs.length + " imágenes" : "imagen") + " a la IA", `<p>${esc(AVISO_IMG)}</p>`, "Enviar")) return aviso("Cancelado: no se envió nada.");
+  imgCola.push(...fs); if (!imgBusy) await procesaImagenes();
+}
+window.__imagen = (...dataUrls) => añadirImagenes(dataUrls); // móvil: el cambio nativo (intent-filter SEND image/*) llama aquí con la imagen compartida como data:image/…;base64,…
+$("#bImagen").onclick = () => $("#fImagen").click();
+$("#fImagen").onchange = e => { const l = [...e.target.files]; e.target.value = ""; añadirImagenes(l); };
+document.addEventListener("paste", e => { const fs = [...((e.clipboardData || {}).files || [])].filter(f => /^image\//.test(f.type)); if (fs.length) { e.preventDefault(); añadirImagenes(fs); } });
+["dragover", "drop"].forEach(ev => document.addEventListener(ev, e => { if (![...((e.dataTransfer || {}).types || [])].includes("Files")) return; e.preventDefault(); if (ev === "drop") añadirImagenes([...e.dataTransfer.files]); }));
 $("#bParar").onclick = () => { pausado = !pausado; $("#bParar").textContent = pausado ? "Reanudar" : "Pausar"; };
 $("#bloques").addEventListener("click", e => {
   { const v = e.target.closest("[data-ver]"); if (v) return verLote(Number(v.dataset.ver)); }
@@ -2125,11 +2170,11 @@ const MINI = (() => { // miniaturas guardadas en el propio dispositivo: las foto
   const tx = async (modo, f) => { const d = await abrir(); if (!d) return null; return new Promise(res => { try { const q = f(d.transaction("m", modo).objectStore("m")); q.onsuccess = () => res(q.result ?? null); q.onerror = () => res(null); } catch (e) { res(null); } }); };
   return { get: id => tx("readonly", s => s.get(id)), put: (id, v) => tx("readwrite", s => s.put(v, id)) };
 })();
-function reducir(src, w = 560) {
+function reducir(src, w = 560, q = .72) {
   return new Promise(res => {
     const im = new Image(); let fin = false; const ok = v => { if (!fin) { fin = true; res(v); } }; setTimeout(() => ok(""), 9000);
     if (!/^data:/.test(src)) im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer";
-    im.onload = () => { try { const k = Math.min(1, w / (im.naturalWidth || w)), cv = document.createElement("canvas"); cv.width = Math.round((im.naturalWidth || w) * k); cv.height = Math.round((im.naturalHeight || w) * k); cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height); ok(cv.toDataURL("image/jpeg", .72)); } catch (e) { ok(""); } };
+    im.onload = () => { try { const k = Math.min(1, w / (im.naturalWidth || w)), cv = document.createElement("canvas"); cv.width = Math.round((im.naturalWidth || w) * k); cv.height = Math.round((im.naturalHeight || w) * k); cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height); ok(cv.toDataURL("image/jpeg", q)); } catch (e) { ok(""); } };
     im.onerror = () => ok(""); im.src = src;
   });
 }
