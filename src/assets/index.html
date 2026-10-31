@@ -287,7 +287,7 @@ a.li.roto{opacity:.45}
 .det-gl{border-radius:14px;margin:8px 0;height:200px}
 /* N2 (21/10): tarjeta limpia, doble toque, lector a pantalla completa, colecciones */
 .fph{position:relative;cursor:pointer;touch-action:pan-x pan-y;user-select:none;-webkit-user-select:none}
-.fph .gl{height:min(52vh,440px)}
+.fph .gl{height:min(40vh,330px)}
 .fov{position:absolute;left:10px;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}
 .fov .sl{background:#000b;color:#fff;border-color:transparent}.fov .sl.ti{background:var(--ac);color:var(--acx)}
 .corz{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;opacity:0}
@@ -313,7 +313,7 @@ a.li.roto{opacity:.45}
 .lh{display:flex;align-items:center;gap:6px;padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;border-bottom:1px solid var(--ln)}
 .lh span{flex:1}
 #lectC{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.lgl{height:min(48vh,420px)}
+.lgl{height:min(34vh,320px)}
 .lcu{max-width:720px;margin:0 auto;padding:14px 18px 28px}
 .lcu h2{font-size:23px;line-height:1.25;margin:4px 0 10px}
 .lsv{font-size:17px;font-weight:600;margin:0 0 6px}
@@ -327,6 +327,18 @@ a.li.roto{opacity:.45}
 #dCol .hb.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
 #dCol input{flex:1;min-width:0}
 @media(prefers-reduced-motion:reduce){.corz.on{animation:none;opacity:0}#lector.on{animation:none}}
+/* 31/10: avisos claros en Inicio (cómo funciona, trabajando, fallidas) */
+#iniEstado{display:flex;flex-direction:column;gap:8px;margin:2px 0 6px}
+.ie{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border-radius:14px;padding:12px 14px;background:var(--s1);border:1px solid var(--ln);color:var(--tx);font:inherit}
+.ie span{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}.ie b{font-size:15px}.ie small{font-size:13px;color:var(--mut)}
+.ie.guia{flex-direction:column;align-items:flex-start;gap:6px}.ie.guia ol{margin:0;padding-left:20px;font-size:14.5px;line-height:1.5}.ie.guia li{margin:4px 0}
+.ie.trab{border-color:var(--ac);cursor:pointer}
+.ie.fall{border-color:var(--warn)}.ie.fall b{color:var(--warn)}
+.ie .iea{flex-direction:row;flex:none;gap:6px}
+.spin{flex:none!important;width:22px;height:22px;border-radius:50%;border:3px solid var(--ln);border-top-color:var(--ac);animation:gira 1s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}}
+@media(max-width:480px){.ie.fall{flex-direction:column;align-items:stretch}.ie .iea .btn{flex:1}}
 /* ---- N3 (21/10/2026): Explorar (filtros de tienda), Mi lista, historias de lotes, informe como una web ---- */
 .hist{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:6px 2px 10px}
 .hist::-webkit-scrollbar{display:none}
@@ -468,7 +480,7 @@ a.li.roto{opacity:.45}
 <header><h1>IG Extractor</h1><span id="cuenta"></span></header>
 <main>
   <section class="pan" id="p-pegar">
-    <div class="vacio" id="pasos"><b>Así de fácil</b>1. Copia tus links (Instagram, YouTube, GitHub…)<br>2. Pégalos aquí abajo<br>3. Pulsa «Ordenar mis links»</div>
+    <div class="vacio" id="pasos"><b>Así de fácil</b>1. Copia tus links (Instagram, YouTube, GitHub…)<br>2. Pégalos aquí abajo<br>3. Pulsa «Leer y explicar»</div>
     <textarea id="txt" placeholder="Pega aquí todos tus links de golpe (Instagram, YouTube, GitHub…), uno por línea o mezclados con texto. Yo saco los links solo." spellcheck="false"></textarea>
     <div class="nota avIA" style="display:none;color:var(--warn)"></div>
     <div class="nota" id="detect">Aún no hay links.</div>
@@ -476,7 +488,7 @@ a.li.roto{opacity:.45}
       <button class="btn" id="bPegar">Pegar del portapapeles</button>
       <button class="btn" id="bImagen">Añadir imagen</button>
       <input type="file" id="fImagen" accept="image/*" multiple hidden>
-      <button class="btn pri" id="bOrdenar">Ordenar mis links</button>
+      <button class="btn pri" id="bOrdenar">Leer y explicar</button>
     </div>
     <div class="prog" id="prog" style="display:none">
       <div id="progT">…</div>
@@ -489,6 +501,7 @@ a.li.roto{opacity:.45}
   </section>
 
   <section class="pan on" id="p-feed">
+    <div id="iniEstado"></div>
     <div class="hist" id="hist" role="group" aria-label="Tus lotes"></div>
     <div class="fbar" id="fbar" role="group" aria-label="Qué ver"></div>
     <div id="feed"></div>
@@ -639,7 +652,26 @@ async function http(url, { method = "GET", headers = {}, body = "" } = {}) {
   try { const r = await fetch(url, { method, headers, body: body || undefined }); return { status: r.status, url: r.url, body: await r.text() }; }
   catch (e) { return { status: 0, body: "", error: String(e) }; }
 }
-const pagina = url => N ? nat("pagina", url) : (window.__pagina ? window.__pagina(url) : Promise.resolve({}));
+// 31/10: el pie del post se saca también del HTML de la incrustación (sin navegador) y, en el PC, con un navegador oculto (Brave/Chrome) como hace el móvil
+function leeHtmlPagina(html) {
+  try {
+    const d = new DOMParser().parseFromString(String(html || ""), "text/html"), c = d.querySelector(".Caption"); let cap = "";
+    if (c) { c.querySelectorAll(".CaptionUsername,.CaptionComments,script,style").forEach(x => x.remove()); c.querySelectorAll("br").forEach(b => b.replaceWith("\n")); cap = c.textContent.replace(/[ \t]+/g, " ").replace(/\s*\n\s*/g, "\n").trim(); }
+    const m = k => (d.querySelector(`meta[property="${k}"]`) || {}).content || "";
+    return { cap, og: m("og:description"), ogt: m("og:title"), title: d.title || "", body: (d.body ? d.body.textContent : "").replace(/\s+/g, " ").slice(0, 3000) };
+  } catch (e) { return {}; }
+}
+async function paginaSinNativo(url) {
+  if (window.__pagina) return window.__pagina(url);
+  const ig = String(url).match(/^(https:\/\/www\.instagram\.com\/(?:p|reel|tv)\/[\w-]+\/)embed\/captioned\/$/);
+  const h = ig ? await embedIG(ig[1]) : await http(url);
+  const o = h && h.status === 200 ? leeHtmlPagina(h.body) : {};
+  if (o.cap) return o;
+  await srvListo;
+  if (SRV && /^https:\/\/www\.instagram\.com\//.test(url)) { const r = await postSrv("/api/pagina", { url }); if (r && r.status === 200 && r.html) { const o2 = leeHtmlPagina(r.html); if (o2.cap || o2.og) return o2; } }
+  return o;
+}
+const pagina = url => N ? nat("pagina", url) : paginaSinNativo(url);
 
 // ============ datos ============
 const BASE_WEB = "https://jorgeacostalizza-prog.github.io/ig-vault/";
@@ -770,8 +802,8 @@ async function chat(prompt, max = 900) {
   iaError = errs.slice(-2).join(" | ") || "sin respuesta";
   return null;
 }
-async function chatJson(prompt) {
-  const t = (await chat(prompt)) || (await chat(prompt)); if (!t) return null; // un reintento
+async function chatJson(prompt, max = 900) {
+  const t = (await chat(prompt, max)) || (await chat(prompt, max)); if (!t) return null; // un reintento
   const a = t.indexOf("{"), b = t.lastIndexOf("}"); if (a < 0 || b < 0) return null;
   try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; }
 }
@@ -825,9 +857,10 @@ async function leerIG0(url, base) { // 31/10: Instagram frena de forma intermite
   return r;
 }
 async function leerIG1(url, base) {
-  const g = await gbIG(base);
-  let r = await pagina(base + "embed/captioned/");
-  let t = (r.cap || "").trim() || g.cap;
+  const [g, e0] = await Promise.all([gbIG(base), embedIG(base)]); // 31/10: a la vez, no una detrás de otra
+  const cap0 = e0 && e0.status === 200 ? (leeHtmlPagina(e0.body).cap || "") : "";
+  let r = cap0 || g.cap ? {} : await pagina(base + "embed/captioned/"); // el navegador (lento) solo si no hay pie todavía
+  let t = cap0 || g.cap || (r.cap || "").trim();
   if (!t) t = capDeOg(r.og) || capDeOg(g.og);
   if (!t) { r = await pagina(base); t = capDeOg(r.og) || ""; if (!t && r.og && !MURO.test(r.og) && r.og.length > 40) t = r.og; }
   if (!t) { const h = await http(base); if (h.status === 200) t = capDeOg(metaDe(h.body, "og:description")); }
@@ -1217,19 +1250,26 @@ async function investigar(card, repos, ai, texto) {
   linksDelTexto(card, texto); // Telegram, Discord, GitHub, webs… que el propio post escribe
   // si no hay ningún link (o solo el repo), se buscan y comprueban las webs oficiales de lo que menciona
   const hb = new Set((card.links || []).map(l => l.u.replace(/\/$/, "").toLowerCase()));
-  if (hb.size < 2 || (hb.size === 1 && r0)) { paso(card, "Buscando links…"); await buscarLinksOficiales(card); }
+  if (hb.size < 2 || (hb.size === 1 && r0)) card.faltanLinks = 1; // 31/10: se buscan al acabar el lote, en segundo plano (antes frenaban cada link hasta 20 s)
   if (!hayIA()) return;
   const material = `${texto.slice(0, 3200)}\n${r0 ? md : ""}\n${web ? web.titulo + " " + web.desc + " " + web.texto : ""}`;
-  paso(card, "Ampliando la explicación…");
-  const ex = await chatJson(`Eres un divulgador técnico. Un post de Instagram habla de un proyecto, herramienta, skill o idea. Explícalo para que alguien lo entienda SIN ver el vídeo. Usa SOLO el material de abajo; si algo no está, no lo menciones. Si parte del material no tiene relación con el post (otro tema), IGNÓRALA. Responde SOLO JSON:
-{"resumen":"1 o 2 frases (MÁXIMO 220 caracteres): qué es y para qué sirve","explicacion":"4 a 6 frases en español claro: qué es, qué problema resuelve y para quién","puntos":["TODOS los puntos, pasos, ideas o herramientas que el post enumera (hasta 8); cada uno: nombre + una frase"],"skills":["si el post crea o propone skills/plugins/comandos para Claude: nombre — qué hace (hasta 5); si no hay, []"],"como":["pasos para instalarlo o usarlo (hasta 6), con el comando EXACTO solo si aparece en el material; si no aparecen, []"],"limites":"coste, requisitos o límites si se mencionan; si no, \"\""}
+  paso(card, "Escribiendo el informe…");
+  const orig = texto.replace(/\[(VOZ|TEXTO|LO QUE)[^\]]*\]/g, "\n").trim().slice(0, 2500);
+  const ex = await chatJson(`Eres un divulgador técnico que escribe para Finn: usa Claude Code en Windows y quiere saber si algo merece la pena instalarlo o probarlo. Un post de Instagram habla de un proyecto, herramienta, skill o idea. Explícaselo para que lo entienda SIN ver el vídeo, en español llano, como a un amigo, sin jerga innecesaria (si usas un término técnico, explícalo en pocas palabras). Usa SOLO el material de abajo; si algo no está, déjalo vacío. Si parte del material no tiene relación con el post, IGNÓRALA. La voz transcrita confunde nombres: «Cloud Code» es Claude Code y «MSP» es MCP. Responde SOLO JSON:
+{"resumen":"1 o 2 frases (MÁXIMO 220 caracteres): qué es y para qué sirve","explicacion":"4 a 6 frases: qué es, qué problema resuelve, un ejemplo concreto de uso y para quién es","puntos":["TODO lo que el post enumera (herramientas, pasos, ideas), hasta 8; cada uno: nombre + una frase sencilla"],"skills":["si propone skills/plugins/comandos para Claude: nombre — qué hace (hasta 5); si no, []"],"como":["pasos para empezar a usarlo, de principiante, hasta 6, en orden; con el comando EXACTO solo si aparece en el material; si el material no lo dice, []"],"limites":"requisitos, coste o límites si se mencionan; si no, \"\"","pros":["2 a 4 ventajas concretas que salen del material"],"contras":["0 a 3 pegas, límites o requisitos que salen del material"],"dificultad":"Fácil | Media | Difícil | vacío si no se sabe","tipo":"UNO de: Skill | Plugin | Servidor MCP | App | Web | Repositorio | Curso | Idea | Otro","para_quien":"una frase: a quién le sirve","traduccion":"si el TEXTO ORIGINAL está en otro idioma, tradúcelo entero al español claro; si ya está en español o no hay, cadena vacía"}
 POST (texto, voz del vídeo, texto de las imágenes y lo que se ve en el vídeo): ${texto.slice(0, 3200)}
 ${r0 ? "README de " + r0.full + ": " + md.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 3500) : ""}
-${web ? "WEB OFICIAL (" + web.url + "): " + web.titulo + " — " + web.desc + " " + web.texto.slice(0, 1200) : ""}`);
-  const lista = (v, n) => Array.isArray(v) ? v.map(x => String(x || "").trim()).filter(x => x.length > 3).slice(0, n) : [];
+${web ? "WEB OFICIAL (" + web.url + "): " + web.titulo + " — " + web.desc + " " + web.texto.slice(0, 1200) : ""}
+TEXTO ORIGINAL DEL POST (para traducir): ${orig || "(no hay)"}`, 2200);
+  const lista = (v, n) => Array.isArray(v) ? v.map(x => corrige(String(x || "").trim())).filter(x => x.length > 3).slice(0, n) : [];
   if (ex && ex.explicacion && ex.explicacion.length > 60 && fundado(ex.explicacion, material + " " + card.titulo)) {
-    card.detalle = ex.explicacion.trim(); card.resumen = corto(ex.resumen && ex.resumen.length > 30 && ex.resumen.length <= MAX_RESUMEN && fundado(ex.resumen, material + " " + card.titulo) ? ex.resumen : ex.explicacion); card.fuente = "investigado";
+    card.detalle = corrige(ex.explicacion.trim()); card.resumen = corto(ex.resumen && ex.resumen.length > 30 && ex.resumen.length <= MAX_RESUMEN && fundado(ex.resumen, material + " " + card.titulo) ? ex.resumen : ex.explicacion); card.fuente = "investigado";
     card.puntos = lista(ex.puntos, 8); card.skills = lista(ex.skills, 5); card.como = lista(ex.como, 6); card.limites = String(ex.limites || "").slice(0, 300);
+    const base = material + " " + orig; card.pros = lista(ex.pros, 4).filter(x => fundado(x, base)); card.contras = lista(ex.contras, 3).filter(x => fundado(x, base));
+    card.dificultad = ["Fácil", "Media", "Difícil"].find(x => sinAcentos(x) === sinAcentos(String(ex.dificultad || "").trim())) || "";
+    card.tipoCosa = String(ex.tipo || "").slice(0, 30); card.paraQuien = corrige(String(ex.para_quien || "").slice(0, 200));
+    if (ex.traduccion && orig && String(ex.traduccion).length > 20) card.trad = String(ex.traduccion).slice(0, 3000);
+    card.informeV = 1;
   }
 }
 
@@ -1479,13 +1519,13 @@ function reconciliaPendientes() { // D7: una ficha «pendiente» sin trabajo rea
   if (n) guardar();
 }
 let pausado = false, actual = null, sesionDesde = (db.bn || 0) + 1;
-function etqOrdenar() { $("#bOrdenar").textContent = corriendo ? `Añadir bloque ${(db.bn || 0) + 1} (en cola)` : "Ordenar mis links"; }
+function etqOrdenar() { $("#bOrdenar").textContent = corriendo ? "Añadir también estos" : "Leer y explicar"; }
 function pintaBloques() {
   const hayCola = db.cards.some(c => c.bloque && c.bloque >= sesionDesde); $("#notaLote").style.display = hayCola ? "" : "none";
   $("#detect").style.display = hayCola || !$("#txt").value.trim() ? "none" : "";
   const bs = {}; db.cards.forEach(c => { if (c.bloque && c.bloque >= sesionDesde) { const b = bs[c.bloque] ||= { n: c.bloque, t: 0, h: 0 }; b.t++; if (c.estado !== "pendiente") b.h++; } });
   $("#bloques").innerHTML = Object.values(bs).sort((x, y) => x.n - y.n).map(b => { const fin = b.h >= b.t, act = !fin && actual && actual.bloque === b.n; return `<div class="blq"><b>${esc(etqLote(loteDeBloque(b.n)))}</b> · ${b.h}/${b.t} ${fin ? "✅ terminado" : act ? "· trabajando" : "· en cola"}<div class="barra"><i style="width:${fin || b.h ? Math.round(b.h / b.t * 100) : 4}%"></i></div>${act && atascado ? '<div class="nota" style="color:var(--warn)">Parece atascado: este link no avanza. Puedes reiniciarlo o quitar el lote.</div>' : ""}${fin ? `<button class="btn pri" data-ver="${loteDeBloque(b.n)}">Ver este lote (${b.t})</button>` : `<div class="fila">${act ? `<button class="btn sm" data-rb="${b.n}">Reiniciar</button>` : ""}<button class="btn sm" data-bq="${b.n}">Quitar</button></div>`}</div>`; }).join("");
-  pintaLotesHist();
+  pintaLotesHist(); if ($("#p-feed").classList.contains("on")) pintaEstadoInicio();
 }
 async function correr() {
   if (corriendo) return; corriendo = true; pausado = false; $("#prog").style.display = "flex"; $("#bParar").textContent = "Pausar"; muertos = {}; etqOrdenar();
@@ -1513,6 +1553,7 @@ async function correr() {
   const sin = db.cards.filter(c => c.estado === "pendiente").length; respaldoYa();
   const pb = {}; db.cards.forEach(c => { if (c.bloque && c.bloque >= sesionDesde) { const b = pb[c.bloque] ||= { n: c.bloque, t: 0, r: 0, p: 0 }; b.t++; if (c.estado === "revisar") b.r++; if (c.estado === "pendiente") b.p++; } });
   const lis = Object.values(pb).sort((x, y) => y.n - x.n); // lo último que pegó Jorge, arriba
+  setTimeout(() => linksPendientes(), 1500); pintaEstadoInicio();
   aviso(`${sin ? "Parado" : "Todo listo"}: ${hechos} procesadas${rev ? `, ${rev} para revisar` : ""}${sin ? `, ${sin} sin terminar` : ""}${uni ? `. Unidas ${uni} repetidas` : ""}. Toca un lote para verlo.`, true);
   if (lis.length > 1) { const a = $("#aviso"); lis.slice(0, 6).forEach((b, i) => { const x = document.createElement("button"); x.className = "btn"; x.dataset.lista = b.n; x.style.cssText = "display:block;width:100%;margin-top:6px;min-height:44px;text-align:left"; x.textContent = `${i ? "" : "🆕 "}${etqLote(loteDeBloque(b.n))}${i ? "" : " (el último)"}: ${b.t} fichas${b.r ? `, ${b.r} para revisar` : ""}${b.p ? `, ${b.p} sin terminar` : ""}`; x.onclick = e => { e.stopPropagation(); verLote(loteDeBloque(b.n)); a.style.display = "none"; }; a.appendChild(x); }); }
   else if (lis.length === 1) { const a = $("#aviso"), x = document.createElement("button"); x.className = "btn pri"; x.style.cssText = "display:block;width:100%;margin-top:8px;min-height:44px"; x.textContent = "Ver " + etqLote(loteDeBloque(lis[0].n)); x.onclick = e => { e.stopPropagation(); verLote(loteDeBloque(lis[0].n)); a.style.display = "none"; }; a.appendChild(x); }
@@ -2133,7 +2174,7 @@ const TEMAS = [
   ["Ideas y negocio", /negocio|dinero|ventas|marketing|\bclientes?\b|emprend|redes sociales|monetiz/],
   ["Aprender", /\bcursos?\b|tutorial|aprende|\bguia\b|errores|consejos|\btips?\b|\breglas\b/]
 ];
-const blobDe = c => sinAcentos([c.titulo, c.sirve, c.resumen, (c.puntos || []).join(" "), (c.skills || []).join(" "), (c.tags || []).join(" "), ...(c.repos || []).map(r => r.full + " " + (r.desc || ""))].join(" \n "));
+const blobDe = c => sinAcentos([c.titulo, c.sirve, c.resumen, c.detalle, (c.pros || []).join(" "), (c.puntos || []).join(" "), (c.skills || []).join(" "), (c.tags || []).join(" "), ...(c.repos || []).map(r => r.full + " " + (r.desc || ""))].join(" \n "));
 const _temaC = new WeakMap();
 function temaDe(c) {
   const k = (c.titulo || "") + "|" + (c.resumen || "") + "|" + (c.sirve || ""), h = _temaC.get(c); if (h && h.k === k) return h.v;
@@ -2187,10 +2228,12 @@ function fotosDe(c, usoImg) {
   const propias = o.filter(u => !rep(u)); if (propias.length) o = propias; // una foto que sale en varias fichas solo se usa si no hay otra
   return o.slice(0, 4);
 }
-function galeriaHtml(c, cls = "") { const f = fotosDe(c, usoImgs()); return `<div class="gl ${cls}" data-gid="${esc(c.id)}"${f.length ? "" : ' style="display:none"'}>${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`; }
+function galeriaHtml(c, cls = "") { const f = fotosDe(c, usoImgs()); return `<div class="gl ${cls}" data-gid="${esc(c.id)}"${f.length ? "" : ' style="display:none"'}>${f.map((u, i) => `<img src="${esc(srcFoto(u))}" data-o="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`; }
 function cuentaGal(g) { const n = [...g.querySelectorAll("img")].filter(im => !(im.complete && im.naturalWidth === 0 && im.getAttribute("src"))).length, po = g.querySelector(".port"); g.style.display = n || po ? "" : "none"; /* 22/10: el respaldo (.port) nunca se quita: queda detrás de las fotos */ const gn = g.nextElementSibling; if (gn && gn.classList.contains("gn")) gn.textContent = n > 1 ? `${Math.min(n, Math.round(g.scrollLeft / Math.max(1, g.clientWidth)) + 1)}/${n}` : ""; }
 document.addEventListener("error", e => { const im = e.target; if (im && im.tagName === "IMG" && im.closest(".gl[data-gid]")) fotoMala(im); }, true);
-window.fotoMala = el => { const g = el.parentNode; el.remove(); if (g) cuentaGal(g); };
+// 31/10: en el PC las fotos pasan por el programa, que las guarda (no caducan). Si falla, se prueba la original y luego se quita.
+const srcFoto = u => SRV && /^https?:\/\//i.test(String(u || "")) ? "/api/foto?u=" + encodeURIComponent(u) : u;
+window.fotoMala = el => { const o = el.dataset && el.dataset.o; if (o && el.getAttribute("src") !== o) { el.src = o; return; } const g = el.parentNode; el.remove(); if (g && g.classList.contains("gl")) cuentaGal(g); };
 document.addEventListener("scroll", e => { const g = e.target; if (g && g.classList && g.classList.contains("gl")) cuentaGal(g); }, true);
 const MINI = (() => { // miniaturas guardadas en el propio dispositivo: las fotos de Instagram caducan a los pocos días
   let dbp = null;
@@ -2255,7 +2298,7 @@ function rellenaGalerias(root) {
     const ids = [...(c.minis || c.minisNube ? [c.id] : []), ...(c.minisDe || [])];
     Promise.all(ids.map(minisDeCard)).then(rs => {
       const ms = rs.flat(); if (!ms.length || !g.isConnected) return;
-      const ya = new Set(ms.map(m => m.u)); g.querySelectorAll("img").forEach(im => { if (ya.has(im.getAttribute("src"))) im.remove(); });
+      const ya = new Set(ms.map(m => m.u)); g.querySelectorAll("img").forEach(im => { if (ya.has(im.dataset.o || im.getAttribute("src"))) im.remove(); });
       g.prepend(...ms.slice(0, 4).map(m => { const im = document.createElement("img"); im.src = m.d; im.alt = ""; return im; }));
       while (g.querySelectorAll("img").length > 5) g.lastElementChild.remove(); cuentaGal(g);
     });
@@ -2321,7 +2364,7 @@ function feedCards() {
   return { cs, sc };
 }
 const resetOrden = () => { feedOrden = null; feedN = 20; };
-function matizTema(t) { let h = 0; for (const ch of String(t || "Otros")) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; } // un color fijo por categoría
+function matizTema(t) { let h = 0; for (const ch of String(t || "Otros")) h = (h * 31 + ch.charCodeAt(0)) % 360; return 150 + h % 170; } // un color fijo por categoría; 31/10: solo verdes, azules y violetas (sin marrones ni rojizos)
 function portadaHtml(c) { // respaldo cuando la foto falta o falla: inicial grande + color de su categoría (va SIEMPRE detrás de las fotos)
   const tt = tituloVis(c), t = temaFicha(c), ini = (String(tt).match(/[\p{L}\p{N}]/u) || [ICO_TEMA[t] || "📌"])[0].toUpperCase();
   return `<div class="port" style="--h:${matizTema(t)}" role="img" aria-label="Sin foto: ${esc(t)}"><span>${esc(ini)}</span><b>${esc(tt)}</b></div>`;
@@ -2332,13 +2375,14 @@ function botonesHtml(c, grande) {
 }
 function fichaFeed(c, p, top) {
   const sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim(), f = fotosDe(c, usoImgs());
-  const gal = `<div class="gl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.map((u, i) => `<img src="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`;
+  const gal = `<div class="gl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.map((u, i) => `<img src="${esc(srcFoto(u))}" data-o="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`;
   return `<article class="fc" data-id="${esc(c.id)}"><div class="fph" title="Doble toque: Lo quiero · Un toque: leer todo">${gal}<div class="fov"><span class="sl">${esc(etqAñadida(c))}</span>${top ? '<span class="sl ti">★ Para ti</span>' : ""}</div><div class="corz" aria-hidden="true">${ICF.cor}</div></div>
 <div class="fcb"><div class="fsl">${sellosHtml(c)}<span class="sl">${esc(temaFicha(c))}</span>${(c.cols || []).map(id => nomCol(id) ? `<span class="sl">🔖 ${esc(nomCol(id))}</span>` : "").join("")}</div>
 <h3 role="heading" aria-level="2" data-fa="leer">${esc(tituloVis(c))}</h3>${sv ? `<p class="fsv">Sirve para: ${esc(sv)}</p>` : ""}${c.resumen && c.resumen !== c.sirve ? `<p class="frs">${esc(c.resumen)}</p>` : ""}${top && p.raz.length ? `<p class="fpq">Para ti porque ${esc(p.raz.join(" · "))}</p>` : ""}</div>
 <div class="fbt">${botonesHtml(c)}</div><button class="btn fleer" data-fa="leer">${ICF.leer} Leer todo</button><div class="fl">${linksFeed(c)}</div></article>`;
 }
 function pintaFeed(suave) {
+  pintaEstadoInicio();
   $("#hist").innerHTML = historiasHtml();
   const y = $("main").scrollTop, ok = db.cards.filter(c => c.estado === "ok");
   const temas = [...new Set(ok.map(temaFicha))].sort((a, b) => a.localeCompare(b, "es")), lotes = lotesLista().filter(l => l.ok), cols = (db.cols || []).filter(x => ok.some(c => (c.cols || []).includes(x.id)));
@@ -2656,7 +2700,7 @@ function chipsActivos() {
 }
 function tarjetaX(c) {
   const f = fotosDe(c, usoImgs()), sv = String(c.sirve || "").replace(/^sirve para:?\s*/i, "").trim() || primeraFrase(c.resumen), u = uso(c), rev = c.estado === "revisar";
-  return `<article class="xc${rev ? " rev" : ""}" data-id="${esc(c.id)}"><div class="xim gl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
+  return `<article class="xc${rev ? " rev" : ""}" data-id="${esc(c.id)}"><div class="xim gl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(srcFoto(s))}" data-o="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
 <button class="xq${u === "quiero" ? " on" : ""}" data-fa="quiero" aria-pressed="${u === "quiero"}" aria-label="Lo quiero">${ICF.cor}</button>
 <div class="xb"><div class="xf">${esc(etqAñadida(c))}</div><h3 role="heading" aria-level="2">${esc(rev ? "No se pudo leer" : tituloVis(c))}</h3><p>${esc(rev ? c.motivo || "" : sv)}</p><div class="fsl">${rev ? '<button class="btn sm" data-fa="reint">Reintentar</button>' : sellosHtml(c) + `<span class="sl">${esc(temaFicha(c))}</span>`}${c.fav ? '<span class="sl pg">★</span>' : ""}</div></div></article>`;
 }
@@ -2713,7 +2757,7 @@ $("#xRes").addEventListener("click", e => {
 function filaLista(c) {
   const cm = comandos(c), hecho = uso(c) === "hecho", f = fotosDe(c, usoImgs());
   return `<div class="lr${hecho ? " hecho" : ""}" data-id="${esc(c.id)}"><button class="lchk" data-li="hecho" aria-pressed="${hecho}" aria-label="${hecho ? "Hecho" : "Marcar como hecho"}">${hecho ? ICF.ok : ""}</button>
-<div class="lmi gl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
+<div class="lmi gl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.slice(0, 1).map(s => `<img src="${esc(srcFoto(s))}" data-o="${esc(s)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div>
 <button class="ltx" data-li="abrir"><b>${esc(tituloVis(c))}</b><span>${esc(String(c.sirve || "").replace(/^sirve para:?\s*/i, "") || primeraFrase(c.resumen))}</span>${cm.length ? `<code>${esc(cm[0])}</code>` : ""}<i>${esc(etqAñadida(c))} · ${esc(temaFicha(c))}</i></button>
 <div class="lac">${c.fav ? '<span class="sl pg">★</span>' : ""}<button class="btn sm" data-li="quitar" title="Quitar de mi lista">Quitar</button></div></div>`;
 }
@@ -2741,7 +2785,7 @@ $("#lista2").addEventListener("click", e => {
 // ---- Inicio: lotes como «historias» arriba, y en cada post cuándo lo añadiste ----
 function historiasHtml() {
   const ls = lotesLista().filter(l => l.ok).slice(0, 15); if (!ls.length) return "";
-  const bola = (n, et, sub, on, img) => `<button class="hi${on ? " on" : ""}" data-hl="${n}"><span class="hb2">${img ? `<img src="${esc(img)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<em>${esc(et)}</em></span><small>${esc(sub)}</small></button>`;
+  const bola = (n, et, sub, on, img) => `<button class="hi${on ? " on" : ""}" data-hl="${n}"><span class="hb2">${img ? `<img src="${esc(srcFoto(img))}" data-o="${esc(img)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<em>${esc(et)}</em></span><small>${esc(sub)}</small></button>`;
   const img = n => { const c = db.cards.find(c => loteDe(c) === n && c.estado === "ok" && (c.imgs || []).length); return c ? fotosDe(c, usoImgs())[0] : ""; };
   const fLote = n => { const ts = db.cards.filter(c => loteDe(c) === n).map(añadida).filter(Boolean); return ts.length ? Math.min(...ts) : 0; };
   return bola("", "Todo", db.cards.filter(c => c.estado === "ok").length + " fichas", feedLote == null, "") + ls.map(l => { const L = (db.lotes || {})[l.n], t = (L && L.t) || fLote(l.n); return bola(l.n, String(l.ok), (t ? fechaCorta(t, true) + " · " : "") + etqLote(l.n).replace(/ · .*$/, ""), feedLote === l.n, img(l.n)); }).join("");
@@ -2773,7 +2817,31 @@ async function completarPendientes() { // de una en una, en segundo plano, sin e
   try { for (const c of db.cards.filter(x => x.estado === "ok" && !x.informeV && !x.informeProb).slice(0, 12)) { if (corriendo) break; c.informeProb = 1; await completarInforme(c); if (lectorId === c.id) pintaLector(); await dormir(800); } } catch (e) { }
   completando = false;
 }
-setInterval(() => { if (!document.hidden) completarPendientes(); }, 90000);
+setInterval(() => { if (!document.hidden) { completarPendientes(); linksPendientes(); } }, 90000);
+// ---- 31/10: los links oficiales se buscan después del lote, sin frenarlo ----
+let buscandoLinks = false;
+async function linksPendientes() {
+  if (buscandoLinks || corriendo) return; buscandoLinks = true;
+  try { for (const c of db.cards.filter(x => x.estado === "ok" && x.faltanLinks).slice(0, 15)) { if (corriendo) break; try { await buscarLinksOficiales(c); } catch (e) { } delete c.faltanLinks; guardar(); if (lectorId === c.id) pintaLector(); } }
+  finally { buscandoLinks = false; }
+}
+// ---- 31/10: Inicio dice claramente qué está pasando: trabajando, posts que fallaron y cómo funciona ----
+function pintaEstadoInicio() {
+  const e = $("#iniEstado"); if (!e) return; const out = [];
+  if (!db.guiaVista) out.push(`<div class="ie guia"><b>Así funciona</b><ol><li><b>Añadir</b>: pega tus links de Instagram (o compártelos desde Instagram a la app).</li><li>Yo leo cada post (texto, voz y lo que se ve) y te escribo un <b>informe</b>: qué es, si te interesa, cómo instalarlo y sus links.</li><li>Pulsa <b>♥</b> en lo que quieras: va a <b>Mi lista</b>, y desde ahí se lo pasas a Claude Code.</li></ol><button class="btn sm" data-ie="ok">Entendido</button></div>`);
+  if (corriendo) { const ses = db.cards.filter(c => c.bloque && c.bloque >= sesionDesde), hechos = ses.filter(c => c.estado !== "pendiente").length;
+    out.push(`<button class="ie trab" data-ie="ver"><span class="spin" aria-hidden="true"></span><span><b>Leyendo tus links: ${hechos} de ${ses.length}</b><small>Puedes seguir usando la app. Toca para ver el progreso.</small></span></button>`); }
+  const fall = db.cards.filter(c => c.estado === "revisar" && uso(c) !== "descartada");
+  if (fall.length && !corriendo) out.push(`<div class="ie fall"><span><b>${fall.length} post${fall.length > 1 ? "s" : ""} no se ${fall.length > 1 ? "pudieron" : "pudo"} leer</b><small>Instagram a veces frena. Reintentar suele arreglarlo.</small></span><span class="iea"><button class="btn sm pri" data-ie="reint">Reintentar</button><button class="btn sm" data-ie="verf">Ver</button></span></div>`);
+  e.innerHTML = out.join("");
+}
+$("#iniEstado").addEventListener("click", e => {
+  const b = e.target.closest("[data-ie]"); if (!b) return; const a = b.dataset.ie;
+  if (a === "ok") { db.guiaVista = 1; guardar(); return pintaEstadoInicio(); }
+  if (a === "ver") return ir("pegar");
+  if (a === "verf") { FIL = { ...FIL0(), marca: ["revisar"] }; return ir("explorar"); }
+  if (a === "reint") { const f = db.cards.filter(c => c.estado === "revisar" && uso(c) !== "descartada"); const n = (db.bn || 0) + 1; db.bn = n; f.forEach(c => Object.assign(c, { estado: "pendiente", bloque: n, motivo: "", autoReint: 0, cola: Date.now() })); guardar(); aviso("Vuelvo a leer " + f.length + "…"); pintaEstadoInicio(); return correr(); }
+});
 
 // ---- el informe de cada post, como una página web ordenada ----
 function veredicto(c) {
@@ -2795,7 +2863,7 @@ function lectorHtml(c) {
   const secc = [["que", "Qué es"], ["video", "Lo que dice el post"], ["como", "Cómo empezar"], ["pros", "Pros y contras"], ["links", "Links"]];
   const links = listaLinks(c).map(l => /(^|\/\/)(t\.me|telegram\.me)\//i.test(l.u) ? { ...l, cls: "tg", ic: IC.tg, t: "Telegram" } : l);
   if (!r && c.tipo !== "GitHub") links.push({ cls: "bs", ic: IC.lupa, t: "Buscar «" + tituloVis(c).replace(/[:|–—].*$/, "").trim() + "» en GitHub", u: "https://github.com/search?q=" + encodeURIComponent(tituloVis(c).replace(/[:|–—].*$/, "").trim()) + "&type=repositories" });
-  return `<div class="ihero"><div class="igal"><div class="gl lgl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.map(u => `<img src="${esc(u)}" referrerpolicy="no-referrer" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div></div>
+  return `<div class="ihero"><div class="igal"><div class="gl lgl" data-gid="${esc(c.id)}">${portadaHtml(c)}${f.map(u => `<img src="${esc(srcFoto(u))}" data-o="${esc(u)}" referrerpolicy="no-referrer" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div></div>
 <div class="ihead"><div class="fsl">${sl.map(([k, t]) => `<span class="sl ${k}">${esc(t)}</span>`).join("")}<span class="sl">${esc(temaFicha(c))}</span></div>
 <h1>${esc(tituloVis(c))}</h1>${sv ? `<p class="lsv">${esc(mayus(sv))}</p>` : ""}${!sv && c.sinIA ? `<p class="lsv nota">${esc(c.sinIA)}</p>` : ""}
 <div class="ver v-${ve.k}"><b>¿Te interesa? ${ve.t}</b>${ve.por.length ? `<span>${esc(mayus(ve.por.join(", ")))}.</span>` : ""}${c.paraQuien ? `<span>${esc(c.paraQuien)}</span>` : ""}</div>
@@ -2812,7 +2880,7 @@ ${!(c.puntos || []).length && !c.trad && !c.texto ? '<p class="nota">No hay más
 <section id="i-links"><h4>Links</h4><div class="enl gr">${links.map(l => aHtml(l, "lk", true)).join("")}</div></section>
 ${c.notas ? `<section><h4>Tus notas</h4><div class="notas">${esc(c.notas)}</div></section>` : ""}
 <div class="ipie"><p>${esc(etqAñadida(c))}${loteDe(c) ? " · " + esc(etqLote(loteDe(c)).replace(/ · .*$/, "")) : ""}${L && L.dev ? " · desde el " + esc(L.dev) : ""}${leido.length ? ". Lo he sacado de " + esc(leido.join(", ")) : ""}.</p>
-<div class="acs"><button class="btn" data-l="editar">Editar / escribir notas</button><button class="btn" data-l="claude">Pasar a Claude Code</button><button class="btn" data-l="borrar" style="grid-column:1/-1;color:var(--bad)">Borrar</button></div></div></div>`;
+<div class="acs"><button class="btn pri" data-l="rehacer" style="grid-column:1/-1">Leer y explicar otra vez</button><button class="btn" data-l="editar">Editar / escribir notas</button><button class="btn" data-l="claude">Pasar a Claude Code</button><button class="btn" data-l="borrar" style="grid-column:1/-1;color:var(--bad)">Borrar</button></div></div></div>`;
 }
 function pintaLector() {
   const c = db.cards.find(x => x.id === lectorId); if (!c) return;
@@ -2835,6 +2903,7 @@ $("#lector").addEventListener("click", async e => {
   if (a === "ant") return pasoLector(-1);
   if (a === "editar") return abrirEditor(c);
   if (a === "claude") return abrirCC([c]);
+  if (a === "rehacer") { const n = (db.bn || 0) + 1; db.bn = n; Object.assign(c, { estado: "pendiente", bloque: n, motivo: "", informeV: 0, informeProb: 0, cola: Date.now() }); guardar(); aviso("Lo vuelvo a leer y te lo explico de nuevo. Tarda un poco."); atrasUI(); return correr(); }
   if (a === "completar") { l.disabled = true; l.textContent = "Preparando…"; await completarInforme(c, true); return pintaLector(); }
   if (a === "borrar") { if (await confirmar("Borrar", `<p>¿Borrar «${esc(tituloVis(c).slice(0, 70))}»?</p>`, "Borrar")) { const pos = db.cards.indexOf(c); db.cards = db.cards.filter(x => x !== c); guardar(); atrasUI(); pintar(); aviso("Ficha borrada", false, () => { if (!db.cards.includes(c)) db.cards.splice(Math.min(pos, db.cards.length), 0, c); guardar(); resetOrden(); pintar(); if (typeof pintaExplorar === "function") pintaExplorar(); }); } }
 });

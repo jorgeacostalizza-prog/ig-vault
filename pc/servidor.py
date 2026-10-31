@@ -200,6 +200,74 @@ def img(d):
         return {"status": 0, "error": str(e)[:200]}
 
 
+FOTOS = os.path.join(os.path.expanduser("~"), ".ig-extractor", "fotos")
+
+
+def foto(url):
+    """31/10: la foto se guarda en el PC la primera vez que se ve (las de Instagram caducan a los pocos dias). Devuelve (bytes, tipo) o None."""
+    if not url.lower().startswith(("http://", "https://")):
+        return None
+    pr = urllib.parse.urlparse(url)
+    if not _publica(pr.hostname or ""):
+        return None
+    clave = hashlib.sha1((pr.netloc + pr.path).encode("utf-8")).hexdigest()  # sin la parte ?oe=… que cambia al caducar
+    ruta = os.path.join(FOTOS, clave)
+    try:
+        with open(ruta, "rb") as f:
+            b = f.read()
+        with open(ruta + ".tipo", encoding="utf-8") as f:
+            return b, f.read().strip() or "image/jpeg"
+    except OSError:
+        pass
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "image/avif,image/webp,image/*,*/*;q=0.8"})
+        with _OPENER.open(req, timeout=20) as r:
+            tipo = (r.headers.get("Content-Type") or "image/jpeg").split(";")[0].strip()
+            b = r.read(MAX_IMG + 1)
+        if not tipo.startswith("image/") or len(b) < 500 or len(b) > MAX_IMG:
+            return None
+        os.makedirs(FOTOS, exist_ok=True)
+        with open(ruta + ".tmp", "wb") as f:
+            f.write(b)
+        os.replace(ruta + ".tmp", ruta)
+        with open(ruta + ".tipo", "w", encoding="utf-8") as f:
+            f.write(tipo)
+        return b, tipo
+    except Exception:
+        return None
+
+
+def navegador_exe():
+    for e in (BRAVE, CHROME, os.path.expandvars(r"%LOCALAPPDATA%\BraveSoftware\Brave-Browser\Application\brave.exe"),
+              os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe")):
+        if e and os.path.exists(e):
+            return e
+    return ""
+
+
+def pagina(d):
+    """31/10: abre la pagina de Instagram en un navegador oculto (como hace el movil) y devuelve el HTML ya pintado. Solo instagram.com."""
+    import tempfile
+    url = d.get("url") or ""
+    pr = urllib.parse.urlparse(url)
+    if pr.scheme != "https" or not (pr.hostname or "").endswith("instagram.com"):
+        return {"status": 0, "error": "solo paginas de instagram.com"}
+    exe = navegador_exe()
+    if not exe:
+        return {"status": 0, "error": "sin Brave ni Chrome"}
+    perfil = tempfile.mkdtemp(prefix="igx-nav-")
+    try:
+        r = subprocess.run([exe, "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--mute-audio",
+                            "--user-data-dir=" + perfil, "--user-agent=" + UA, "--virtual-time-budget=7000", "--dump-dom", url],
+                           capture_output=True, timeout=35, creationflags=0x08000000)
+        html = r.stdout.decode("utf-8", errors="replace")
+        return {"status": 200 if len(html) > 500 else 0, "html": html[:1_500_000]}
+    except Exception as e:
+        return {"status": 0, "error": str(e)[:200]}
+    finally:
+        shutil.rmtree(perfil, ignore_errors=True)
+
+
 OBSIDIAN = r"C:\Users\PC\DeskBox\Apps\CODE\Claudes Things\IG Extractor Obsidian"
 
 
@@ -455,6 +523,18 @@ class H(BaseHTTPRequestHandler):
             return self._json(claves())
         if p == "/api/respaldo":
             return self._json(respaldo_leer())
+        if p == "/api/foto":  # 31/10: <img src="/api/foto?u=…"> — se baja una vez y queda guardada en el PC
+            u = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("u", [""])[0]
+            r = foto(u)
+            if not r:
+                return self._json({"error": "sin foto"}, 404)
+            self.send_response(200)
+            self.send_header("Content-Type", r[1])
+            self.send_header("Content-Length", str(len(r[0])))
+            self.send_header("Cache-Control", "max-age=31536000")
+            self.end_headers()
+            self.wfile.write(r[0])
+            return
         if p == "/api/semilla":  # fichas precargadas una vez por versión (la app las suma sin repetir)
             try:
                 with open(os.path.join(RESP, "semilla.json"), "rb") as f:
@@ -480,7 +560,7 @@ class H(BaseHTTPRequestHandler):
             d = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
         except Exception:
             return self._json({"status": 0, "body": "", "error": "json invalido"}, 400)
-        f = {"/api/http": http, "/api/voz": voz, "/api/abrir": abrir, "/api/frames": frames, "/api/img": img, "/api/respaldo": respaldo_guardar}.get(self.path.split("?")[0])
+        f = {"/api/http": http, "/api/voz": voz, "/api/abrir": abrir, "/api/frames": frames, "/api/img": img, "/api/pagina": pagina, "/api/respaldo": respaldo_guardar}.get(self.path.split("?")[0])
         if not f:
             return self._json({"error": "no existe"}, 404)
         self._json(f(d))

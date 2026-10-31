@@ -56,7 +56,7 @@ cards=[dict(c,id="s%d"%i) for i,c in enumerate(sem["cards"])]
 with sync_playwright() as p:
   for ancho,nom in ((390,"movil"),(1280,"pc")):
     print("== "+nom); GH["repo"]=False; GH["files"]={}
-    br,pg=pagina(p,ancho,{"cards":cards,"cfg":{}})
+    br,pg=pagina(p,ancho,{"cards":cards,"cfg":{},"guiaVista":1})
     titulos=pg.evaluate("db.cards.map(c=>c.titulo)")
     print("   quedan", len(titulos), "fichas")
     ok("duplicados: Orchestrator / Codex Security en 1", sum(1 for t in titulos if t.lower().startswith("orchestrator"))<=1 and sum(1 for t in titulos if "codex security de openai" in t.lower())==1, [t for t in titulos if "rchestr" in t or "Codex" in t])
