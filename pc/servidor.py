@@ -18,6 +18,7 @@ BRAVE = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 WEB = os.path.join(AQUI, "web")
 WEB_APK = os.path.abspath(os.path.join(AQUI, "..", "ig-vault-apk", "src", "assets"))
+WEB_REPO = os.path.abspath(os.path.join(AQUI, "..", "src", "assets"))  # cuando el servidor corre desde el repo (pruebas)
 
 
 def log(msg):
@@ -200,7 +201,8 @@ def img(d):
         return {"status": 0, "error": str(e)[:200]}
 
 
-FOTOS = os.path.join(os.path.expanduser("~"), ".ig-extractor", "fotos")
+DATOS = os.environ.get("IGX_DATOS") or os.path.join(os.path.expanduser("~"), ".ig-extractor")  # IGX_DATOS: carpeta de datos aparte (pruebas)
+FOTOS = os.path.join(DATOS, "fotos")
 
 
 def foto(url):
@@ -257,10 +259,15 @@ def pagina(d):
         return {"status": 0, "error": "sin Brave ni Chrome"}
     perfil = tempfile.mkdtemp(prefix="igx-nav-")
     try:
-        r = subprocess.run([exe, "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--mute-audio",
-                            "--user-data-dir=" + perfil, "--user-agent=" + UA, "--virtual-time-budget=7000", "--dump-dom", url],
-                           capture_output=True, timeout=35, creationflags=0x08000000)
-        html = r.stdout.decode("utf-8", errors="replace")
+        pr_ = subprocess.Popen([exe, "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--mute-audio",
+                                "--user-data-dir=" + perfil, "--user-agent=" + UA, "--virtual-time-budget=7000", "--dump-dom", url],
+                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, creationflags=0x08000000)
+        try:
+            salida = pr_.communicate(timeout=22)[0]
+        except subprocess.TimeoutExpired:  # 31/10: matar TODO el arbol (antes quedaban procesos hijos y la peticion tardaba 110 s)
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(pr_.pid)], capture_output=True, creationflags=0x08000000)
+            return {"status": 0, "error": "tiempo agotado"}
+        html = salida.decode("utf-8", errors="replace")
         return {"status": 200 if len(html) > 500 else 0, "html": html[:1_500_000]}
     except Exception as e:
         return {"status": 0, "error": str(e)[:200]}
@@ -272,7 +279,7 @@ OBSIDIAN = r"C:\Users\PC\DeskBox\Apps\CODE\Claudes Things\IG Extractor Obsidian"
 
 
 
-RESP = os.path.join(os.path.expanduser("~"), ".ig-extractor")
+RESP = DATOS
 
 _LOCK_RESP = threading.Lock()
 
@@ -345,7 +352,7 @@ def abrir(d):
 def buscar_estatico(p):
     """Ruta de fichero para p: primero pc/web, luego la web del APK. None si no existe."""
     rel = "index.html" if p in ("/", "") else p.lstrip("/")
-    for base in (WEB, WEB_APK):
+    for base in (WEB, WEB_APK, WEB_REPO):
         f = os.path.abspath(os.path.join(base, rel))
         if f.startswith(base + os.sep) and os.path.isfile(f):
             return f

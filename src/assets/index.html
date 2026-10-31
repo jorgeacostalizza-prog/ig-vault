@@ -661,6 +661,7 @@ function leeHtmlPagina(html) {
     return { cap, og: m("og:description"), ogt: m("og:title"), title: d.title || "", body: (d.body ? d.body.textContent : "").replace(/\s+/g, " ").slice(0, 3000) };
   } catch (e) { return {}; }
 }
+const _navProbado = new Set(); // 31/10: el navegador oculto del PC se usa UNA vez por post (cada intento tarda hasta 35 s y antes se repetía 4 veces: 150 s por post sin leer)
 async function paginaSinNativo(url) {
   if (window.__pagina) return window.__pagina(url);
   const ig = String(url).match(/^(https:\/\/www\.instagram\.com\/(?:p|reel|tv)\/[\w-]+\/)embed\/captioned\/$/);
@@ -668,7 +669,8 @@ async function paginaSinNativo(url) {
   const o = h && h.status === 200 ? leeHtmlPagina(h.body) : {};
   if (o.cap) return o;
   await srvListo;
-  if (SRV && /^https:\/\/www\.instagram\.com\//.test(url)) { const r = await postSrv("/api/pagina", { url }); if (r && r.status === 200 && r.html) { const o2 = leeHtmlPagina(r.html); if (o2.cap || o2.og) return o2; } }
+  const clv = (String(url).match(/instagram\.com\/(?:p|reel|reels|tv)\/([\w-]+)/) || [])[1] || url;
+  if (SRV && /^https:\/\/www\.instagram\.com\//.test(url) && !_navProbado.has(clv)) { _navProbado.add(clv); const r = await postSrv("/api/pagina", { url }); if (r && r.status === 200 && r.html) { const o2 = leeHtmlPagina(r.html); if (o2.cap || o2.og) return o2; } }
   return o;
 }
 const pagina = url => N ? nat("pagina", url) : paginaSinNativo(url);
@@ -741,8 +743,8 @@ async function ghReadme(full) {
 const repoInfo = g => ({ pushed: g.pushed_at || "", archived: !!g.archived, full: g.full_name, desc: g.description || "", stars: g.stargazers_count, topics: g.topics || [], url: g.html_url, lang: g.language || "", home: g.homepage || "" });
 
 // ============ IA en la nube ============
-const MOD_NV = ["nvidia/nemotron-3-super-120b-a12b", "z-ai/glm-5.3-flash", "nvidia/nemotron-3.5-lightning-30b-a3b", "meta/llama-3.3-70b-instruct"];
-const MOD_OR = ["nvidia/nemotron-3-super-120b-a12b:free", "google/gemma-4-31b-it:free", "openai/gpt-oss-120b:free", "meta-llama/llama-3.3-70b-instruct:free"]; // 22/10: más modelos de respaldo (si uno no existe da 404 y se salta solo)
+const MOD_NV = ["nvidia/nemotron-3.5-lightning-30b-a3b", "nvidia/nemotron-3-ultra-550b-a55b", "z-ai/glm-5.3-flash", "deepseek-ai/deepseek-v4.1-flash"]; // 31/10: comprobados vivos (los demás dan 404/410 o no contestan); si uno falla se salta solo
+const MOD_OR = ["nvidia/nemotron-3.5-lightning:free", "nvidia/nemotron-3-ultra-550b-a55b:free", "google/gemma-4-31b-it:free", "cohere/north-mini-code:free"];
 let muertos = {}, iaError = "";
 const hayIA = () => !!(db.cfg.nvidia || db.cfg.openrouter);
 const ACCIONES = ["Instalar", "Probar", "Solo guardar"];
@@ -839,7 +841,7 @@ const embedIG = base => { if (!_embedC.has(base)) _embedC.set(base, http(base + 
 async function leerIG(url) {
   const mi = String(url).match(RE_IG); // 22/10: el ?stkn=… de los enlaces de la app rompía la URL (…/?stkn=x/embed/) y Instagram servía otra página
   const base = mi ? `https://www.instagram.com/${mi[1] === "reels" ? "reel" : mi[1]}/${mi[2]}/` : String(url).replace(/[?#].*$/, "").replace(/\/$/, "") + "/";
-  try { return await leerIG0(url, base); } finally { _embedC.delete(base); }
+  try { return await leerIG0(url, base); } finally { _embedC.delete(base); _navProbado.delete((base.match(/\/([\w-]+)\/$/) || [])[1]); }
 }
 const esperaMs = ms => new Promise(r => setTimeout(r, ms));
 async function leerIG0(url, base) { // 31/10: Instagram frena de forma intermitente: espero y reintento una vez; luego oEmbed público (sin login ni cookies)
