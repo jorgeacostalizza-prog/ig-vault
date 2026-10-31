@@ -78,8 +78,8 @@ public class MainActivity extends Activity {
             File cache = new File(getFilesDir(), "index.html");
             try {
                 HttpURLConnection c = (HttpURLConnection) new URL(WEB + "?t=" + System.currentTimeMillis()).openConnection();
-                c.setConnectTimeout(2500);
-                c.setReadTimeout(2500);
+                c.setConnectTimeout(4000);
+                c.setReadTimeout(8000);
                 if (c.getResponseCode() == 200) {
                     InputStream in = c.getInputStream();
                     byte[] b = leer(in, 3000000);

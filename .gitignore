@@ -9,3 +9,4 @@ capturas/
 BACKUPS/
 __pycache__/
 *.pyc
+.codegraph/
