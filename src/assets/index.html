@@ -763,9 +763,13 @@ let ENFRIA_CORTE_MS = 20000;       // igual si la llamada se corta sin respuesta
 let enfria = {};
 const estaFria = nom => (enfria[nom] || 0) > Date.now();
 function esperandoIA() { const e = $("#progS"); if (e && corriendo) e.textContent = "Esperando a la IA…"; }
+const MAX_NV_A_LA_VEZ = 2, esperaNV = []; let nvAhora = 0; // 1/11 (B4): NVIDIA cuelga con muchas llamadas a la vez: como mucho 2 en vuelo; las demás esperan turno
+async function turnoNV() { if (nvAhora < MAX_NV_A_LA_VEZ) { nvAhora++; return; } await new Promise(r => esperaNV.push(r)); }
+function sueltaNV() { const s = esperaNV.shift(); if (s) s(); else nvAhora--; }
 async function httpIA(nom, url, opt, tope = TOPE_IA_MS) {
-  let to; const corte = new Promise(r => { to = setTimeout(() => r({ status: 0, body: "", error: "tiempo agotado" }), tope); });
-  const r = await Promise.race([http(url, opt), corte]); clearTimeout(to);
+  const nv = nom === "NVIDIA"; if (nv) await turnoNV();
+  let to, r; const corte = new Promise(z => { to = setTimeout(() => z({ status: 0, body: "", error: "tiempo agotado" }), tope); });
+  try { r = await Promise.race([http(url, opt), corte]); } finally { clearTimeout(to); if (nv) sueltaNV(); }
   if (r.status === 429) enfria[nom] = Date.now() + ENFRIA_429_MS; else if (r.status === 0) enfria[nom] = Date.now() + ENFRIA_CORTE_MS;
   return r;
 }
@@ -777,7 +781,17 @@ function primera(tareas) { // lanza todas a la vez; devuelve la primera que dé 
   });
 }
 const sinFrias = provs => { const v = provs.filter(p => !estaFria(p.nom)); return v.length ? v : provs; }; // si todas están frías, se prueban igual
-const jsonDe = t => { const a = t.indexOf("{"), b = t.lastIndexOf("}"); if (a < 0 || b < a) return null; try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; } };
+const jsonDe = t => { // 1/11 (B4): con reparación barata (comas finales, JSON cortado por el tope de palabras: cierra comillas/corchetes)
+  const a = t.indexOf("{"); if (a < 0) return null;
+  const b = t.lastIndexOf("}"); if (b > a) { try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { } }
+  let x = t.slice(a, b > a ? b + 1 : t.length).replace(/,\s*([}\]])/g, "$1");
+  try { return JSON.parse(x); } catch (e) { }
+  const st = []; let ins = false, esc = false;
+  for (const ch of x) { if (ins) { if (esc) esc = false; else if (ch === "\\") esc = true; else if (ch === '"') ins = false; continue; } if (ch === '"') ins = true; else if (ch === "{" || ch === "[") st.push(ch); else if (ch === "}" || ch === "]") st.pop(); }
+  if (ins) x += '"'; x = x.replace(/[,:\s]+$/, "").replace(/,\s*"[^"]*"$/, "");
+  for (let i = st.length - 1; i >= 0; i--) x += st[i] === "{" ? "}" : "]";
+  x = x.replace(/,\s*([}\]])/g, "$1"); try { return JSON.parse(x); } catch (e) { return null; }
+};
 async function chat(prompt, max = 900, comoJson = false) {
   const provs = [];
   if (db.cfg.nvidia) provs.push({ nom: "NVIDIA", url: "https://integrate.api.nvidia.com/v1/chat/completions", key: db.cfg.nvidia, mods: MOD_NV });
@@ -1147,10 +1161,10 @@ async function analizar(card, textoManual) {
   if (hayIA() && ctx.trim() && !soloGancho) {
     paso(card, "Resumiendo…");
     ai = await chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
-{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"1 o 2 frases en español claro (MÁXIMO 220 caracteres): QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null","subtipo":"solo si categoria es Inteligencia artificial y el contenido lo deja claro: UNO de ${SUBTIPOS.join(" | ")}; si no está claro, cadena vacía","sirve":"UNA línea llana (MÁXIMO 110 caracteres) que empiece por un verbo: para qué le sirve a quien la guarda, SOLO según el contenido; si no se sabe, cadena vacía","sirve_cita":"cita corta TEXTUAL (MÁXIMO 120 caracteres, en el IDIOMA ORIGINAL de la fuente, sin traducir) copiada letra por letra del contenido, que respalde «sirve»; si no hay, cadena vacía","sirve_fuente":"de dónde copiaste la cita: pie | voz | fotogramas | repo","accion":"Instalar (si el contenido da forma de instalarlo) | Probar (si se puede probar sin instalar) | Solo guardar (si no hay base clara)"}
+{"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"1 o 2 frases en español claro (MÁXIMO 220 caracteres): QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null","subtipo":"solo si categoria es Inteligencia artificial y el contenido lo deja claro: UNO de ${SUBTIPOS.join(" | ")}; si no está claro, cadena vacía","sirve":"UNA línea llana (MÁXIMO 110 caracteres) que empiece por un verbo: para qué le sirve a quien la guarda, SOLO según el contenido; si no se sabe, cadena vacía","sirve_cita":"cita corta TEXTUAL (MÁXIMO 120 caracteres, en el IDIOMA ORIGINAL de la fuente, sin traducir) copiada letra por letra del contenido, que respalde «sirve»; si no hay, cadena vacía","sirve_fuente":"de dónde copiaste la cita: pie | voz | fotogramas | repo","accion":"Instalar (si el contenido da forma de instalarlo) | Probar (si se puede probar sin instalar) | Solo guardar (si no hay base clara)","explicacion":"INFORME para Finn (usa Claude Code en Windows; quiere saber si merece la pena instalarlo o probarlo): 4 a 6 frases en español llano, como a un amigo: qué es, qué problema resuelve, un ejemplo concreto de uso y para quién es. Si no hay información útil, cadena vacía","puntos":["TODO lo que el post enumera (herramientas, pasos, ideas), hasta 8; cada uno: nombre + una frase sencilla"],"skills":["si propone skills/plugins/comandos para Claude: nombre — qué hace (hasta 5); si no, []"],"como":["pasos para empezar a usarlo, de principiante, hasta 6, en orden; con el comando EXACTO solo si aparece en el contenido; si no lo dice, []"],"limites":"requisitos, coste o límites si se mencionan; si no, cadena vacía","pros":["2 a 4 ventajas concretas que salen del contenido"],"contras":["0 a 3 pegas, límites o requisitos que salen del contenido"],"dificultad":"Fácil | Media | Difícil | vacío si no se sabe","tipo":"UNO de: Skill | Plugin | Servidor MCP | App | Web | Repositorio | Curso | Idea | Otro","para_quien":"una frase: a quién le sirve","traduccion":"si el texto original del post está en otro idioma, tradúcelo entero al español claro; si ya está en español, cadena vacía"}
 Reglas (0) «sirve» y «accion» salen SOLO del pie del post, de la VOZ del vídeo, del texto leído en imágenes/fotogramas o del README (cualquiera de esas fuentes vale; no hace falta que el pie lo diga); sin base en ninguna: "sirve":"" y "accion":"Solo guardar". (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) Si no hay información útil: "resumen":"" y "categoria":"Otros". (6) La voz transcrita confunde nombres: «Cloud Code» es Claude Code, «Cloud» junto a skills/plugins/MCP es Claude, «MSP» es MCP. Escribe el nombre correcto.
 CONTENIDO:
-${ctx}`);
+${ctx}`, 2400); // 1/11 (B4): UNA sola llamada con ficha + informe completo (antes dos de ~14 s seguidas)
     if (ai && !repos.length) { // propuestas de la IA: solo valen si GitHub confirma que existen
       for (const p of (ai.proyectos || []).slice(0, 2)) {
         let g = p.repo && /^[\w.-]+\/[\w.-]+$/.test(p.repo) ? await ghRepo(p.repo) : null;
@@ -1267,9 +1281,9 @@ async function investigar(card, repos, ai, texto) {
   if (hb.size < 2 || (hb.size === 1 && r0)) card.faltanLinks = 1; // 31/10: se buscan al acabar el lote, en segundo plano (antes frenaban cada link hasta 20 s)
   if (!hayIA()) return;
   const material = `${texto.slice(0, 3200)}\n${r0 ? md : ""}\n${web ? web.titulo + " " + web.desc + " " + web.texto : ""}`;
-  paso(card, "Escribiendo el informe…");
+  if (!ai) paso(card, "Escribiendo el informe…");
   const orig = texto.replace(/\[(VOZ|TEXTO|LO QUE)[^\]]*\]/g, "\n").trim().slice(0, 2500);
-  const ex = await chatJson(`Eres un divulgador técnico que escribe para Finn: usa Claude Code en Windows y quiere saber si algo merece la pena instalarlo o probarlo. Un post de Instagram habla de un proyecto, herramienta, skill o idea. Explícaselo para que lo entienda SIN ver el vídeo, en español llano, como a un amigo, sin jerga innecesaria (si usas un término técnico, explícalo en pocas palabras). Usa SOLO el material de abajo; si algo no está, déjalo vacío. Si parte del material no tiene relación con el post, IGNÓRALA. La voz transcrita confunde nombres: «Cloud Code» es Claude Code y «MSP» es MCP. Responde SOLO JSON:
+  const ex = ai ? ai : await chatJson(`Eres un divulgador técnico que escribe para Finn: usa Claude Code en Windows y quiere saber si algo merece la pena instalarlo o probarlo. Un post de Instagram habla de un proyecto, herramienta, skill o idea. Explícaselo para que lo entienda SIN ver el vídeo, en español llano, como a un amigo, sin jerga innecesaria (si usas un término técnico, explícalo en pocas palabras). Usa SOLO el material de abajo; si algo no está, déjalo vacío. Si parte del material no tiene relación con el post, IGNÓRALA. La voz transcrita confunde nombres: «Cloud Code» es Claude Code y «MSP» es MCP. Responde SOLO JSON:
 {"resumen":"1 o 2 frases (MÁXIMO 220 caracteres): qué es y para qué sirve","explicacion":"4 a 6 frases: qué es, qué problema resuelve, un ejemplo concreto de uso y para quién es","puntos":["TODO lo que el post enumera (herramientas, pasos, ideas), hasta 8; cada uno: nombre + una frase sencilla"],"skills":["si propone skills/plugins/comandos para Claude: nombre — qué hace (hasta 5); si no, []"],"como":["pasos para empezar a usarlo, de principiante, hasta 6, en orden; con el comando EXACTO solo si aparece en el material; si el material no lo dice, []"],"limites":"requisitos, coste o límites si se mencionan; si no, \"\"","pros":["2 a 4 ventajas concretas que salen del material"],"contras":["0 a 3 pegas, límites o requisitos que salen del material"],"dificultad":"Fácil | Media | Difícil | vacío si no se sabe","tipo":"UNO de: Skill | Plugin | Servidor MCP | App | Web | Repositorio | Curso | Idea | Otro","para_quien":"una frase: a quién le sirve","traduccion":"si el TEXTO ORIGINAL está en otro idioma, tradúcelo entero al español claro; si ya está en español o no hay, cadena vacía"}
 POST (texto, voz del vídeo, texto de las imágenes y lo que se ve en el vídeo): ${texto.slice(0, 3200)}
 ${r0 ? "README de " + r0.full + ": " + md.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 3500) : ""}
@@ -1532,6 +1546,7 @@ function reconciliaPendientes() { // D7: una ficha «pendiente» sin trabajo rea
   db.cards.forEach(c => { if (c.estado === "pendiente" && !(c.cola && Date.now() - c.cola < 90000)) { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = c.motivo || "Se quedó a medias (se cerró la app o se cortó la conexión). Pulsa «Reintentar»."; n++; } });
   if (n) guardar();
 }
+let PAUSA_IG_MS = 3000; // pausa mínima entre dos posts de Instagram
 let pausado = false, actual = null, sesionDesde = (db.bn || 0) + 1;
 function etqOrdenar() { $("#bOrdenar").textContent = corriendo ? "Añadir también estos" : "Leer y explicar"; }
 function pintaBloques() {
@@ -1557,7 +1572,7 @@ async function correr() {
     if (c.estado === "pendiente") { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = c.motivo || "No terminó de procesarse. Prueba «Reintentar» o ábrelo con el botón"; } // nunca se queda «En cola» tras su turno
     if (c.estado === "ok") await guardaMinis(c); else fotosTmp.delete(c.id);
     actual = null; guardar(); respaldoYa(); pintar(); pintaBloques(); hechos++;
-    if (c.tipo === "Instagram") await dormir(700);
+    if (c.tipo === "Instagram" && db.cards.some(x => x.estado === "pendiente")) await dormir((c.estado === "ok" ? PAUSA_IG_MS : PAUSA_IG_MS * 2.5) + Math.random() * 1200); // 1/11 (B4): pausa entre posts seguidos para no disparar el freno de Instagram (más larga si el último no se pudo leer)
   }
   { const re = db.cards.filter(c => c.estado === "revisar" && !c.autoReint && c.bloque >= sesionDesde && RE_REINT.test(c.motivo || "")); // fallos de red: se reintentan solos UNA vez
     if (re.length) { re.forEach(c => Object.assign(c, { estado: "pendiente", autoReint: 1, motivo: "", cola: Date.now() })); guardar(); corriendo = false; aviso(`Reintento solo ${re.length} que fallaron por la conexión…`); return correr(); } }

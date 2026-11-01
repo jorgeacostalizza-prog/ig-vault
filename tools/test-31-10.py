@@ -15,9 +15,10 @@ def http(m,url,hd,body):
         if isinstance(pr,list): return {"status":200,"body":json.dumps({"choices":[{"message":{"content":""}}]})}
         if "Eres un extractor riguroso" in pr:
             out={"titulo":"claude-mem","resumen":"claude-mem es una skill gratis para Claude Code que guarda memoria entre sesiones y ahorra tokens.","categoria":"Inteligencia artificial","proyectos":[],"tags":["claude-code"],"web":None,"sirve":"Guardar memoria entre sesiones de Claude Code","sirve_cita":"guarda memoria entre sesiones","sirve_fuente":"pie","accion":"Probar"}
-        else:
-            assert "Finn" in pr
-            out={"resumen":"claude-mem guarda memoria entre sesiones de Claude Code y ahorra tokens.","explicacion":"claude-mem es una skill gratis para Claude Code. Guarda memoria entre sesiones para que no tengas que explicar tu proyecto cada vez. Así ahorra tokens. Sirve a quien usa Claude Code a diario.","puntos":["claude-mem: guarda memoria entre sesiones"],"skills":["claude-mem — memoria entre sesiones"],"como":[],"limites":"","pros":["Ahorra tokens al guardar memoria entre sesiones","Es gratis"],"contras":[],"dificultad":"Fácil","tipo":"Skill","para_quien":"Quien usa Claude Code a diario","traduccion":""}
+        inf={"resumen":"claude-mem guarda memoria entre sesiones de Claude Code y ahorra tokens.","explicacion":"claude-mem es una skill gratis para Claude Code. Guarda memoria entre sesiones para que no tengas que explicar tu proyecto cada vez. Así ahorra tokens. Sirve a quien usa Claude Code a diario.","puntos":["claude-mem: guarda memoria entre sesiones"],"skills":["claude-mem — memoria entre sesiones"],"como":[],"limites":"","pros":["Ahorra tokens al guardar memoria entre sesiones","Es gratis"],"contras":[],"dificultad":"Fácil","tipo":"Skill","para_quien":"Quien usa Claude Code a diario","traduccion":""}
+        if "Eres un extractor riguroso" in pr:  # B4: llamada unica = ficha + informe
+            assert "Finn" in pr; out.update({k:v for k,v in inf.items() if k!="resumen"})
+        else: out=inf
         return {"status":200,"body":json.dumps({"choices":[{"message":{"content":json.dumps(out)}}]})}
     return {"status":404,"url":url,"body":""}
 with sync_playwright() as p:
@@ -47,7 +48,7 @@ with sync_playwright() as p:
     ok("aviso de posts que no se pudieron leer, con Reintentar", pg.locator("#iniEstado .fall [data-ie=reint]").count()==1)
     pg.screenshot(path="C:/Users/PC/DeskBox/Apps/CODE/IG Info extractor Code/ig-vault-apk/capturas/n4-inicio-%s.png"%nom)
     pg.click("#iniEstado [data-ie=reint]"); pg.wait_for_timeout(300)
-    ok("Reintentar pone a leer las fallidas y lo dice", pg.evaluate("corriendo || db.cards.find(c=>c.id==='f1').estado!=='revisar'"))
+    ok("Reintentar pone a leer las fallidas y lo dice", pg.evaluate("corriendo || !db.cards.find(c=>c.id==='f1') || db.cards.find(c=>c.id==='f1').estado!=='revisar'"))
     pg.wait_for_function("!corriendo", timeout=60000)
     ok("fotos en el PC por el programa (no caducan)", pg.evaluate("SRV=true, srcFoto('https://scontent.cdninstagram.com/e.jpg')").startswith("/api/foto?u="))
     pg.evaluate("SRV=false")
