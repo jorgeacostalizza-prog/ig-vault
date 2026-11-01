@@ -636,6 +636,7 @@ srvListo.then(() => { if (!SRV) return; setInterval(latido, window.IGX_LATIDO ||
 const postSrv = async (ruta, o) => { try { return await (await fetch(ruta, { method: "POST", body: JSON.stringify(o) })).json(); } catch (e) { return { status: 0, body: "", error: String(e) }; } };
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const dormir = ms => new Promise(r => setTimeout(r, ms));
+const TM = (n, p) => { const t0 = performance.now(); return Promise.resolve(p).finally(() => { (window.TLOG ||= []).push([n, Math.round(performance.now() - t0)]); }); }; // 1/11 (B6): tiempo real de cada función (window.TLOG)
 const MEDIA_TOPE_MS = 18000, TARDE = Symbol("tarde"); // 1/11: tope de espera de voz+imágenes+fotogramas por post
 
 // ============ puente nativo (en navegador de PC se usa fetch, solo para pruebas) ============
@@ -1115,7 +1116,7 @@ async function analizar(card, textoManual) {
   const src = { pie: "", voz: "", vis: "" }; // M1: de dónde sale cada cosa (pie del post / voz del vídeo / texto leído en imágenes y fotogramas)
   if (!texto) {
     paso(card, "Leyendo el post…");
-    const l = card.tipo === "Instagram" ? await leerIG(card.url) : card.tipo === "YouTube" ? await leerYT(card.url) : card.tipo === "TikTok" ? await leerTikTok(card.url) : card.tipo === "X" ? await leerX(card.url) : card.tipo === "GitHub" ? { texto: "" } : await leerWeb(card.url);
+    const l = card.tipo === "Instagram" ? await TM("lectura", leerIG(card.url)) : card.tipo === "YouTube" ? await leerYT(card.url) : card.tipo === "TikTok" ? await leerTikTok(card.url) : card.tipo === "X" ? await leerX(card.url) : card.tipo === "GitHub" ? { texto: "" } : await leerWeb(card.url);
     if (l.error) { Object.assign(card, { estado: "revisar", motivo: l.error, categoria: "Para revisar" }); if (card.tipo !== "GitHub") return card; }
     texto = l.texto || ""; titulo = l.titulo || ""; if (l.fecha) card.fechaPost = l.fecha;
     if (card.tipo === "Instagram") texto = quitaGancho(texto);
@@ -1125,10 +1126,10 @@ async function analizar(card, textoManual) {
     // 1/11: tope duro de MEDIA_TOPE_MS para voz+imágenes+fotogramas: la ficha no espera más. Lo que llegue tarde se añade luego a la ficha (voz) o se ignora (visión).
     const pie0 = texto.replace(/^Comentarios:.*$/mi, "").trim();
     const omiteVoz = pie0.length >= 700; // un pie largo ya lo explica todo: la voz solo añadiría espera
-    const pVoz = l.video && !omiteVoz ? leerVoz(l.video) : null, pImg = l.imgs && l.imgs.length ? leerImgs(l.imgs) : null;
-    const pFr = l.video ? leerFrames(l.video).then(f => { fotosTmp.set(card.id, f); return f.length ? leerImgs(f, PROMPT_VIDEO, 2) : ""; }) : null;
+    const pVoz = l.video && !omiteVoz ? TM("voz", leerVoz(l.video)) : null, pImg = l.imgs && l.imgs.length ? TM("imgs", leerImgs(l.imgs)) : null;
+    const pFr = l.video ? TM("fotogramas", leerFrames(l.video).then(f => { fotosTmp.set(card.id, f); return f.length ? leerImgs(f, PROMPT_VIDEO, 2) : ""; })) : null;
     const conTope = p => p ? Promise.race([p, dormir(MEDIA_TOPE_MS).then(() => TARDE)]) : null;
-    let [vz, vi, fr] = await Promise.all([conTope(pVoz), conTope(pImg), conTope(pFr)]);
+    let [vz, vi, fr] = await TM("medios", Promise.all([conTope(pVoz), conTope(pImg), conTope(pFr)]));
     const vozTarde = vz === TARDE; if (vz === TARDE) vz = ""; if (vi === TARDE) vi = ""; if (fr === TARDE) fr = "";
     if (vozTarde) pVoz.then(v => { if (!v) { card.voz = "no"; return; } card.voz = "sí"; card.vio = { ...(card.vio || {}), voz: true }; card.texto = (card.texto || "") + String.fromCharCode(10) + "[VOZ DEL VÍDEO, transcrita]" + String.fromCharCode(10) + corrige(v).slice(0, 1300); guardar(); }).catch(() => { });
     if (vz) vz = corrige(vz); // la voz transcribe mal los nombres («Cloud Code» = Claude Code)
@@ -1156,15 +1157,15 @@ async function analizar(card, textoManual) {
   if (!src.pie && !src.voz && !src.vis) src.pie = texto;
   let ctx = texto.slice(0, 2600);
   if (src.voz || src.vis) ctx = (src.pie.slice(0, 900) + (src.voz ? "\n[VOZ DEL VÍDEO, transcrita]\n" + src.voz.slice(0, 1100) : "") + (src.vis ? "\n[TEXTO LEÍDO EN IMÁGENES/FOTOGRAMAS]\n" + src.vis.slice(0, 900) : "")).slice(0, 3000); // M1: la voz y los fotogramas siempre entran en lo que ve la IA, aunque el pie sea largo
-  for (const r of repos.slice(0, 2)) { const rd = await ghReadme(r.full); r.readme = rd; ctx += `\n[REPO VERIFICADO ${r.full} — ${r.desc} — README: ${rd.slice(0, 900)}]`; }
+  for (const r of repos.slice(0, 2)) { const rd = await TM("readme", ghReadme(r.full)); r.readme = rd; ctx += `\n[REPO VERIFICADO ${r.full} — ${r.desc} — README: ${rd.slice(0, 900)}]`; }
   let ai = null;
   if (hayIA() && ctx.trim() && !soloGancho) {
     paso(card, "Resumiendo…");
-    ai = await chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
+    ai = await TM("ia", chatJson(`Eres un extractor riguroso. Debajo está TODO lo que se pudo leer de un link de ${card.tipo} (texto del post, voz del vídeo transcrita, texto leído en las imágenes y, si hay, repo verificado). Responde SOLO JSON:
 {"titulo":"nombre corto del proyecto o tema (máx. 8 palabras)","resumen":"1 o 2 frases en español claro (MÁXIMO 220 caracteres): QUÉ es y PARA QUÉ sirve, usando SOLO lo que dice el contenido","categoria":"UNA de: ${CATS.filter(x => x !== "Otros").join(" | ")} | Otros","proyectos":[{"nombre":"...","repo":"owner/name o null"}],"tags":["3 a 5 etiquetas: una palabra (o 2 con guion), minúscula, sin acentos, sin #, singular. Usa ia (no ai), claude-code, open-source. Reutiliza ESTAS ya existentes si encajan: ${tagsVocab().replace(/#/g, "") || "(ninguna aún)"}"],"web":"web oficial SOLO si aparece en el contenido o es una herramienta muy conocida citada por nombre; si no, null","subtipo":"solo si categoria es Inteligencia artificial y el contenido lo deja claro: UNO de ${SUBTIPOS.join(" | ")}; si no está claro, cadena vacía","sirve":"UNA línea llana (MÁXIMO 110 caracteres) que empiece por un verbo: para qué le sirve a quien la guarda, SOLO según el contenido; si no se sabe, cadena vacía","sirve_cita":"cita corta TEXTUAL (MÁXIMO 120 caracteres, en el IDIOMA ORIGINAL de la fuente, sin traducir) copiada letra por letra del contenido, que respalde «sirve»; si no hay, cadena vacía","sirve_fuente":"de dónde copiaste la cita: pie | voz | fotogramas | repo","accion":"Instalar (si el contenido da forma de instalarlo) | Probar (si se puede probar sin instalar) | Solo guardar (si no hay base clara)","explicacion":"INFORME para Finn (usa Claude Code en Windows; quiere saber si merece la pena instalarlo o probarlo): 4 a 6 frases en español llano, como a un amigo: qué es, qué problema resuelve, un ejemplo concreto de uso y para quién es. Si no hay información útil, cadena vacía","puntos":["TODO lo que el post enumera (herramientas, pasos, ideas), hasta 8; cada uno: nombre + una frase sencilla"],"skills":["si propone skills/plugins/comandos para Claude: nombre — qué hace (hasta 5); si no, []"],"como":["pasos para empezar a usarlo, de principiante, hasta 6, en orden; con el comando EXACTO solo si aparece en el contenido; si no lo dice, []"],"limites":"requisitos, coste o límites si se mencionan; si no, cadena vacía","pros":["2 a 4 ventajas concretas que salen del contenido"],"contras":["0 a 3 pegas, límites o requisitos que salen del contenido"],"dificultad":"Fácil | Media | Difícil | vacío si no se sabe","tipo":"UNO de: Skill | Plugin | Servidor MCP | App | Web | Repositorio | Curso | Idea | Otro","para_quien":"una frase: a quién le sirve","traduccion":"si el texto original del post está en otro idioma, tradúcelo entero al español claro; si ya está en español, cadena vacía"}
 Reglas (0) «sirve» y «accion» salen SOLO del pie del post, de la VOZ del vídeo, del texto leído en imágenes/fotogramas o del README (cualquiera de esas fuentes vale; no hace falta que el pie lo diga); sin base en ninguna: "sirve":"" y "accion":"Solo guardar". (1) No inventes NADA: si el contenido no lo dice, no lo pongas. (2) Si el contenido habla de varios temas, el título es el tema principal del post. (3) Muchos posts/reels acaban con un gancho tipo «comenta X y te mando…», «sígueme», «link en bio»: IGNÓRALO. (4) Categoría: Repositorios = código en GitHub; Inteligencia artificial = modelos, agentes, prompts, skills; Programas y apps = software instalable; Webs = servicios online; Recursos = listas, plantillas, packs; Tutoriales = explica cómo hacer algo; Cursos = formación completa. (5) Si no hay información útil: "resumen":"" y "categoria":"Otros". (6) La voz transcrita confunde nombres: «Cloud Code» es Claude Code, «Cloud» junto a skills/plugins/MCP es Claude, «MSP» es MCP. Escribe el nombre correcto.
 CONTENIDO:
-${ctx}`, 2400); // 1/11 (B4): UNA sola llamada con ficha + informe completo (antes dos de ~14 s seguidas)
+${ctx}`, 2400)); // 1/11 (B4): UNA sola llamada con ficha + informe completo (antes dos de ~14 s seguidas)
     if (ai && !repos.length) { // propuestas de la IA: solo valen si GitHub confirma que existen
       for (const p of (ai.proyectos || []).slice(0, 2)) {
         let g = p.repo && /^[\w.-]+\/[\w.-]+$/.test(p.repo) ? await ghRepo(p.repo) : null;
@@ -1204,7 +1205,7 @@ ${ctx}`, 2400); // 1/11 (B4): UNA sola llamada con ficha + informe completo (ant
   card.subtipo = (ai && SUBTIPOS.find(s => sinAcentos(s) === sinAcentos(String(ai.subtipo || "").trim()))) || "";
   if (ai && Array.isArray(ai.tags)) card.tags = normalizarTags([...ai.tags, ...card.tags]);
   card.fuente = ai ? (r0 ? "verificado" : "resumen IA") : (r0 ? "verificado" : "deducido");
-  try { await investigar(card, repos, ai, texto); } catch (e) { card.detalleTecnico = "investigar: " + String(e).slice(0, 120); }
+  try { await TM("investigar", investigar(card, repos, ai, texto)); } catch (e) { card.detalleTecnico = "investigar: " + String(e).slice(0, 120); }
   card.estado = "ok"; if (!/descart/.test(card.motivo || "")) card.motivo = "";
   { const mc = card.tipo === "Foto" || card.tipo === "GitHub" ? "" : coherencia(card.titulo, card.resumen, { pie: src.pie, voz: src.voz, vis: src.vis, repo: repos.map(r => r.desc).join(" ") });
     if (mc) { card.resumenDudoso = card.resumen; card.estado = "revisar"; card.categoria = "Para revisar"; card.motivo = mc + ". Pulsa «Reintentar» o pega el texto del post a mano."; } }
@@ -1533,6 +1534,7 @@ const TIEMPO_ATASCADO_MS = 180000; // un link que lleva 3 minutos sin cambiar de
 let soltar = null, ultimoPaso = 0, atascado = false;
 const urlCorta = u => String(u || "").replace(/^https?:\/\/(www\.)?/, "").slice(0, 50);
 function paso(card, t) { // dice en qué va el link que se está procesando
+  (window.TLOG ||= []).push(["paso: " + t, Math.round(performance.now())]);
   if (actual && card !== actual) return; // un intento abandonado no pisa al nuevo
   ultimoPaso = Date.now(); if (card) card.cola = ultimoPaso; if (atascado) { atascado = false; pintaBloques(); }
   $("#progS").textContent = t + (card ? " · " + urlCorta(card.url) : "");
@@ -1570,7 +1572,7 @@ async function correr() {
     try { await Promise.race([analizar(c), suelto.then(() => { cortado = true; })]); } catch (e) { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = "No pude procesar este link. Prueba «Reintentar»"; c.detalleTecnico = String(e).slice(0, 160); }
     if (cortado) { fotosTmp.delete(c.id); const i = db.cards.indexOf(c); if (i >= 0 && c.reiniciar) db.cards[i] = { ...copia, estado: "pendiente" }; actual = null; guardar(); pintar(); pintaBloques(); continue; } // reiniciado o quitado: lo que el intento viejo siga haciendo ya no cuenta
     if (c.estado === "pendiente") { c.estado = "revisar"; c.categoria = "Para revisar"; c.motivo = c.motivo || "No terminó de procesarse. Prueba «Reintentar» o ábrelo con el botón"; } // nunca se queda «En cola» tras su turno
-    if (c.estado === "ok") await guardaMinis(c); else fotosTmp.delete(c.id);
+    if (c.estado === "ok") { guardaFotosLocal(c); await guardaMinis(c); } else fotosTmp.delete(c.id); // 1/11 (B6): la foto se guarda en el PC al crear la ficha
     actual = null; guardar(); respaldoYa(); pintar(); pintaBloques(); hechos++;
     if (c.tipo === "Instagram" && db.cards.some(x => x.estado === "pendiente")) await dormir((c.estado === "ok" ? PAUSA_IG_MS : PAUSA_IG_MS * 2.5) + Math.random() * 1200); // 1/11 (B4): pausa entre posts seguidos para no disparar el freno de Instagram (más larga si el último no se pudo leer)
   }
@@ -2257,7 +2259,7 @@ function fotosDe(c, usoImg) {
   const propias = o.filter(u => !rep(u)); if (propias.length) o = propias; // una foto que sale en varias fichas solo se usa si no hay otra
   return o.slice(0, 4);
 }
-function galeriaHtml(c, cls = "") { const f = fotosDe(c, usoImgs()); return `<div class="gl ${cls}" data-gid="${esc(c.id)}"${f.length ? "" : ' style="display:none"'}>${f.map((u, i) => `<img src="${esc(srcFoto(u))}" data-o="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`; }
+function galeriaHtml(c, cls = "") { const f = fotosDe(c, usoImgs()); return `<div class="gl ${cls}" data-gid="${esc(c.id)}"${f.length ? "" : ' style="display:none"'}>${f.length ? portadaHtml(c) : ""}${f.map((u, i) => `<img src="${esc(srcFoto(u))}" data-o="${esc(u)}" referrerpolicy="no-referrer" loading="lazy" alt="" onerror="fotoMala(this)">`).join("")}</div><div class="gn"></div>`; }
 function cuentaGal(g) { const n = [...g.querySelectorAll("img")].filter(im => !(im.complete && im.naturalWidth === 0 && im.getAttribute("src"))).length, po = g.querySelector(".port"); g.style.display = n || po ? "" : "none"; /* 22/10: el respaldo (.port) nunca se quita: queda detrás de las fotos */ const gn = g.nextElementSibling; if (gn && gn.classList.contains("gn")) gn.textContent = n > 1 ? `${Math.min(n, Math.round(g.scrollLeft / Math.max(1, g.clientWidth)) + 1)}/${n}` : ""; }
 document.addEventListener("error", e => { const im = e.target; if (im && im.tagName === "IMG" && im.closest(".gl[data-gid]")) fotoMala(im); }, true);
 // 31/10: en el PC las fotos pasan por el programa, que las guarda (no caducan). Si falla, se prueba la original y luego se quita.
@@ -2286,6 +2288,9 @@ async function bajarFoto(u) { // PC: la baja el programa (sin bloqueo del CDN); 
   return u;
 }
 async function miniDe(u) { const s = await bajarFoto(u); return s ? reducir(s) : ""; }
+async function guardaFotosLocal(c) { // 1/11 (B6): en el PC, /api/foto guarda la foto en disco al momento (las de Instagram caducan); la ficha la lee de esa copia (srcFoto)
+  try { await srvListo; if (!SRV) return; await Promise.all(fotosDe(c, usoImgs()).filter(u => /^https?:\/\//i.test(u)).map(u => fetch(srcFoto(u)).then(r => r.arrayBuffer()).catch(() => { }))); } catch (e) { }
+}
 async function guardaMinis(c) {
   try {
     const fr = fotosTmp.get(c.id) || [], partes = partesFrames || []; fotosTmp.delete(c.id); partesFrames = [];
