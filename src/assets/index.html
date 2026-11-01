@@ -688,7 +688,7 @@ function migraUso() {
   try { if (!localStorage.getItem("igv-antes-H2")) localStorage.setItem("igv-antes-H2", JSON.stringify({ cards: db.cards, sel: db.sel || {} })); } catch (e) { }
   sin.forEach(c => { c.estadoUso = "nuevo"; }); return sin.length;
 }
-const respaldoYa = () => { if (!SRV) return; clearTimeout(_rsp); try { fetch("/api/respaldo", { method: "POST", body: JSON.stringify({ cards: db.cards, sel: db.sel || [] }), keepalive: true }); } catch (e) { } }; // al acabar un link o cerrar: la copia no se queda atrás
+const respaldoYa = () => { if (!SRV) return; clearTimeout(_rsp); try { const b = JSON.stringify({ cards: db.cards, sel: db.sel || [] }); fetch("/api/respaldo", { method: "POST", body: b, keepalive: b.length < 60000 }).catch(() => { }); } catch (e) { } }; // al acabar un link o cerrar: la copia no se queda atrás
 addEventListener("pagehide", () => respaldoYa());
 let _rsp; // PC: copia de las fichas fuera del navegador (si el perfil se vacía, se restauran solas)
 let otraPestana = false; try { addEventListener("storage", e => { if (e.key === "igv" && !otraPestana) { otraPestana = true; const a = document.createElement("div"); a.setAttribute("role", "alert"); a.style.cssText = "position:fixed;inset:auto 12px 76px 12px;z-index:99;background:var(--bad,#b3261e);color:#fff;padding:12px;border-radius:12px;text-align:center"; a.innerHTML = "Hay otra pestaña de la app abierta y ha guardado cambios. <button style=\"margin-left:8px\" onclick=\"location.reload()\">Recargar</button>"; document.body.appendChild(a); } }); } catch (e) { }
@@ -1500,7 +1500,7 @@ function encolar(links, bloque, lote = bloque) {
   for (const u of links) {
     const ya = yaGuardada(u);
     if (ya) { repes++; if (ya.lote) dondeRepes.add(ya.lote); continue; }
-    db.cards.push({ bloque, lote, añadida: Date.now(), id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", cola: Date.now(), grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
+    db.cards.push({ bloque, lote, añadida: Date.now(), publicada: pubIG(u) || undefined, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url: u, tipo: tipoDe(u), estado: "pendiente", cola: Date.now(), grupo: grupoActual(), titulo: u, resumen: "", categoria: "Pendiente", repos: [], tags: [], fuente: "", motivo: "" });
     nuevos++;
   }
   if (nuevos) { db.lotes = db.lotes || {}; db.lotes[lote] ||= { t: Date.now(), dev: DISPO }; }
@@ -2611,7 +2611,16 @@ async function activarSync() {
 // ---- cuándo se añadió cada ficha (solo fechas reales; las fichas viejas sin fecha lo dicen) ----
 function añadida(c) { if (c.añadida) return c.añadida; const L = c.lote && (db.lotes || {})[c.lote]; if (L && L.t) return L.t; return tsId(c.id) || 0; }
 const DIA = 864e5, hoy0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); };
-function etqAñadida(c) { const t = añadida(c); return t ? "Añadido " + fechaCorta(t, true) : "Sin fecha"; }
+// B5: fecha real de publicación (ms). Campo c.publicada; si falta y es de Instagram, sale del shortcode (id de medio >> 23 + 1314220021300).
+const B64IG = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+function pubIG(u) {
+  const m = String(u || "").match(RE_IG); if (!m) return 0;
+  try { let id = 0n; for (const ch of m[2].slice(0, 11)) { const i = B64IG.indexOf(ch); if (i < 0) return 0; id = id * 64n + BigInt(i); }
+    const t = Number(id >> 23n) + 1314220021300; return t > 1.3e12 && t <= Date.now() + DIA ? t : 0; } catch (e) { return 0; }
+}
+const publicada = c => c.publicada || pubIG(c.url) || 0;
+const fechaVer = c => publicada(c) || añadida(c);
+function etqAñadida(c) { const p = publicada(c); if (p) return "Publicado " + fechaCorta(p, false); const t = añadida(c); return t ? "Añadido " + fechaCorta(t, true) : "Sin fecha"; }
 const FECHAS = [["hoy", "Hoy", t => t >= hoy0()], ["ayer", "Ayer", t => t >= hoy0() - DIA && t < hoy0()], ["7d", "Últimos 7 días", t => t >= hoy0() - 6 * DIA], ["30d", "Último mes", t => t >= hoy0() - 29 * DIA], ["viejo", "Hace más de un mes", t => t && t < hoy0() - 29 * DIA], ["sin", "Sin fecha", t => !t]];
 // ---- navegación: «atrás» vuelve a la pantalla anterior; desde Inicio pide pulsar otra vez para salir ----
 const TABS = ["feed", "explorar", "lista", "pegar", "ajustes"];
@@ -2683,7 +2692,7 @@ $("#dOrd").addEventListener("click", e => {
 const textoBusca = c => sinAcentos([c.titulo, c.sirve, c.resumen, c.detalle, (c.puntos || []).join(" "), (c.tags || []).join(" "), ...(c.repos || []).map(r => r.full), (c.links || []).map(l => l.u).join(" "), c.notas, c.url].join(" "));
 function pasaFil(c, sin) { // sin = el grupo de filtros que no se aplica (para contar cuántos saldrían en cada opción)
   if (c.estado === "pendiente") return false;
-  const t = añadida(c);
+  const t = añadida(c) || publicada(c);
   if (sin !== "fecha") { if (FIL.fecha) { const f = FECHAS.find(x => x[0] === FIL.fecha); if (f && !f[2](t)) return false; }
     if (FIL.desde && !(t && t >= new Date(FIL.desde + "T00:00").getTime())) return false; if (FIL.hasta && !(t && t < new Date(FIL.hasta + "T00:00").getTime() + DIA)) return false; }
   if (sin !== "lote" && FIL.lote !== "" && String(loteDe(c)) !== String(FIL.lote)) return false;
@@ -2696,7 +2705,7 @@ function pasaFil(c, sin) { // sin = el grupo de filtros que no se aplica (para c
 }
 function resultados() {
   const A = aprendizaje(), cs = db.cards.filter(c => pasaFil(c)), sc = new Map(cs.map(c => [c, paraTi(c, A).s])), st = c => Math.max(0, ...(c.repos || []).map(r => Number(r.stars) || 0));
-  const o = FIL.orden; cs.sort(o === "viejo" ? (a, b) => (añadida(a) || 9e15) - (añadida(b) || 9e15) : o === "ti" ? (a, b) => sc.get(b) - sc.get(a) : o === "az" ? (a, b) => tituloVis(a).localeCompare(tituloVis(b), "es") : o === "estrellas" ? (a, b) => st(b) - st(a) : (a, b) => añadida(b) - añadida(a) || (b.hecha || 0) - (a.hecha || 0));
+  const o = FIL.orden; cs.sort(o === "viejo" ? (a, b) => (fechaVer(a) || 9e15) - (fechaVer(b) || 9e15) : o === "ti" ? (a, b) => sc.get(b) - sc.get(a) : o === "az" ? (a, b) => tituloVis(a).localeCompare(tituloVis(b), "es") : o === "estrellas" ? (a, b) => st(b) - st(a) : (a, b) => fechaVer(b) - fechaVer(a) || (b.hecha || 0) - (a.hecha || 0));
   return cs;
 }
 function cuenta(grupo, prueba) { return db.cards.filter(c => pasaFil(c, grupo) && prueba(c)).length; }
@@ -2705,7 +2714,7 @@ function panelFiltros() {
   const rd = (k, t, n) => `<label class="fck${n ? "" : " cero"}"><input type="radio" name="ffecha" data-g="fecha" value="${k}"${FIL.fecha === k ? " checked" : ""}><span>${t}</span><b>${n}</b></label>`;
   const temas = [...TEMAS.map(x => x[0]), "Otros", "No se pudo leer"].map(t => [t, cuenta("temas", c => (c.estado === "ok" ? temaFicha(c) : "No se pudo leer") === t)]).filter(x => x[1] || FIL.temas.includes(x[0]));
   const lotes = lotesLista().filter(l => l.k);
-  return `<div class="fgr"><h4>Cuándo lo añadiste</h4>${rd("", "Cualquier fecha", cuenta("fecha", () => true))}${FECHAS.map(([k, t, f]) => rd(k, t, cuenta("fecha", c => f(añadida(c))))).join("")}
+  return `<div class="fgr"><h4>Cuándo lo añadiste</h4>${rd("", "Cualquier fecha", cuenta("fecha", () => true))}${FECHAS.map(([k, t, f]) => rd(k, t, cuenta("fecha", c => f(añadida(c) || publicada(c))))).join("")}
 <div class="frango"><label>Desde<input type="date" id="fDesde" value="${esc(FIL.desde)}"></label><label>Hasta<input type="date" id="fHasta" value="${esc(FIL.hasta)}"></label></div></div>
 <div class="fgr"><h4>Lote</h4><select id="fLoteX"><option value="">Todos los lotes</option>${lotes.map(l => `<option value="${l.n}"${String(FIL.lote) === String(l.n) ? " selected" : ""}>${esc(etqLote(l.n))} (${l.k})</option>`).join("")}</select></div>
 <div class="fgr"><h4>Lo que has marcado</h4>${MARCAS.map(([k, t, f]) => ck("marca", k, t, cuenta("marca", f), FIL.marca.includes(k))).join("")}</div>
