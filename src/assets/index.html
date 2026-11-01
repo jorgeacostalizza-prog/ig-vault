@@ -636,6 +636,7 @@ srvListo.then(() => { if (!SRV) return; setInterval(latido, window.IGX_LATIDO ||
 const postSrv = async (ruta, o) => { try { return await (await fetch(ruta, { method: "POST", body: JSON.stringify(o) })).json(); } catch (e) { return { status: 0, body: "", error: String(e) }; } };
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const dormir = ms => new Promise(r => setTimeout(r, ms));
+const MEDIA_TOPE_MS = 18000, TARDE = Symbol("tarde"); // 1/11: tope de espera de voz+imágenes+fotogramas por post
 
 // ============ puente nativo (en navegador de PC se usa fetch, solo para pruebas) ============
 let seq = 0; const pend = {};
@@ -717,7 +718,7 @@ const ghH = () => ({ Accept: "application/vnd.github+json", ...(db.cfg.github ? 
 let ghAviso = "";
 let ghEstado = 0;
 async function ghRepo(full) {
-  const r = await http("https://api.github.com/repos/" + full, { headers: ghH() });
+  const r = await httpT("https://api.github.com/repos/" + full, { headers: ghH() });
   ghEstado = r.status;
   if (r.status === 200) { try { return JSON.parse(r.body); } catch (e) { } }
   if (r.status === 403 || r.status === 429) { // límite de la API: leo la página pública del repo (sin API)
@@ -732,7 +733,7 @@ async function ghRepo(full) {
 }
 async function ghBuscar(nombre) {
   if (nombre.replace(/\s+/g, "").length < 5 || /^(claude|kaggle|colab|codex|gemini|chatgpt|openai|anthropic|google|github|python|ollama|huggingface|hugging face|lightning|chrome|firefox|linux|windows|mac|android|ios|instagram|tiktok|youtube|nvidia|meta|llama|mistral|deepseek|cursor|vscode|node|docker)\b/i.test(nombre.trim())) return null; // marcas/plataformas: no son "el repo" del vídeo
-  const r = await http("https://api.github.com/search/repositories?per_page=3&q=" + encodeURIComponent(nombre + " in:name"), { headers: ghH() });
+  const r = await httpT("https://api.github.com/search/repositories?per_page=3&q=" + encodeURIComponent(nombre + " in:name"), { headers: ghH() });
   if (r.status !== 200) { if (r.status === 403) ghAviso = "GitHub limitó las consultas (pon un token en Ajustes)"; return null; }
   try { const it = JSON.parse(r.body).items || []; const n = nombre.toLowerCase().replace(/\s+/g, "-"); return it.find(x => x.name.toLowerCase() === n || x.name.toLowerCase() === nombre.toLowerCase()) || null; } catch (e) { return null; }
 }
@@ -743,8 +744,8 @@ async function ghReadme(full) {
 const repoInfo = g => ({ pushed: g.pushed_at || "", archived: !!g.archived, full: g.full_name, desc: g.description || "", stars: g.stargazers_count, topics: g.topics || [], url: g.html_url, lang: g.language || "", home: g.homepage || "" });
 
 // ============ IA en la nube ============
-const MOD_NV = ["nvidia/nemotron-3.5-lightning-30b-a3b", "nvidia/nemotron-3-ultra-550b-a55b", "z-ai/glm-5.3-flash", "deepseek-ai/deepseek-v4.1-flash"]; // 31/10: comprobados vivos (los demás dan 404/410 o no contestan); si uno falla se salta solo
-const MOD_OR = ["nvidia/nemotron-3.5-lightning:free", "nvidia/nemotron-3-ultra-550b-a55b:free", "google/gemma-4-31b-it:free", "cohere/north-mini-code:free"];
+const MOD_NV = ["nvidia/nemotron-3.5-lightning-30b-a3b", "nvidia/nemotron-3-ultra-550b-a55b", "z-ai/glm-5.3-flash", "deepseek-ai/deepseek-v4.1-flash"]; // 1/11: medido: lightning 5 s con JSON válido; ultra a veces 503; glm y deepseek colgaban >45 s (van al final y entran por relevo, no por espera)
+const MOD_OR = ["cohere/north-mini-code:free", "nvidia/nemotron-3.5-lightning:free", "google/gemma-4-31b-it:free", "nvidia/nemotron-3-ultra-550b-a55b:free"]; // 1/11: north-mini 4 s con JSON válido; lightning:free razona y a veces devuelve vacío; ultra:free colgó 124 s
 let muertos = {}, iaError = "";
 const hayIA = () => !!(db.cfg.nvidia || db.cfg.openrouter);
 const ACCIONES = ["Instalar", "Probar", "Solo guardar"];
@@ -755,14 +756,15 @@ const AVISO_SIN_IA = "Sin IA: añade una clave en Ajustes para tener resumen";
 let clavesListas = !!N; // R6: en PC las claves llegan de /api/claves; hasta saberlo no se avisa de «Sin IA»
 function pintaAvisoIA() { $$(".avIA").forEach(e => { e.style.display = hayIA() || !clavesListas ? "none" : "block"; e.textContent = AVISO_SIN_IA + "."; }); }
 // R5: la IA no puede colgar la ficha. Tope por llamada, NVIDIA y OpenRouter a la vez (gana la primera respuesta válida) y una clave que da 429 se enfría un rato.
-let TOPE_IA_MS = 14000;            // tope de espera por cada llamada a la IA
+let TOPE_IA_MS = 14000;            // tope de espera por cada llamada a la IA (informes largos: 22 s)
+let RELEVO_IA_MS = 6000;           // 1/11: si un modelo no ha contestado en 6 s, arranca el siguiente SIN esperar (el primero que dé JSON válido gana)
 let ENFRIA_429_MS = 60000;         // una clave con 429 no se vuelve a pedir durante este rato (si hay otra)
 let ENFRIA_CORTE_MS = 20000;       // igual si la llamada se corta sin respuesta
 let enfria = {};
 const estaFria = nom => (enfria[nom] || 0) > Date.now();
 function esperandoIA() { const e = $("#progS"); if (e && corriendo) e.textContent = "Esperando a la IA…"; }
-async function httpIA(nom, url, opt) {
-  let to; const corte = new Promise(r => { to = setTimeout(() => r({ status: 0, body: "", error: "tiempo agotado" }), TOPE_IA_MS); });
+async function httpIA(nom, url, opt, tope = TOPE_IA_MS) {
+  let to; const corte = new Promise(r => { to = setTimeout(() => r({ status: 0, body: "", error: "tiempo agotado" }), tope); });
   const r = await Promise.race([http(url, opt), corte]); clearTimeout(to);
   if (r.status === 429) enfria[nom] = Date.now() + ENFRIA_429_MS; else if (r.status === 0) enfria[nom] = Date.now() + ENFRIA_CORTE_MS;
   return r;
@@ -775,44 +777,45 @@ function primera(tareas) { // lanza todas a la vez; devuelve la primera que dé 
   });
 }
 const sinFrias = provs => { const v = provs.filter(p => !estaFria(p.nom)); return v.length ? v : provs; }; // si todas están frías, se prueban igual
-async function chat(prompt, max = 900) {
+const jsonDe = t => { const a = t.indexOf("{"), b = t.lastIndexOf("}"); if (a < 0 || b < a) return null; try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; } };
+async function chat(prompt, max = 900, comoJson = false) {
   const provs = [];
   if (db.cfg.nvidia) provs.push({ nom: "NVIDIA", url: "https://integrate.api.nvidia.com/v1/chat/completions", key: db.cfg.nvidia, mods: MOD_NV });
   if (db.cfg.openrouter) provs.push({ nom: "OpenRouter", url: "https://openrouter.ai/api/v1/chat/completions", key: db.cfg.openrouter, mods: MOD_OR });
-  const errs = [];
-  const tareas = sinFrias(provs).map(({ nom, url, key, mods }) => async parar => {
-    if (muertos[nom]) { errs.push(nom + ": " + muertos[nom]); return null; }
-    for (const m of mods) {
-      for (let i = 0; i < 2; i++) {
-        if (parar()) return null;
-        const r = await httpIA(nom, url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: prompt }], max_tokens: max, temperature: 0.2, ...(nom === "NVIDIA" ? { chat_template_kwargs: { enable_thinking: false } } : {}) }) });
-        if (parar()) return null;
-        if (r.status === 401 || r.status === 403) { muertos[nom] = "clave rechazada"; errs.push(nom + ": clave rechazada"); return null; }
-        if (r.status === 404 || r.status === 410) break;
-        if (r.status === 200) {
-          try { const t = (JSON.parse(r.body).choices[0].message.content || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim(); if (t) return t; errs.push(m + ": vacío"); } catch (e) { errs.push(m + ": respuesta rara"); }
-        } else errs.push(m + ": HTTP " + r.status);
-        if (r.status === 429) return null;      // clave saturada: ya está enfriada, no insisto con ella
-        if (r.status === 0) break;              // no contestó: paso al siguiente modelo sin repetir
-        esperandoIA(); await dormir(1500 + i * 2500);
-      }
-    }
-    return null;
-  });
+  const errs = [], tope = max > 1200 ? 22000 : TOPE_IA_MS;
+  const tareas = sinFrias(provs).map(({ nom, url, key, mods }) => parar => new Promise(res => { // 1/11: modelos en relevo dentro de cada proveedor: el siguiente arranca si el anterior falla o tarda más de RELEVO_IA_MS
+    if (muertos[nom]) { errs.push(nom + ": " + muertos[nom]); return res(null); }
+    let idx = 0, vivos = 0, fin = false, timer = null;
+    const cierra = v => { if (fin) return; fin = true; clearTimeout(timer); res(v); };
+    const intento = async m => {
+      const r = await httpIA(nom, url, { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify({ model: m, messages: [{ role: "user", content: prompt }], max_tokens: max, temperature: 0.2, ...(nom === "NVIDIA" ? { chat_template_kwargs: { enable_thinking: false } } : {}) }) }, tope);
+      if (r.status === 401 || r.status === 403) { muertos[nom] = "clave rechazada"; errs.push(nom + ": clave rechazada"); fin = true; return null; }
+      if (r.status === 200) {
+        try { const t = (JSON.parse(r.body).choices[0].message.content || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim(); if (t && (!comoJson || jsonDe(t))) return t; errs.push(m + (t ? ": sin JSON válido" : ": vacío")); } catch (e) { errs.push(m + ": respuesta rara"); }
+      } else errs.push(m + ": HTTP " + r.status);
+      if (r.status === 429) fin = true; // clave saturada: ya está enfriada, no insisto con ella
+      return null;
+    };
+    const lanza = () => {
+      clearTimeout(timer); if (fin || parar() || idx >= mods.length) return;
+      if (idx > 0) esperandoIA(); const m = mods[idx++]; vivos++;
+      timer = setTimeout(lanza, RELEVO_IA_MS);
+      intento(m).then(v => { vivos--; if (v) return cierra(v); if (fin || parar()) return cierra(null); if (idx >= mods.length) { if (!vivos) cierra(null); } else lanza(); }, () => { vivos--; if (!vivos && idx >= mods.length) cierra(null); });
+    };
+    lanza();
+  }));
   const t = await primera(tareas);
   if (t) return t;
   iaError = errs.slice(-2).join(" | ") || "sin respuesta";
   return null;
 }
 async function chatJson(prompt, max = 900) {
-  const t = (await chat(prompt, max)) || (await chat(prompt, max)); if (!t) return null; // un reintento
-  const a = t.indexOf("{"), b = t.lastIndexOf("}"); if (a < 0 || b < 0) return null;
-  try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; }
+  const t = (await chat(prompt, max, true)); return t ? jsonDe(t) : null; // el relevo ya exige JSON válido; si ninguno lo da, null (sin repetir toda la ronda)
 }
 
 // ============ fotos del chat (IA de visión de NVIDIA) ============
-const MOD_VIS = ["meta/llama-3.2-11b-vision-instruct", "meta/llama-3.2-90b-vision-instruct", "google/gemma-4-31b-it"];
-const MOD_VIS_OR = ["google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"];
+const MOD_VIS = ["nvidia/nemotron-3-nano-omni-30b-a3b-reasoning", "meta/llama-3.2-90b-vision-instruct"]; // 1/11: medido: nano-omni contesta en ~3 s; llama-11b da 404; llama-90b y gemma en NVIDIA cuelgan >25 s y atascan a los demás
+const MOD_VIS_OR = ["nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "google/gemma-4-31b-it:free", "google/gemma-4-26b-a4b-it:free"];
 const PROMPT_FOTO = "Mira la imagen. 1) Si ves un nombre de cuenta pública (@usuario) escribe primero «Cuenta: @usuario». 2) Transcribe TODO el texto visible tal cual está. 3) Termina con «Imagen: » y una frase de qué muestra (proyecto, repo, herramienta, tema). Incluye nombres de repos owner/name o URLs que veas. No inventes nada.";
 async function verFoto(nombre) {
   const provs = [];
@@ -858,13 +861,14 @@ async function leerIG0(url, base) { // 31/10: Instagram frena de forma intermite
   r.error = r.error.replace(/^Instagram no deja leer este post sin iniciar sesión \(puede ser privado, borrado o pedir login\)\./, "Instagram no dejó leer este post ahora (puede estar frenándome, o ser privado o borrado). Lo intenté 2 veces y por oEmbed.");
   return r;
 }
+const paginaT = u => Promise.race([pagina(u), dormir(14000).then(() => ({}))]); // 1/11: el navegador oculto, a lo sumo 14 s (medido: 13-23 s para nada)
 async function leerIG1(url, base) {
   const [g, e0] = await Promise.all([gbIG(base), embedIG(base)]); // 31/10: a la vez, no una detrás de otra
   const cap0 = e0 && e0.status === 200 ? (leeHtmlPagina(e0.body).cap || "") : "";
-  let r = cap0 || g.cap ? {} : await pagina(base + "embed/captioned/"); // el navegador (lento) solo si no hay pie todavía
+  let r = cap0 || g.cap || capDeOg(g.og) ? {} : await paginaT(base + "embed/captioned/"); // el navegador (lento) solo si no hay pie todavía (1/11: tampoco si Googlebot ya dio el pie en og:description: ahorra ~22 s por post)
   let t = cap0 || g.cap || (r.cap || "").trim();
   if (!t) t = capDeOg(r.og) || capDeOg(g.og);
-  if (!t) { r = await pagina(base); t = capDeOg(r.og) || ""; if (!t && r.og && !MURO.test(r.og) && r.og.length > 40) t = r.og; }
+  if (!t) { r = await paginaT(base); t = capDeOg(r.og) || ""; if (!t && r.og && !MURO.test(r.og) && r.og.length > 40) t = r.og; }
   if (!t) { const h = await http(base); if (h.status === 200) t = capDeOg(metaDe(h.body, "og:description")); }
   t = t.replace(/\s+\n/g, "\n").trim();
   if (g.comments != null && g.comments > 0) t = (t ? t + "\n" : "") + "Comentarios: " + g.comments;
@@ -955,7 +959,7 @@ async function modelosVisOR() {
 }
 async function leerImgs(imgs, prompt = PROMPT_FOTO, max = 3) {
   const grupos = [];
-  if (db.cfg.nvidia) grupos.push({ nom: "NVIDIA", url: "https://integrate.api.nvidia.com/v1/chat/completions", key: db.cfg.nvidia, mods: MOD_VIS.slice(0, 2) });
+  if (db.cfg.nvidia) grupos.push({ nom: "NVIDIA", url: "https://integrate.api.nvidia.com/v1/chat/completions", key: db.cfg.nvidia, mods: MOD_VIS.slice(0, 1) });
   if (db.cfg.openrouter) grupos.push({ nom: "OpenRouter", url: "https://openrouter.ai/api/v1/chat/completions", key: db.cfg.openrouter, mods: MOD_VIS_OR });
   const una = u => primera(sinFrias(grupos).map(({ nom, url, key, mods }) => async parar => { // NVIDIA y OpenRouter a la vez; dentro de cada una, modelo por modelo
     for (const m of mods) {
@@ -1104,9 +1108,17 @@ async function analizar(card, textoManual) {
     soloGancho = card.tipo === "Instagram" && !texto.replace(/^Comentarios:.*$/mi, "").trim();
     if (l.imgs && l.imgs.length) card.imgs = l.imgs;
     if (l.video || (l.imgs && l.imgs.length)) paso(card, "Mirando el vídeo y las imágenes…");
-    let [vz, vi, fr] = await Promise.all([l.video ? leerVoz(l.video) : null, l.imgs && l.imgs.length ? leerImgs(l.imgs) : null, l.video ? leerFrames(l.video).then(f => { fotosTmp.set(card.id, f); return f.length ? leerImgs(f, PROMPT_VIDEO, 4) : ""; }) : null]); // a la vez: ahorra segundos
+    // 1/11: tope duro de MEDIA_TOPE_MS para voz+imágenes+fotogramas: la ficha no espera más. Lo que llegue tarde se añade luego a la ficha (voz) o se ignora (visión).
+    const pie0 = texto.replace(/^Comentarios:.*$/mi, "").trim();
+    const omiteVoz = pie0.length >= 700; // un pie largo ya lo explica todo: la voz solo añadiría espera
+    const pVoz = l.video && !omiteVoz ? leerVoz(l.video) : null, pImg = l.imgs && l.imgs.length ? leerImgs(l.imgs) : null;
+    const pFr = l.video ? leerFrames(l.video).then(f => { fotosTmp.set(card.id, f); return f.length ? leerImgs(f, PROMPT_VIDEO, 2) : ""; }) : null;
+    const conTope = p => p ? Promise.race([p, dormir(MEDIA_TOPE_MS).then(() => TARDE)]) : null;
+    let [vz, vi, fr] = await Promise.all([conTope(pVoz), conTope(pImg), conTope(pFr)]);
+    const vozTarde = vz === TARDE; if (vz === TARDE) vz = ""; if (vi === TARDE) vi = ""; if (fr === TARDE) fr = "";
+    if (vozTarde) pVoz.then(v => { if (!v) { card.voz = "no"; return; } card.voz = "sí"; card.vio = { ...(card.vio || {}), voz: true }; card.texto = (card.texto || "") + String.fromCharCode(10) + "[VOZ DEL VÍDEO, transcrita]" + String.fromCharCode(10) + corrige(v).slice(0, 1300); guardar(); }).catch(() => { });
     if (vz) vz = corrige(vz); // la voz transcribe mal los nombres («Cloud Code» = Claude Code)
-    if (l.video) card.voz = vz ? "sí" : "no";
+    if (l.video) card.voz = vz ? "sí" : vozTarde ? "tarde" : omiteVoz ? "omitida" : "no";
     const vf = (fr || "").split("\n").filter(x => x.trim() && !/^persona hablando/i.test(x.trim())).join("\n");
     card.vio = { voz: !!vz, imgs: !!vi, video: !!l.video, frames: !!vf };
     { // R7: si el pie del post y lo que se oye/ve en el vídeo no comparten NI UNA palabra, no afirmo nada: Para revisar
